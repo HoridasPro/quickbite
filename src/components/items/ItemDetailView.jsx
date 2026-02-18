@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
+import ReviewSection from '@/components/items/ReviewSection';
 
 const ItemDetailView = ({ item }) => {
     const { addToCart } = useCart();
@@ -93,6 +94,7 @@ const ItemDetailView = ({ item }) => {
 
     return (
         <div className="bg-white min-h-screen pb-20">
+            {/* Breadcrumbs */}
             <div className="border-b border-gray-100 hidden md:block">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <nav className="flex items-center text-xs text-gray-500">
@@ -106,7 +108,9 @@ const ItemDetailView = ({ item }) => {
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+                    {/* --- LEFT COLUMN: Info, Image & Reviews --- */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Header */}
                         <div>
                             {item.tags && (
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -124,6 +128,7 @@ const ItemDetailView = ({ item }) => {
                             </div>
                         </div>
 
+                        {/* Main Image */}
                         <div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden relative border border-gray-100">
                             {item.image ? (
                                 <Image
@@ -140,8 +145,12 @@ const ItemDetailView = ({ item }) => {
                                 </div>
                             )}
                         </div>
+
+                        {/* Reviews Section Component */}
+                        <ReviewSection itemId={item.id} />
                     </div>
 
+                    {/* --- RIGHT COLUMN: Customization Sidebar --- */}
                     <div className="lg:col-span-1">
                         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sticky top-6">
                             <h3 className="font-bold text-gray-900 text-lg mb-6 pb-3 border-b border-gray-100">Customize your Order</h3>
