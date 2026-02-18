@@ -9,18 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
-<<<<<<< HEAD
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-icons": "^5.5.0"
-=======
-    "daisyui": "^5.5.18",
-    "lucide-react": "^0.564.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
->>>>>>> e446a20323dd918b00b8cf85b153b8a5a1890628
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
