@@ -6,9 +6,8 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false); // 1. Add loading flag
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load cart on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('quickbite_cart');
@@ -19,13 +18,12 @@ export function CartProvider({ children }) {
           console.error("Failed to parse cart data:", error);
         }
       }
-      setIsLoaded(true); // 2. Mark as loaded
+      setIsLoaded(true);
     }
   }, []);
 
-  // Save to localStorage ONLY after loading is complete
   useEffect(() => {
-    if (isLoaded && typeof window !== 'undefined') { // 3. Check flag before saving
+    if (isLoaded && typeof window !== 'undefined') {
       localStorage.setItem('quickbite_cart', JSON.stringify(cartItems));
     }
   }, [cartItems, isLoaded]);
