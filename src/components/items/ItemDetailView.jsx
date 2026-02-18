@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import ReviewSection from '@/components/items/ReviewSection';
+import CartActions from '@/components/items/CartActions';
 
 const ItemDetailView = ({ item }) => {
     const { addToCart } = useCart();
@@ -93,8 +94,7 @@ const ItemDetailView = ({ item }) => {
     };
 
     return (
-        <div className="bg-white min-h-screen pb-20">
-            {/* Breadcrumbs */}
+        <div className="bg-white min-h-screen pb-32 md:pb-20">
             <div className="border-b border-gray-100 hidden md:block">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <nav className="flex items-center text-xs text-gray-500">
@@ -108,9 +108,7 @@ const ItemDetailView = ({ item }) => {
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                    {/* --- LEFT COLUMN: Info, Image & Reviews --- */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Header */}
                         <div>
                             {item.tags && (
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -128,14 +126,13 @@ const ItemDetailView = ({ item }) => {
                             </div>
                         </div>
 
-                        {/* Main Image */}
                         <div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden relative border border-gray-100">
                             {item.image ? (
-                                <Image
-                                    src={item.image}
-                                    alt={item.title}
-                                    fill
-                                    className="object-cover"
+                                <Image 
+                                    src={item.image} 
+                                    alt={item.title} 
+                                    fill 
+                                    className="object-cover" 
                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
                                     priority
                                 />
@@ -146,11 +143,9 @@ const ItemDetailView = ({ item }) => {
                             )}
                         </div>
 
-                        {/* Reviews Section Component */}
                         <ReviewSection itemId={item.id} />
                     </div>
 
-                    {/* --- RIGHT COLUMN: Customization Sidebar --- */}
                     <div className="lg:col-span-1">
                         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sticky top-6">
                             <h3 className="font-bold text-gray-900 text-lg mb-6 pb-3 border-b border-gray-100">Customize your Order</h3>
@@ -195,30 +190,34 @@ const ItemDetailView = ({ item }) => {
                                 ))}
                             </div>
 
-                            <div className="space-y-4 pt-4 border-t border-gray-100">
+                            <div className="hidden md:block space-y-4 pt-4 border-t border-gray-100">
                                 <div className="flex items-center justify-between font-bold text-gray-900 text-lg">
                                     <span>Total</span>
                                     <span className="text-[#D70F64]">Tk {calculateTotal()}</span>
                                 </div>
 
-                                <div className="flex gap-3 h-12">
-                                    <div className="flex items-center border border-gray-300 rounded-lg w-32 justify-between px-1">
-                                        <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-full text-gray-500 hover:text-[#D70F64] text-xl font-medium">−</button>
-                                        <span className="font-bold text-gray-900">{quantity}</span>
-                                        <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-full text-gray-500 hover:text-[#D70F64] text-xl font-medium">+</button>
-                                    </div>
-
-                                    <button
-                                        onClick={handleAddToCart}
-                                        className="flex-1 bg-[#D70F64] hover:bg-[#c20d5a] text-white font-bold rounded-lg transition-colors shadow-lg shadow-pink-100 flex items-center justify-center gap-2"
-                                    >
-                                        Add to Cart
-                                    </button>
-                                </div>
+                                <CartActions 
+                                    quantity={quantity} 
+                                    setQuantity={setQuantity} 
+                                    onAdd={handleAddToCart} 
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+                <div className="flex items-center justify-between mb-3">
+                     <span className="font-bold text-gray-900">Total</span>
+                     <span className="font-bold text-[#D70F64] text-xl">Tk {calculateTotal()}</span>
+                </div>
+                
+                <CartActions 
+                    quantity={quantity} 
+                    setQuantity={setQuantity} 
+                    onAdd={handleAddToCart} 
+                />
             </div>
         </div>
     );
