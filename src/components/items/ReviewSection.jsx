@@ -4,7 +4,6 @@ import React from 'react';
 import reviewsData from '@/data/reviews.json';
 
 const ReviewSection = ({ itemId }) => {
-    // Filter reviews for THIS specific item
     const itemReviews = reviewsData.filter(review => review.itemId === itemId);
 
     return (
