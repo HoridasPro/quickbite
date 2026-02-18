@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useCart } from '@/contexts/CartContext';
 
 const ItemDetailView = ({ item }) => {
+    const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
 
     const [selections, setSelections] = useState(() => {
@@ -78,14 +80,15 @@ const ItemDetailView = ({ item }) => {
             itemId: item.id,
             title: item.title,
             restaurant: item.restaurant_name,
+            image: item.image,
             basePrice: item.price,
             selectedVariations: selections,
             quantity: quantity,
             totalPrice: calculateTotal(),
         };
 
-        console.log("Order Placed:", orderPayload);
-        alert(`Added to Cart!\nTotal: Tk ${orderPayload.totalPrice}\n(Check Console for JSON)`);
+        addToCart(orderPayload);
+        alert(`Added to Cart!\nTotal: Tk ${orderPayload.totalPrice}`);
     };
 
     return (
