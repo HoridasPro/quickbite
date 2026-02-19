@@ -1,60 +1,94 @@
-export default function OrdersPage() {
-  return (
-    <div className="bg-gray-50 min-h-screen">
+"use client";
 
-      {/* Container */}
-      <div className="max-w-[760px] mx-auto px-6 py-10">
+import OrderHistoryCard from "@/components/orders/OrderHistoryCard";
+
+export default function OrdersPage() {
+  const activeOrders = [
+    {
+      image: "https://i.ibb.co.com/qL2pycTr/Hot-Honey-Pimento-Cheese-Fried-Chicken-Sandwich.jpg",
+      restaurant: "KFC",
+      items: "Zinger Burger, Wings",
+      date: "Arriving in 20 mins",
+      status: "On the way",
+      price: 620,
+    },
+    {
+      image: "https://i.ibb.co.com/5X5FFwvH/download.jpg",
+      restaurant: "Pizza Hut",
+      items: "Cheese Pizza, Garlic Bread",
+      date: "Preparing your order",
+      status: "Pending",
+      price: 890,
+    },
+  ];
+
+  const pastOrders = [
+    {
+      image: "https://i.ibb.co.com/qL2pycTr/Hot-Honey-Pimento-Cheese-Fried-Chicken-Sandwich.jpg",
+      restaurant: "Burger King",
+      items: "Chicken Burger, Fries",
+      date: "18 Feb 2026 • 8:30 PM",
+      status: "Delivered",
+      price: 450,
+    },
+    {
+      image: "https://i.ibb.co.com/5X5FFwvH/download.jpg",
+      restaurant: "Pizza Hut",
+      items: "Cheese Pizza, Coke",
+      date: "16 Feb 2026 • 9:10 PM",
+      status: "Cancelled",
+      price: 890,
+    },
+    {
+      image: "https://i.ibb.co.com/TMWkCf20/image.jpg",
+      restaurant: "Sultan Dine",
+      items: "Kacchi, Borhani",
+      date: "14 Feb 2026 • 2:00 PM",
+      status: "Delivered",
+      price: 750,
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f7f7f7]">
+      <div className="max-w-[680px] mx-auto px-6 py-10">
 
         {/* Active Orders */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-            Active orders
-          </h2>
-
-          <p className="text-gray-600">
-            You have no active orders.
-          </p>
-        </div>
+        <OrdersSection
+          title="Active orders"
+          orders={activeOrders}
+          emptyText="You have no active orders."
+        />
 
         {/* Past Orders */}
-        <div className="mb-14">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-            Past orders
-          </h2>
-
-          <p className="text-gray-600">
-            Oops, looks like you havent placed any orders yet.
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t"></div>
-
-        {/* Empty Illustration Style Card  */}
-        <div className="mt-10 bg-white rounded-2xl p-8 text-center shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No orders yet
-          </h3>
-
-          <p className="text-gray-600 mb-6">
-            When you place orders, they will appear here.
-          </p>
-
-          <button className="
-            bg-orange-500 
-            hover:bg-orange-600 
-            text-white 
-            px-6 py-3 
-            rounded-lg 
-            font-medium 
-            transition
-          ">
-            Browse restaurants
-          </button>
-        </div>
+        <OrdersSection
+          title="Past orders"
+          orders={pastOrders}
+          emptyText="No past orders yet."
+        />
 
       </div>
+    </div>
+  );
+}
 
+
+function OrdersSection({ title, orders, emptyText }) {
+  return (
+    <div className="mb-12">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+        {title}
+      </h2>
+
+      {orders?.length ? (
+        <div className="space-y-4">
+          {orders.map((order, index) => (
+            <OrderHistoryCard key={index} {...order} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500">{emptyText}</p>
+      )}
     </div>
   );
 }
