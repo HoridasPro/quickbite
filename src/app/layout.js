@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
+// import Header from "@/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,19 +14,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "QuickBite",
-  description: "Food Delivery App",
+  title: "QuickBite - Food Delivery",
+  description: "Your favorite food delivered fast",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="quickbite"> 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-base-bg text-secondary`}
       >
         <CartProvider>
           {children}
         </CartProvider>
+        <div />
+        <main className="w-full min-h-screen bg-base-bg">
+          {children}
+        </main>
       </body>
     </html>
   );
