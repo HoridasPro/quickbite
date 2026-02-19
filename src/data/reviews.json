@@ -1,0 +1,42 @@
+[
+  {
+    "id": 101,
+    "itemId": 1,
+    "user": "Rahim Ahmed",
+    "rating": 5,
+    "comment": "Best burger I've had in Dhaka! The sauce is amazing.",
+    "date": "2023-10-25"
+  },
+  {
+    "id": 102,
+    "itemId": 1,
+    "user": "Sarah Khan",
+    "rating": 4,
+    "comment": "Great taste but the bun was a bit dry. Delivery was fast though.",
+    "date": "2023-11-02"
+  },
+  {
+    "id": 103,
+    "itemId": 2,
+    "user": "Tanvir Hasan",
+    "rating": 5,
+    "comment": "Authentic Italian taste. The crust is perfect.",
+    "date": "2023-11-05"
+  },
+  {
+    "id": 104,
+    "itemId": 3,
+    "user": "Nusrat Jahan",
+    "rating": 3,
+    "comment": "Too spicy for me, even though I asked for mild.",
+    "date": "2023-10-15"
+  },
+  {
+    "id": 104,
+    "itemId": 1,
+    "user": "Nusrat Jahan",
+    "rating": 2,
+    "comment": "Tasted awful",
+    "date": "2023-10-15"
+  }
+]

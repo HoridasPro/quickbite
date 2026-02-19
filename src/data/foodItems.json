@@ -1,0 +1,153 @@
+[
+  {
+    "id": 1,
+    "restaurant_name": "Ahmed's Kitchen",
+    "title": "Smokey BBQ Beef Burger",
+    "description": "150g juicy beef patty, cheddar cheese, caramelized onions, crisp lettuce, and our secret BBQ sauce.",
+    "price": 350,
+    "image": "https://as2.ftcdn.net/v2/jpg/02/30/30/71/1000_F_230307176_PfsGx6S3QAdI51mi9YYiaifIQ3jIf1wu.jpg",
+    "tags": ["Burgers", "American", "Spicy"],
+    "variations": [
+      {
+        "id": "v_size",
+        "title": "Choose Size",
+        "type": "radio",
+        "required": true,
+        "options": [
+          { "name": "Regular", "price": 0 },
+          { "name": "Large (Double Patty)", "price": 120 }
+        ]
+      },
+      {
+        "id": "v_extras",
+        "title": "Add Extras",
+        "type": "checkbox",
+        "required": false,
+        "options": [
+          { "name": "Extra Cheese", "price": 40 },
+          { "name": "Fried Egg", "price": 30 },
+          { "name": "Mushroom Sauce", "price": 50 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "restaurant_name": "Pizza Roma",
+    "title": "Creamy Chicken Mushroom Pizza",
+    "description": "12-inch hand-tossed dough topped with alfredo sauce, grilled chicken, mushrooms, and extra mozzarella.",
+    "price": 899,
+    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1002.jpg",
+    "tags": ["Pizza", "Italian", "Cheesy"],
+    "variations": [
+      {
+        "id": "v_crust",
+        "title": "Choose Crust",
+        "type": "radio",
+        "required": true,
+        "options": [
+          { "name": "Thin Crust", "price": 0 },
+          { "name": "Deep Dish", "price": 100 },
+          { "name": "Cheese Stuffed Crust", "price": 150 }
+        ]
+      },
+      {
+        "id": "v_drink",
+        "title": "Add a Drink",
+        "type": "radio",
+        "required": false,
+        "options": [
+          { "name": "Coke (500ml)", "price": 60 },
+          { "name": "Sprite (500ml)", "price": 60 },
+          { "name": "Water", "price": 20 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "restaurant_name": "Spice Garden",
+    "title": "Hyderabadi Chicken Biryani",
+    "description": "Aromatic basmati rice cooked with tender chicken pieces, saffron, and special Hyderabadi spices. Served with raita.",
+    "price": 450,
+    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1003.jpg",
+    "tags": ["Indian", "Rice", "Spicy", "Bestseller"],
+    "variations": [
+      {
+        "id": "v_spice_level",
+        "title": "Spice Level",
+        "type": "radio",
+        "required": true,
+        "options": [
+          { "name": "Mild", "price": 0 },
+          { "name": "Medium", "price": 0 },
+          { "name": "Extra Hot", "price": 0 }
+        ]
+      },
+      {
+        "id": "v_sides",
+        "title": "Add Sides",
+        "type": "checkbox",
+        "required": false,
+        "options": [
+          { "name": "Extra Raita", "price": 30 },
+          { "name": "Salad", "price": 20 },
+          { "name": "Shammi Kebab (1pc)", "price": 60 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "restaurant_name": "Sushi Samurai",
+    "title": "Salmon Avocado Roll (8pcs)",
+    "description": "Fresh salmon and creamy avocado rolled in sushi rice and seaweed. Served with soy sauce and wasabi.",
+    "price": 650,
+    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1004.jpg",
+    "tags": ["Japanese", "Sushi", "Healthy"],
+    "variations": [
+      {
+        "id": "v_condiments",
+        "title": "Condiments",
+        "type": "checkbox",
+        "required": false,
+        "options": [
+          { "name": "Extra Wasabi", "price": 0 },
+          { "name": "Extra Ginger", "price": 0 },
+          { "name": "Spicy Mayo", "price": 50 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "restaurant_name": "Dessert Heaven",
+    "title": "Oreo Chocolate Cheesecake",
+    "description": "Rich creamy cheesecake on an Oreo crust, topped with chocolate ganache.",
+    "price": 280,
+    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1005.jpg",
+    "tags": ["Dessert", "Sweet", "Cake"],
+    "variations": []
+  },
+  {
+    "id": 6,
+    "restaurant_name": "Chill Sip",
+    "title": "Mango Lassi",
+    "description": "Refreshing yogurt drink blended with sweet ripe mangoes.",
+    "price": 120,
+    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1006.jpg",
+    "tags": ["Beverage", "Cold", "Sweet"],
+    "variations": [
+      {
+        "id": "v_size_drink",
+        "title": "Size",
+        "type": "radio",
+        "required": true,
+        "options": [
+          { "name": "Regular (250ml)", "price": 0 },
+          { "name": "Large (400ml)", "price": 60 }
+        ]
+      }
+    ]
+  }
+]
