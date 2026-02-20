@@ -1,111 +1,123 @@
 "use client";
 
+import React from "react";
+import {
+  MapPin,
+  ShoppingCart,
+  Search,
+  Bike,
+  Store,
+  ShoppingBag,
+  Menu,
+} from "lucide-react";
+import Language from "./Language";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { IoLocation, IoMenu, IoClose } from "react-icons/io5";
-import React, { useState } from "react";
 
 const Header = () => {
-  const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const activeLink = (path) =>
-    pathname === path
-      ? "text-orange-500 font-semibold border-b-2 border-orange-500 pb-1"
-      : "hover:text-orange-500 transition";
-
   return (
-    <header className="bg-gray-50">
-      <nav className="flex flex-wrap md:flex-nowrap justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-2xl font-bold text-orange-500 mb-2 md:mb-0"
-        >
-          🍔FDP
-        </Link>
-
-        {/* Location Input (Same for all devices) */}
-        <div className="w-full md:w-auto mt-2 md:mt-0">
-          <div className="flex items-center border rounded-lg overflow-hidden">
-            <span className="px-2 text-gray-500">
-              <IoLocation />
-            </span>
-            <input
-              type="text"
-              placeholder="Enter your delivery location"
-              className="flex-1 px-2 py-3 outline-none"
-            />
-            <button className="bg-orange-500 text-white px-6 py-3 hover:bg-orange-600 transition">
-              Search
-            </button>
+    <div className="w-full bg-white shadow-sm">
+      {/* Top Navbar */}
+      <div className="max-w-[1380px] mx-auto px-8 py-3 flex items-center justify-between">
+        {/* Left Side */}
+        <div className="flex items-center gap-6">
+          {/* Mobile Menu */}
+          <div className="lg:hidden">
+            <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
           </div>
-        </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex space-x-6">
-          <Link href="/" className={activeLink("/")}>
-            🚚 Delivery
-          </Link>
-          <Link href="/pick-up" className={activeLink("/pick-up")}>
-            🛍 Pick-up
-          </Link>
-          <Link href="/pandamart" className={activeLink("/pandamart")}>
-            🛒 Foodamart
-          </Link>
-          <Link href="/shops" className={activeLink("/shops")}>
-            🏬 Shops
+          {/* Logo */}
+          <Link
+            href="/"
+            className="text-orange-500 font-bold text-2xl cursor-pointer"
+          >
+            🍔QuickBite
           </Link>
         </div>
 
-        {/* Desktop Cart + Login */}
-        <div className="hidden md:flex space-x-4">
-          <span className="hover:text-orange-500 cursor-pointer">🛒 Cart</span>
+        {/* Address - Hidden on small screens */}
+        <div className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer">
+          <MapPin className="w-4 h-4" />
+          <span>New Address Road 71, Dhaka, Bangladesh</span>
+        </div>
+
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
+          {/* Login Button */}
           <Link
             href="/login"
-            className="bg-orange-500 hover:bg-orange-600 text-white py-1 px-4 rounded-lg transition"
+            className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition"
           >
-            Login
+            Log in
           </Link>
-        </div>
 
-        {/* Mobile Hamburger */}
-        <div className="md:hidden flex items-center">
-          <button onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <IoClose size={28} /> : <IoMenu size={28} />}
+          {/* Sign Up Button */}
+          <Link href="/register" className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer">
+            Sign up for free delivery
+          </Link>
+
+          {/* Language Dropdown */}
+          <Language />
+
+          {/* Disabled Cart */}
+          <button
+            disabled
+            className="bg-gray-100 p-3 rounded-full cursor-not-allowed opacity-50"
+          >
+            <ShoppingCart className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden bg-white px-4 pb-4 space-y-4 shadow-md">
-            <Link href="/" className={activeLink("/")}>
-              🚚 Delivery
-            </Link>
-            <Link href="/pick-up" className={activeLink("/pick-up")}>
-              🛍 Pick-up
-            </Link>
-            <Link href="/pandamart" className={activeLink("/pandamart")}>
-              🛒 Foodamart
-            </Link>
-            <Link href="/shops" className={activeLink("/shops")}>
-              🏬 Shops
+      </div>
+
+      {/* Bottom Menu */}
+      <div>
+        <div className="max-w-[1380px] mx-auto px-8 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Left Options */}
+          <div className="flex items-center gap-8 text-gray-700 text-sm">
+            <Link
+              href="/"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Bike className="w-5 h-5" />
+              Delivery
             </Link>
 
-            <div className="flex flex-col gap-2 mt-2">
-              <span className="hover:text-orange-500 cursor-pointer">
-                🛒 Cart
-              </span>
-              <Link
-                href="/login"
-                className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg text-center"
-              >
-                Login
-              </Link>
-            </div>
+            <Link
+              href="/pick-up"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Pick-up
+            </Link>
+
+            <Link
+              href="/pandamart"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Store className="w-5 h-5" />
+              Pandamart
+            </Link>
+
+            <Link
+              href="/shops"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Store className="w-5 h-5" />
+              Shops
+            </Link>
           </div>
-        )}
-      </nav>
-    </header>
+
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-[400px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for restaurants, cuisines, and dishes"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

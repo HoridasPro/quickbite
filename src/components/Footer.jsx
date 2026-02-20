@@ -1,16 +1,11 @@
 import React from "react";
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 py-10">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Section 1: Company Info / Help Center */}
+        {/* Section 1 */}
         <div>
           <h3 className="text-white font-bold mb-4">Help Center</h3>
           <ul className="space-y-2">
@@ -32,7 +27,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Section 2: Terms */}
+        {/* Section 2 */}
         <div>
           <h3 className="text-white font-bold mb-4">Legal</h3>
           <ul className="space-y-2">
@@ -49,7 +44,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Section 3: Social Media */}
+        {/* Section 3 */}
         <div>
           <h3 className="text-white font-bold mb-4">Follow Us</h3>
           <div className="flex gap-4">
@@ -57,38 +52,38 @@ export default function Footer() {
               href="https://facebook.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white"
+              className="hover:text-white transition"
             >
-              <FaFacebookF />
+              <Facebook className="w-5 h-5 stroke-1.5" />
             </a>
             <a
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white"
+              className="hover:text-white transition"
             >
-              <FaTwitter />
+              <Twitter className="w-5 h-5 stroke-1.5" />
             </a>
             <a
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white"
+              className="hover:text-white transition"
             >
-              <FaInstagram />
+              <Instagram className="w-5 h-5 stroke-1.5" />
             </a>
             <a
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white"
+              className="hover:text-white transition"
             >
-              <FaLinkedinIn />
+              <Linkedin className="w-5 h-5 stroke-1.5" />
             </a>
           </div>
         </div>
 
-        {/* Section 4: Newsletter / Optional */}
+        {/* Section 4 */}
         <div>
           <h3 className="text-white font-bold mb-4">Newsletter</h3>
           <p className="text-gray-400 mb-2">Subscribe to our newsletter</p>
@@ -105,9 +100,9 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Footer Bottom */}
       <div className="mt-10 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+        &copy; {new Date().getFullYear()} Food Delivery Platform. All rights
+        reserved.
       </div>
     </footer>
   );

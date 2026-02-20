@@ -1,5 +1,4 @@
 @import "tailwindcss";
-<<<<<<< HEAD
 /* 
 /* :root {
   --background: #ffffff;
@@ -25,32 +24,3 @@
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 } */
-=======
-
-@theme {
-  --color-primary: #FF6B01;
-  --color-secondary: #333333;
-  --color-accent: #00B14F;
-  --color-base-bg: #F7F7F7;
-}
-
-/* plugin and theme setup at once */
-@plugin "daisyui" {
-  themes: quickbite;
-}
-
-[data-theme="quickbite"] {
-  --p: 25 100% 50%;
-  --s: 0 0% 20%;
-  --a: 147 100% 35%;
-  --b1: 0 0% 97%;
-  --pc: 0 0% 100%; /* Primary Content: to show button text white */
-}
-
-@layer base {
-  body {
-    background-color: var(--color-base-bg);
-    color: var(--color-secondary);
-  }
-}
->>>>>>> e446a20323dd918b00b8cf85b153b8a5a1890628
