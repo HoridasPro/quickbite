@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Info, Heart, Bike, ShoppingBag } from 'lucide-react';
+import { Star, Info, Heart, Bike, ShoppingBag, ShoppingBagIcon } from 'lucide-react';
 
 const RestaurantHero = () => {
     return (
@@ -93,7 +93,7 @@ const RestaurantHero = () => {
                         <p className="text-sm text-gray-300">Download the app to unlock more discounts</p>
                     </div>
                     {/* Subtle background icon for design */}
-                    <ShoppingBag size={100} className="absolute -right-4 -bottom-4 text-white/5 rotate-12" />
+                    <ShoppingBagIcon size={100} className="absolute -right-4 -bottom-4 text-white/5 rotate-12" />
                 </div>
             </div>
         </div>
