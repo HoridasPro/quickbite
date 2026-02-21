@@ -17,7 +17,7 @@ const Header = () => {
   return (
     <div className="w-full bg-white shadow-sm">
       {/* Top Navbar */}
-      <div className="max-w-[1380px] mx-auto px-8 py-3 flex items-center justify-between">
+      <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between">
         {/* Left Side */}
         <div className="flex items-center gap-6">
           {/* Mobile Menu */}
@@ -51,7 +51,10 @@ const Header = () => {
           </Link>
 
           {/* Sign Up Button */}
-          <Link href="/register" className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer">
+          <Link
+            href="/register"
+            className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
+          >
             Sign up for free delivery
           </Link>
 
@@ -70,12 +73,12 @@ const Header = () => {
 
       {/* Bottom Menu */}
       <div>
-        <div className="max-w-[1380px] mx-auto px-8 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Left Options */}
           <div className="flex items-center gap-8 text-gray-700 text-sm">
             <Link
               href="/"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className="flex items-center gap-2 hover:bg-gray-100  rounded-xl transition"
             >
               <Bike className="w-5 h-5" />
               Delivery
@@ -87,6 +90,13 @@ const Header = () => {
             >
               <ShoppingBag className="w-5 h-5" />
               Pick-up
+            </Link>
+            <Link
+              href="/vouchers"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Vouchers
             </Link>
 
             <Link

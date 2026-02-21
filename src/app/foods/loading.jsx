@@ -1,4 +1,3 @@
-i;
 import FoodCardsSkeleton from "@/components/FoodCardsSkeleton";
 import React from "react";
 

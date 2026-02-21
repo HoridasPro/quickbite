@@ -36,9 +36,9 @@ const FoodsPage = () => {
   const offerOptions = ["Discount", "Free Delivery", "Buy 1 Get 1", "Cashback"];
 
   return (
-    <div className="grid grid-cols-12 gap-5 h-screen px-10 mt-5">
+    <div className="grid grid-cols-12 gap-5 h-screen  mt-5">
       {/* 🔥 Sidebar */}
-      <div className="col-span-3 bg-white shadow-lg rounded-2xl p-6 overflow-y-auto">
+      <div className="col-span-3 bg-white shadow-lg rounded-2xl p-6 overflow-y-auto ">
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-bold text-2xl">Filters</h2>
           <button
