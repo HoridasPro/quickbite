@@ -140,6 +140,7 @@ const ProductPage = () => {
         >
           {"<"}
         </button>
+        <button></button>
 
         <div
           ref={scrollRef}
