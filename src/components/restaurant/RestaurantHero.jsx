@@ -86,7 +86,7 @@ const RestaurantHero = ({ foodImg, title }) => {
       <div className="border-t border-gray-200 my-4 "></div>
 
       <h2 className="font-bold text-2xl">Abailable deals</h2>
-      <div className="flex flex-col md:flex-row gap-4 w-[700px] mt-5 mb-10">
+      <div className="flex flex-col md:flex-row gap-4 md:w-[700px] mt-5 mb-10">
         {/* Card 1: App-only deals */}
         <div className="flex-1 bg-gray-800 text-white rounded-xl p-6 flex items-center gap-4 shadow-md hover:shadow-xl transition">
           <div className="flex-1">

@@ -25,11 +25,11 @@ const getCategories = async () => {
 const CategoryCard = ({ name, count, onClick, active }) => (
   <div
     onClick={onClick}
-    className={`flex-shrink-0 w-40 h-20 flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-4 cursor-pointer transition hover:shadow-xl ${
+    className={`flex-shrink-0 w-36 sm:w-40 h-20 flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-4 cursor-pointer transition hover:shadow-xl ${
       active ? "border-2 border-orange-500" : ""
     }`}
   >
-    <span className="text-sm font-medium text-gray-800 text-center">
+    <span className="text-sm font-medium text-gray-800 text-center truncate">
       {name} ({count})
     </span>
   </div>
@@ -38,10 +38,10 @@ const CategoryCard = ({ name, count, onClick, active }) => (
 // 🔹 Food Card Component
 const FoodCard = ({ food, onClick }) => (
   <div
-    className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-row-reverse"
+    className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
     onClick={onClick}
   >
-    <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
+    <div className="w-full md:w-32 h-32 md:h-36 flex-shrink-0 overflow-hidden rounded-t-lg md:rounded-r-lg md:rounded-t-none">
       <img
         src={food.foodImg}
         alt={food.foodName}
@@ -68,7 +68,7 @@ const FoodCard = ({ food, onClick }) => (
 
 // 🔹 Sidebar Component
 const Sidebar = () => (
-  <div className="w-full md:w-80 bg-white shadow-md rounded-xl p-4 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+  <div className="w-full md:w-80 bg-white shadow-md rounded-xl p-4 sticky top-24 h-auto md:h-[calc(100vh-6rem)] overflow-y-auto">
     <h3 className="text-xl font-bold mb-4">Your Cart</h3>
     <p className="text-gray-500 text-sm">Add items to see your cart.</p>
     <div className="mt-6 border-t border-gray-200 pt-4">
@@ -119,7 +119,7 @@ const ProductPage = () => {
     scrollRef.current.scrollBy({ left: -900, behavior: "smooth" });
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 px-2 sm:px-4">
       {/* Hero Section */}
       <div className="bg-[#FCFCFC] pt-4">
         {foods[0] && (
@@ -133,16 +133,17 @@ const ProductPage = () => {
           {categories.length} Food Categories
         </h2>
 
+        {/* Scroll Buttons */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-20 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
+          className="absolute left-0 top-20 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 hidden sm:flex items-center justify-center"
         >
           {"<"}
         </button>
 
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide mb-10"
+          className="flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth scrollbar-hide mb-10"
         >
           {categories.map((cat) => {
             const name = cat.categoryName || cat.name;
@@ -160,7 +161,7 @@ const ProductPage = () => {
 
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-20 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100"
+          className="absolute right-0 top-20 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 hidden sm:flex items-center justify-center"
         >
           {">"}
         </button>
@@ -172,9 +173,9 @@ const ProductPage = () => {
         )}
 
         {/* Foods + Sidebar */}
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           <div className="md:col-span-9 flex flex-col gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredFoods.map((food) => (
                 <FoodCard
                   key={food.id}
