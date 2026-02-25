@@ -5,11 +5,9 @@ import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect } from "react";
 
 const getFoods = async () => {
-  const res = await fetch(
-    "https://taxi-kitchen-api.vercel.app/api/v1/foods/random",
-  );
+  const res = await fetch("http://localhost:3000/api/feedback");
   const data = await res.json();
-  return data.foods || [];
+  return data || [];
 };
 
 const FoodsPage = () => {
@@ -37,7 +35,7 @@ const FoodsPage = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 h-screen">
-      {/* 🔥 Sidebar */}
+      {/* Sidebar */}
       <div className="col-span-8 md:col-span-3 bg-white shadow-lg rounded-2xl p-6 overflow-y-auto md:ml-0 ml-5">
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-bold text-2xl">Filters</h2>
@@ -117,10 +115,11 @@ const FoodsPage = () => {
         </div>
       </div>
 
-      {/* 🔥 Right Side Products Section */}
+      {/* Right Side Products Section */}
       <div className="col-span-9 overflow-y-auto px-6">
         <HeroSection />
         <CategoriesFoods></CategoriesFoods>
+
         <h2 className="font-bold text-2xl mt-10 mb-5">
           {foods.length} Restaurants Found
         </h2>

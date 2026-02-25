@@ -1,18 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // images: {
+  //   remotePatterns: [
+  //     {
+  //       protocol: "https",
+  //       hostname: "www.themealdb.com",
+  //       // port: '',
+  //       pathname: "/images/media/**",
+  //       search: "",
+  //     },
+  //   ],
+  // },
   /* config options here */
-images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'as2.ftcdn.net',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.deliveryhero.io',
-      },
-    ],
-  },
 };
 
 export default nextConfig;

@@ -7,14 +7,17 @@ import {
   Search,
   Bike,
   Store,
-  ShoppingBag,
   Menu,
   X,
 } from "lucide-react";
+import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
 import Link from "next/link";
+import AuthButton from "./AuthButton";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
+  const { status } = useSession();
   const [open, setOpen] = useState(false);
 
   return (
@@ -48,22 +51,18 @@ const Header = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-3 md:gap-4">
-          <Link
-            href="/login"
-            className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition"
-          >
-            Log in
-          </Link>
+          <AuthButton />
 
-          <Link
-            href="/register"
-            className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
-          >
-            Sign up for free delivery
-          </Link>
-
+          {/* Register button if not logged in */}
+          {status !== "authenticated" && (
+            <Link
+              href="/register"
+              className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
+            >
+              Sign up for free delivery
+            </Link>
+          )}
           <Language />
-
           <button
             disabled
             className="bg-gray-100 p-2 sm:p-3 rounded-full cursor-not-allowed opacity-50"
@@ -75,42 +74,31 @@ const Header = () => {
 
       {/* Bottom Section */}
       <div>
-        <div className="max-w-[1380px] mx-auto  py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="hidden lg:flex items-center gap-8 text-gray-700 text-sm">
             <Link
               href="/"
               className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
             >
-              <Bike className="w-5 h-5" />
-              Delivery
+              <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
             </Link>
             <Link
               href="/pick-up"
               className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
             >
-              <ShoppingBag className="w-5 h-5" />
-              Pick-up
-            </Link>
-            <Link
-              href="/vouchers"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              Vouchers
+              <Bike className="w-5 h-5" /> Pick-up
             </Link>
             <Link
               href="/pandamart"
               className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
             >
-              <Store className="w-5 h-5" />
-              Pandamart
+              <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
             </Link>
             <Link
               href="/shops"
               className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
             >
-              <Store className="w-5 h-5" />
-              Shops
+              <Store className="w-5 h-5" /> Shops
             </Link>
           </div>
 
@@ -149,22 +137,19 @@ const Header = () => {
               <span>New Address Road 71, Dhaka</span>
             </div>
 
-            {/* Auth Buttons */}
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="block mb-3 text-sm font-medium"
-            >
-              Log in
-            </Link>
+            {/* Auth Buttons - Mobile */}
+            <AuthButton isMobile={true} />
 
-            <Link
-              href="/register"
-              onClick={() => setOpen(false)}
-              className="block mb-5 bg-orange-500 text-white text-center py-2 rounded-lg text-sm"
-            >
-              Sign up for free delivery
-            </Link>
+            {/* Register only if not logged in */}
+            {status !== "authenticated" && (
+              <Link
+                href="/register"
+                onClick={() => setOpen(false)}
+                className="block mb-5 bg-orange-500 text-white text-center py-2 rounded-lg text-sm"
+              >
+                Sign up for free delivery
+              </Link>
+            )}
 
             {/* Menu Links */}
             <div className="flex flex-col gap-4 text-gray-700 text-sm border-t pt-4">
@@ -173,44 +158,28 @@ const Header = () => {
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2"
               >
-                <Bike className="w-5 h-5" />
-                Delivery
+                <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
               </Link>
-
               <Link
                 href="/pick-up"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2"
               >
-                <ShoppingBag className="w-5 h-5" />
-                Pick-up
+                <Bike className="w-5 h-5" /> Pick-up
               </Link>
-
-              <Link
-                href="/vouchers"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                Vouchers
-              </Link>
-
               <Link
                 href="/pandamart"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2"
               >
-                <Store className="w-5 h-5" />
-                Pandamart
+                <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
               </Link>
-
               <Link
                 href="/shops"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2"
               >
-                <Store className="w-5 h-5" />
-                Shops
+                <Store className="w-5 h-5" /> Shops
               </Link>
             </div>
 

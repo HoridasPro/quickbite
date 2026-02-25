@@ -50,6 +50,7 @@ export default function VouchersPage() {
 
   return (
     <div className="bg-[#ffffff] px-8 min-h-screen">
+
       {/* Header */}
       <div className="max-w-6xl mx-auto pt-10 pb-6 px-4">
         <div className="flex items-center justify-between mb-6">
@@ -126,8 +127,6 @@ export default function VouchersPage() {
             </div>
           ))}
         </div>
-
-        {/* RIGHT SIDE same as before */}
       </div>
     </div>
   );
