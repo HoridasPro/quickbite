@@ -2,10 +2,8 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center py-10 text-gray-800">
       <div className="w-full max-w-2xl space-y-6">
-
-        {/* ================= Delivery Address ================= */}
+        {/*  Delivery Address */}
         <div className="bg-white rounded-2xl p-6 shadow-md">
-
           <h2 className="text-xl font-extrabold mb-4 text-black">
             Delivery address
           </h2>
@@ -22,9 +20,7 @@ export default function CheckoutPage() {
               <p className="font-semibold text-black">📍 Road 71</p>
               <p className="text-sm text-gray-600">Dhaka</p>
             </div>
-            <button className="text-gray-600 text-sm font-medium">
-              Edit
-            </button>
+            <button className="text-gray-600 text-sm font-medium">Edit</button>
           </div>
 
           <hr className="mb-4 border-gray-300" />
@@ -35,7 +31,6 @@ export default function CheckoutPage() {
 
           {/* Inputs */}
           <div className="space-y-4">
-
             <input
               type="text"
               placeholder="Street / House Number"
@@ -53,7 +48,6 @@ export default function CheckoutPage() {
               placeholder="Note to rider - e.g. building, landmark"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black resize-none focus:outline-none focus:border-gray-600"
             />
-
           </div>
 
           {/* Add Label */}
@@ -77,14 +71,11 @@ export default function CheckoutPage() {
 
           <div className="flex items-center gap-3 mt-4">
             <input type="checkbox" className="w-4 h-4" />
-            <span className="text-sm text-black">
-              Contactless delivery
-            </span>
+            <span className="text-sm text-black">Contactless delivery</span>
           </div>
-
         </div>
 
-        {/* ================= Delivery Options ================= */}
+        {/*  Delivery Options */}
         <div className="bg-white rounded-2xl p-6 shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-black">
             Delivery options
@@ -97,13 +88,15 @@ export default function CheckoutPage() {
             </label>
 
             <label className="border border-gray-300 rounded-xl p-4 flex justify-between items-center cursor-pointer">
-              <span className="text-black">Priority 25 – 40 mins (+ Tk 40)</span>
+              <span className="text-black">
+                Priority 25 – 40 mins (+ Tk 40)
+              </span>
               <input type="radio" name="delivery" />
             </label>
           </div>
         </div>
 
-        {/* ================= Personal Details ================= */}
+        {/* Personal Details */}
         <div className="bg-white rounded-2xl p-6 shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-black">
             Personal details
@@ -141,7 +134,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* ================= Tip Section ================= */}
+        {/* Tip Section */}
         <div className="bg-white rounded-2xl p-6 shadow-md">
           <h2 className="text-xl font-semibold mb-2 text-black">
             Tip your rider
@@ -152,16 +145,14 @@ export default function CheckoutPage() {
           </p>
 
           <div className="flex gap-3 flex-wrap">
-            {["Not now", "Tk 10", "Tk 20", "Tk 30", "Tk 50"].map(
-              (tip, i) => (
-                <button
-                  key={i}
-                  className="px-4 py-2 rounded-full border border-gray-400 text-sm text-black hover:border-gray-600 hover:text-gray-600 transition"
-                >
-                  {tip}
-                </button>
-              )
-            )}
+            {["Not now", "Tk 10", "Tk 20", "Tk 30", "Tk 50"].map((tip, i) => (
+              <button
+                key={i}
+                className="px-4 py-2 rounded-full border border-gray-400 text-sm text-black hover:border-gray-600 hover:text-gray-600 transition"
+              >
+                {tip}
+              </button>
+            ))}
           </div>
 
           <div className="mt-4 flex items-center gap-2">
@@ -180,9 +171,9 @@ export default function CheckoutPage() {
           By making this purchase you agree to our terms and conditions.
         </p>
         <p className="text-gray-600 text-sm ">
-            I agree that placing the order places me under an obligation to make a payment in accordance with the General Terms and Conditions.
+          I agree that placing the order places me under an obligation to make a
+          payment in accordance with the General Terms and Conditions.
         </p>
-
       </div>
     </div>
   );

@@ -1,24 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { postUser } from "@/actions/server/auth";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleRegister = (e) => {
+  const route = useRouter();
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
+    const form = e.target;
+    const formData = {
+      name: form.name.value,
+      email: form.email.value,
+      photo: form.photo.value,
+      password: form.password.value,
+    };
 
-    // এখানে তুমি API call দিতে পারো
-    console.log("Name:", name, "Email:", email, "Password:", password);
-    alert("Registration submitted!");
+    const result = await postUser(formData);
+    if (result.message) {
+      alert("✅ Seccessful, please login");
+      route.push("/login");
+    }
   };
 
   return (
@@ -27,81 +29,63 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
+          {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
-            </label>
+            <label className="block text-sm font-medium mb-1">Name</label>
             <input
-              placeholder="Enter your name"
+              name="name"
               type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
+          {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
-              placeholder="Enter your email"
+              name="email"
               type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
+          {/* Photo URL */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-1"
-            >
-              Password
-            </label>
+            <label className="block text-sm font-medium mb-1">Photo URL</label>
             <input
+              name="photo"
+              type="url"
+              placeholder="Enter your photo URL"
+              required
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Password</label>
+            <input
+              name="password"
+              type="password"
               placeholder="Enter your password"
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium mb-1"
-            >
-              Confirm Password
-            </label>
-            <input
-              placeholder="Enter your confirm password"
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md transition-colors cursor-pointer"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md transition cursor-pointer"
           >
             Register
           </button>
         </form>
 
-        <p className="text-sm text-gray-500 mt-4 text-center">
+        <p className="text-sm text-gray-500 mt-4 text-center cursor-pointer">
           Already have an account?{" "}
           <a href="/login" className="text-blue-500 underline">
             Login
