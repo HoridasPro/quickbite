@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image"; // ✅ Imported Next.js Image component
 
 // 🔹 Category Card
 const CategoryCard = ({ img, name, onClick, active }) => {
@@ -13,9 +14,11 @@ const CategoryCard = ({ img, name, onClick, active }) => {
         active ? "border-2 border-orange-500" : ""
       }`}
     >
-      <img
+      <Image
         src={img}
         alt={name}
+        width={80} // Represents w-20 (20 * 4px = 80px)
+        height={80} // Represents h-20
         className="w-20 h-20 object-cover rounded-full mb-2"
       />
       <span className="text-sm font-medium text-gray-800 text-center">
@@ -35,9 +38,11 @@ const FoodCard = ({ food }) => {
     >
       {/* Image */}
       <div className="overflow-hidden rounded-xl">
-        <img
+        <Image
           src={food.foodImg}
           alt={food.title || food.foodName}
+          width={400} // Standard width for cards
+          height={160} // Matches h-[160px]
           className="h-[160px] w-full object-cover hover:scale-110 transition duration-500"
         />
       </div>
