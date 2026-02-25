@@ -5,11 +5,10 @@ import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect } from "react";
 
 const getFoods = async () => {
-  const res = await fetch(
-    "https://taxi-kitchen-api.vercel.app/api/v1/foods/random",
-  );
+  // FIXED: Changed absolute localhost URL to relative path for safe deployment
+  const res = await fetch("/api/foods");
   const data = await res.json();
-  return data.foods || [];
+  return data || [];
 };
 
 const FoodsPage = () => {

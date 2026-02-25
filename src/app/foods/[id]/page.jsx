@@ -2,23 +2,20 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantHero from "@/components/restaurant/RestaurantHero";
+import { useParams } from "next/navigation";
 
-// 🔹 Fetch all foods
+// 🔹 Fetch all foods from LOCAL API
 const getFoods = async () => {
-  const res = await fetch(
-    `https://taxi-kitchen-api.vercel.app/api/v1/foods/random`,
-  );
+  const res = await fetch(`/api/foods`);
   const data = await res.json();
-  return data.foods || [];
+  return data || []; 
 };
 
-// 🔹 Fetch categories
+// 🔹 Fetch categories from LOCAL API (We will build this in Step 4)
 const getCategories = async () => {
-  const res = await fetch(
-    `https://taxi-kitchen-api.vercel.app/api/v1/categories`,
-  );
+  const res = await fetch(`/api/categories`);
   const data = await res.json();
-  return data.categories || [];
+  return data || [];
 };
 
 // 🔹 Category Card Component
@@ -81,20 +78,35 @@ const Sidebar = () => (
 );
 
 const ProductPage = () => {
+  const params = useParams();
+  const { id } = params || {};
+  
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
+  const [mainFood, setMainFood] = useState(null); // Added state to track the active item
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const cats = await getCategories();
-      setCategories(cats);
-      const fds = await getFoods();
-      setFoods(fds);
+      try {
+        const fds = await getFoods();
+        setFoods(fds);
+        
+        // Match the URL parameter 'id' to find the exact clicked food item
+        if (fds.length > 0) {
+          const currentItem = fds.find((f) => f.id.toString() === id);
+          setMainFood(currentItem || fds[0]); // fallback to index 0 if not found
+        }
+
+        const cats = await getCategories();
+        setCategories(cats);
+      } catch (err) {
+        console.error("Failed to fetch page data", err);
+      }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
   const filteredFoods = selectedCategory
     ? foods.filter(
@@ -114,16 +126,16 @@ const ProductPage = () => {
   }, {});
 
   const scrollRight = () =>
-    scrollRef.current.scrollBy({ left: 900, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: 900, behavior: "smooth" });
   const scrollLeft = () =>
-    scrollRef.current.scrollBy({ left: -900, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: -900, behavior: "smooth" });
 
   return (
     <div className="pb-20">
       {/* Hero Section */}
       <div className="bg-[#FCFCFC] pt-4">
-        {foods[0] && (
-          <RestaurantHero foodImg={foods[0].foodImg} title={foods[0].title} />
+        {mainFood && (
+          <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} />
         )}
       </div>
 
@@ -144,11 +156,11 @@ const ProductPage = () => {
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide mb-10"
         >
-          {categories.map((cat) => {
+          {categories.map((cat, index) => {
             const name = cat.categoryName || cat.name;
             return (
               <CategoryCard
-                key={cat.id}
+                key={cat.id || index}
                 name={name}
                 count={categoryCounts[name] || 0}
                 active={selectedCategory === name}
