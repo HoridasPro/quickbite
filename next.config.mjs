@@ -11,6 +11,14 @@ images: {
         protocol: 'https',
         hostname: 'images.deliveryhero.io',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      }
     ],
   },
 };
