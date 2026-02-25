@@ -25,7 +25,7 @@ const CategoryCard = ({ img, name, onClick, active }) => {
   );
 };
 
-// 🔥 Updated Food Card (With Title Added Properly)
+// 🔥 Updated Food Card
 const FoodCard = ({ food }) => {
   const router = useRouter();
   return (
@@ -56,7 +56,7 @@ const FoodCard = ({ food }) => {
         </p>
 
         {/* Price */}
-        <p className="text-orange-500 font-bold text-lg mt-2">${food.price}</p>
+        <p className="text-orange-500 font-bold text-lg mt-2">Tk {food.price}</p>
       </div>
     </div>
   );
@@ -68,20 +68,20 @@ const CategoriesFoods = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
 
-  // 🔹 Load Categories
+  // 🔹 Load Categories from LOCAL API
   useEffect(() => {
-    fetch("https://taxi-kitchen-api.vercel.app/api/v1/categories")
+    fetch("/api/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data.categories))
-      .catch((err) => console.error(err));
+      .then((data) => setCategories(data.categories || []))
+      .catch((err) => console.error("Failed to load categories:", err));
   }, []);
 
-  // 🔹 Load Foods
+  // 🔹 Load Foods from LOCAL API
   useEffect(() => {
-    fetch("https://taxi-kitchen-api.vercel.app/api/v1/foods/random")
+    fetch("/api/foods")
       .then((res) => res.json())
-      .then((data) => setFoods(data.foods))
-      .catch((err) => console.error(err));
+      .then((data) => setFoods(data)) 
+      .catch((err) => console.error("Failed to load foods:", err));
   }, []);
 
   // 🔥 Filter Foods by Selected Category
