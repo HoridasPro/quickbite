@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantHero from "@/components/restaurant/RestaurantHero";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 // 🔹 Fetch all foods from LOCAL API
 const getFoods = async () => {
@@ -11,7 +12,7 @@ const getFoods = async () => {
   return data || []; 
 };
 
-// 🔹 Fetch categories from LOCAL API (We will build this in Step 4)
+// 🔹 Fetch categories from LOCAL API
 const getCategories = async () => {
   const res = await fetch(`/api/categories`);
   const data = await res.json();
@@ -39,9 +40,11 @@ const FoodCard = ({ food, onClick }) => (
     onClick={onClick}
   >
     <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
-      <img
+      <Image
         src={food.foodImg}
-        alt={food.foodName}
+        alt={food.title || food.foodName || "Food Item"}
+        width={150} // Required by next/image
+        height={150} // Required by next/image
         className="w-full h-full object-cover hover:scale-110 transition duration-500"
       />
     </div>
@@ -83,7 +86,7 @@ const ProductPage = () => {
   
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
-  const [mainFood, setMainFood] = useState(null); // Added state to track the active item
+  const [mainFood, setMainFood] = useState(null); 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
 
@@ -93,10 +96,9 @@ const ProductPage = () => {
         const fds = await getFoods();
         setFoods(fds);
         
-        // Match the URL parameter 'id' to find the exact clicked food item
         if (fds.length > 0) {
           const currentItem = fds.find((f) => f.id.toString() === id);
-          setMainFood(currentItem || fds[0]); // fallback to index 0 if not found
+          setMainFood(currentItem || fds[0]); 
         }
 
         const cats = await getCategories();
