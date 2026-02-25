@@ -62,10 +62,10 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center py-10 text-gray-800">
+    <div className="min-h-screen bg-[#f7f7f7] flex justify-center py-10 text-gray-800 px-4">
       <div className="w-full max-w-2xl space-y-6">
         
-        <div className="bg-white rounded-2xl p-6 shadow-md">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-xl font-extrabold mb-4 text-black">Delivery address</h2>
           <div className="w-full h-40 rounded-xl overflow-hidden mb-4 border">
             <iframe
@@ -105,29 +105,9 @@ export default function CheckoutPage() {
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black resize-none focus:outline-none focus:border-gray-600"
             />
           </div>
-          <div className="mt-6">
-            <p className="mb-2 font-medium text-black">Add a Label</p>
-            <div className="flex gap-3 flex-wrap">
-              {["Home", "Work", "Partner", "Other"].map((item, i) => (
-                <button
-                  key={i}
-                  className="px-4 py-2 rounded-full border border-gray-400 text-sm text-black hover:border-gray-600 hover:text-orange-600 transition"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button className="w-full mt-6 bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition">
-            Save and continue
-          </button>
-          <div className="flex items-center gap-3 mt-4">
-            <input type="checkbox" className="w-4 h-4" />
-            <span className="text-sm text-black">Contactless delivery</span>
-          </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-md">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-xl font-semibold mb-4 text-black">Delivery options</h2>
           <div className="space-y-3">
             <label className="border border-gray-300 rounded-xl p-4 flex justify-between items-center cursor-pointer">
@@ -141,7 +121,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-md">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-xl font-semibold mb-4 text-black">Personal details</h2>
           <div className="space-y-4">
             <input
@@ -174,44 +154,61 @@ export default function CheckoutPage() {
               placeholder="Mobile number"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black"
             />
-            <button className="w-full bg-gray-300 text-gray-500 py-3 rounded-xl font-medium">
-              Save
-            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-md">
-          <h2 className="text-xl font-semibold mb-2 text-black">Tip your rider</h2>
-          <p className="text-sm text-gray-700 mb-4">Your rider receives 100% of the tip</p>
-          <div className="flex gap-3 flex-wrap">
-            {["Not now", "Tk 10", "Tk 20", "Tk 30", "Tk 50"].map((tip, i) => (
-              <button
-                key={i}
-                className="px-4 py-2 rounded-full border border-gray-400 text-sm text-black hover:border-gray-600 hover:text-gray-600 transition"
-              >
-                {tip}
-              </button>
-            ))}
-          </div>
-          <div className="mt-4 flex items-center gap-2">
-            <input type="checkbox" />
-            <span className="text-sm text-black">Save it for the next order</span>
-          </div>
+        {/* ================= ORDER SUMMARY ================= */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-semibold mb-4 text-black">Your Order</h2>
+          
+          {cartItems.length === 0 ? (
+            <p className="text-gray-500 text-sm">Your cart is empty.</p>
+          ) : (
+            <div className="space-y-4">
+              {cartItems.map((item) => (
+                <div key={item.cartItemId} className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div className="flex gap-3">
+                    <div className="bg-gray-100 text-gray-800 font-bold px-3 py-1 rounded-lg h-fit text-sm">
+                      {item.quantity}x
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{item.title}</h3>
+                      {item.selectedVariations && Object.values(item.selectedVariations).map((variant, i) => {
+                        if (Array.isArray(variant)) {
+                          return variant.map((v, j) => (
+                            <p key={`${i}-${j}`} className="text-xs text-gray-500">+ {v.name}</p>
+                          ));
+                        } else if (variant) {
+                          return <p key={i} className="text-xs text-gray-500">+ {variant.name}</p>;
+                        }
+                        return null;
+                      })}
+                    </div>
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    Tk {item.totalPrice}
+                  </div>
+                </div>
+              ))}
+              
+              <div className="pt-4 flex justify-between items-center text-lg font-extrabold text-black">
+                <span>Total</span>
+                <span className="text-orange-600">Tk {totalAmount}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <button
           onClick={handlePlaceOrder}
-          disabled={loading}
-          className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold disabled:bg-gray-400"
+          disabled={loading || cartItems.length === 0}
+          className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold disabled:bg-gray-400 hover:bg-orange-700 transition"
         >
           {loading ? "Processing..." : `Place order (Tk ${totalAmount})`}
         </button>
 
         <p className="text-gray-600 text-sm">
           By making this purchase you agree to our terms and conditions.
-        </p>
-        <p className="text-gray-600 text-sm">
-          I agree that placing the order places me under an obligation to make a payment in accordance with the General Terms and Conditions.
         </p>
       </div>
     </div>

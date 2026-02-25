@@ -137,7 +137,7 @@ const ProductPage = () => {
       {/* Hero Section */}
       <div className="bg-[#FCFCFC] pt-4">
         {mainFood && (
-          <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} />
+          <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} id={mainFood.id} />
         )}
       </div>
 

@@ -3,7 +3,7 @@ import { Star, Info, Bike, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-const RestaurantHero = ({ foodImg, title }) => {
+const RestaurantHero = ({ foodImg, title, id }) => {
   return (
     <div className="max-w-[1380px] mx-auto">
       {/* Breadcrumbs */}
@@ -66,7 +66,6 @@ const RestaurantHero = ({ foodImg, title }) => {
 
           {/* info section  */}
           <div className="flex items-center justify-between gap-6 mt-4 pt-4 w-full">
-            {/* Left Side: Rating and Info Group */}
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
                 <Star size={18} className="text-primary fill-primary" />
@@ -76,10 +75,18 @@ const RestaurantHero = ({ foodImg, title }) => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 text-secondary font-bold">
-                <Info size={18} className="text-primary" />
-                <span>More info</span>
-              </div>
+              {/* ✅ THE FIX: Connect "More info" to your detailed Item page */}
+              {id ? (
+                <Link href={`/items/${id}`} className="flex items-center gap-2 cursor-pointer hover:opacity-80 text-secondary font-bold hover:text-orange-500 transition-colors">
+                  <Info size={18} className="text-primary" />
+                  <span>More info (Customize)</span>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 text-secondary font-bold">
+                  <Info size={18} className="text-primary" />
+                  <span>More info</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -88,7 +95,7 @@ const RestaurantHero = ({ foodImg, title }) => {
       {/* horizontal line */}
       <div className="border-t border-gray-200 my-4 "></div>
 
-      <h2 className="font-bold text-2xl">Abailable deals</h2>
+      <h2 className="font-bold text-2xl">Available deals</h2>
       <div className="flex flex-col md:flex-row gap-4 w-[700px] mt-5 mb-10">
         {/* Card 1: App-only deals */}
         <div className="flex-1 bg-gray-800 text-white rounded-xl p-6 flex items-center gap-4 shadow-md hover:shadow-xl transition">
@@ -99,19 +106,8 @@ const RestaurantHero = ({ foodImg, title }) => {
             </p>
           </div>
           <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center opacity-40">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 8v8m4-4H8"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
             </svg>
           </div>
         </div>
@@ -125,19 +121,8 @@ const RestaurantHero = ({ foodImg, title }) => {
             </p>
           </div>
           <div className=" h-10 bg-pink-200 rounded-full flex items-center justify-center opacity-40">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-pink-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 8v8m4-4H8"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
             </svg>
           </div>
         </div>
