@@ -20,9 +20,9 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      alert("Invalid email or password ❌");
+      alert("❌Invalid email or password");
     } else {
-      alert("Login successful ✅");
+      alert("✅Login successful");
       router.push("/");
     }
   };
@@ -33,6 +33,7 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
+
           {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>

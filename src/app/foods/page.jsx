@@ -115,7 +115,7 @@ const FoodsPage = () => {
         </div>
       </div>
 
-      {/* Right Side Products Section */}
+      {/* Product section for the right side*/}
       <div className="col-span-9 overflow-y-auto px-6">
         <HeroSection />
         <CategoriesFoods></CategoriesFoods>
