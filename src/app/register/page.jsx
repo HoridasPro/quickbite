@@ -1,26 +1,80 @@
 "use client";
 
 import { postUser } from "@/actions/server/auth";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import SocialLogin from "@/components/SocialLogin";
 
 export default function RegisterPage() {
-  const route = useRouter();
+  const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [image, setImage] = useState(null);
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    const form = e.target;
+    if (!name || !email || !password || !confirmPassword) {
+      alert("❌ All fields are required");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("❌ Password must be at least 6 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("❌ Passwords do not match");
+      return;
+    }
+
+    let imageUrl = null;
+
+    // ✅ Upload image to imgbb (if selected)
+    if (image) {
+      const imageData = new FormData();
+      imageData.append("image", image);
+
+      const res = await fetch(
+        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
+        {
+          method: "POST",
+          body: imageData,
+        }
+      );
+
+      const data = await res.json();
+      imageUrl = data?.data?.url;
+    }
+
     const formData = {
-      name: form.name.value,
-      email: form.email.value,
-      photo: form.photo.value,
-      password: form.password.value,
+      name,
+      email,
+      password,
+      image: imageUrl,
     };
 
     const result = await postUser(formData);
-    if (result.message) {
-      alert("✅ Seccessful, please login");
-      route.push("/login");
+
+    if (!result?.success) {
+      alert("❌ " + result.message);
+      return;
     }
+
+    alert("✅ Account created successfully");
+
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    router.push("/");
   };
 
   return (
@@ -29,63 +83,60 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <input
-              name="name"
-              type="text"
-              placeholder="Enter your name"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
-          </div>
+          <input
+            placeholder="Enter your name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              name="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
-          </div>
+          <input
+            placeholder="Enter your email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          {/* Photo URL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Photo URL</label>
-            <input
-              name="photo"
-              type="url"
-              placeholder="Enter your photo URL"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
-          </div>
+          <input
+            placeholder="Enter your password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
-          </div>
+          <input
+            placeholder="Confirm your password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md transition cursor-pointer"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md"
           >
             Register
           </button>
+
+          <SocialLogin />
         </form>
 
-        <p className="text-sm text-gray-500 mt-4 text-center cursor-pointer">
+        <p className="text-sm text-gray-500 mt-6 text-center">
           Already have an account?{" "}
           <a href="/login" className="text-blue-500 underline">
             Login
