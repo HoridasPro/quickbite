@@ -1,5 +1,6 @@
 export async function GET() {
-    return Response.json({
-         message: "Hello from the API route!",
-        });
+  return Response.json({
+    status: 200,
+    message: "api running",
+  });
 }

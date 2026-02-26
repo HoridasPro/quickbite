@@ -33,7 +33,7 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    if (res?.error) {
+    if (res?.error) {``
       setError("Invalid email or password!");
     } else {
       alert("Login successful!");
@@ -48,6 +48,8 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
+
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -56,10 +58,11 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
@@ -68,7 +71,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 

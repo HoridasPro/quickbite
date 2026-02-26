@@ -3,7 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SessionProvider } from "next-auth/react";
-import NextAuthProvaider from "@/provider/NextAuthProvaider";
+import NextAuthProvider from "@/provider/NextAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,16 +23,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        <NextAuthProvaider>
-        <Header></Header>
-
-        <main className="max-w-[1380px] mx-auto">{children}</main>
-         <Footer></Footer>
-    </NextAuthProvaider>
-      </body>
-    </html>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+          <NextAuthProvider>
+          <Header />
+          <main className="max-w-[1380px] mx-auto">{children}</main>
+          <Footer />
+        </NextAuthProvider>
+        </body>
+      </html>
   );
 }

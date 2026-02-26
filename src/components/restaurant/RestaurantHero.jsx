@@ -15,9 +15,7 @@ const RestaurantHero = ({ foodImg, title }) => {
           Restaurant List
         </span>
         <span>&gt;</span>
-        <span className="text-secondary font-medium">
-           {title}
-        </span>
+        <span className="text-secondary font-medium">{title}</span>
       </nav>
 
       <div className="flex flex-col md:flex-row gap-6 items-start pb-7 mt-2  border-gray-100 pb-4 max-w-[1380px] mx-auto">
@@ -43,7 +41,10 @@ const RestaurantHero = ({ foodImg, title }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 mt-3">
-            <Link href="/delivery" className="flex items-center gap-1 bg-red-50 text-error px-2 py-1 rounded-md text-sm font-bold">
+            <Link
+              href="/delivery"
+              className="flex items-center gap-1 bg-red-50 text-error px-2 py-1 rounded-md text-sm font-bold"
+            >
               <ShoppingBag size={14} />
               Super Restaurant
             </Link>
@@ -86,7 +87,7 @@ const RestaurantHero = ({ foodImg, title }) => {
       <div className="border-t border-gray-200 my-4 "></div>
 
       <h2 className="font-bold text-2xl">Abailable deals</h2>
-      <div className="flex flex-col md:flex-row gap-4 w-[700px] mt-5 mb-10">
+      <div className="flex flex-col md:flex-row gap-4 md:w-[700px] mt-5 mb-10">
         {/* Card 1: App-only deals */}
         <div className="flex-1 bg-gray-800 text-white rounded-xl p-6 flex items-center gap-4 shadow-md hover:shadow-xl transition">
           <div className="flex-1">

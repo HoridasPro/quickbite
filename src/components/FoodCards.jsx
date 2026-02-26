@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
 const FoodCards = ({ food }) => {
   const router = useRouter();
   return (
@@ -19,15 +18,12 @@ const FoodCards = ({ food }) => {
       </figure>
 
       {/* Content */}
-
       <div className="mt-2">
         <h2 className="font-semibold text-gray-800 mb-2">{food.title}</h2>
-
         <p className="text-gray-600">
-          <span className="font-medium text-gray-700">Category:</span>
+          <span className="font-medium text-gray-700"></span>
           {food.category}
         </p>
-
         <p className="mt-3 font-bold text-orange-500">${food.price}</p>
       </div>
     </div>
