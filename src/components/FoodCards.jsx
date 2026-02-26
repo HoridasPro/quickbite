@@ -15,7 +15,6 @@ const FoodCards = ({ food }) => {
           className="h-[150px] w-full flex object-cover hover:scale-110 transition duration-500 rounded-xl"
           src={food.foodImg}
           alt={food.title}
-          b
         />
       </figure>
 
