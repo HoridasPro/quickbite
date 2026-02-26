@@ -1,63 +1,75 @@
 "use server";
-import { connect } from "@/app/lib/dbConnect";
+
+import clientPromise from "@/lib/dbConnect";
 import bcrypt from "bcryptjs";
+
 export const postUser = async (payload) => {
   try {
-    const { email, password, name, photo } = payload;
+    const { name, email, password, image } = payload;
 
-    if (!email || !password) {
+    if (!name || !email || !password || !image) {
       return {
         success: false,
-        message: "Email and password required",
+        message: "All fields are required",
       };
     }
 
-    const collection = await connect("users");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        success: false,
+        message: "Invalid email format",
+      };
+    }
 
-    //Check existing user properly
-    const isUserExist = await collection.findOne({
-      email: email.toLowerCase(),
-    });
-    if (isUserExist) {
+    if (password.length < 6) {
+      return {
+        success: false,
+        message: "Password must be at least 6 characters",
+      };
+    }
+
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
+
+    const isExist = await db.collection("users").findOne({ email });
+
+    if (isExist) {
       return {
         success: false,
         message: "User already exists",
       };
     }
 
-    //Hash password
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = {
-      name: name || "",
-      email: email.toLowerCase(),
-      photo: photo || "",
+      name,
+      email,
+      password: hashedPassword,
       role: "user",
-      password: hashPassword,
+      image: image || null,
       createdAt: new Date(),
     };
-    const result = await collection.insertOne(newUser);
+    const result = await db.collection("users").insertOne(newUser);
+
     if (result.acknowledged) {
       return {
         success: true,
-        message: `User created with ID ${result.insertedId}`,
+        message: "User created successfully",
       };
     }
-    return {
-      success: false,
-      message: "User creation failed",
-    };
-  } catch (error) {
-    console.error("Register Error:", error);
 
-    if (error.code === 11000) {
-      return {
-        success: false,
-        message: "Email already registered",
-      };
-    }
     return {
       success: false,
       message: "Something went wrong",
+    };
+
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Server error",
     };
   }
 };

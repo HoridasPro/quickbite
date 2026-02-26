@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import React, { useState } from "react";``
 import {
   MapPin,
   ShoppingCart,
@@ -13,12 +14,13 @@ import {
 import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
 import Link from "next/link";
+import Image from "next/image";
 import AuthButton from "./AuthButton";
-import { useSession } from "next-auth/react";
 
 const Header = () => {
-  const { status } = useSession();
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession();
+  console.log(session);
 
   return (
     <div className="w-full bg-white shadow-sm">
@@ -50,19 +52,45 @@ const Header = () => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-3 md:gap-4">
-          <AuthButton />
-
-          {/* Register button if not logged in */}
-          {status !== "authenticated" && (
-            <Link
-              href="/register"
-              className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
+        <div className="flex items-center gap-4 relative">
+          {session ? (
+            <div
+              className="relative"
+              onMouseEnter={() => setOpen(true)}
+              // onMouseLeave={() => setOpen(false)}
             >
-              Sign up for free delivery
-            </Link>
+              
+              {/* Profile Image */}
+              {session.user?.image && (
+                <Image
+                  src={session.user.image}
+                  alt="User"
+                  width={40}
+                  height={40}
+                  className="rounded-full bg-gray-300 cursor-pointer border"
+                />
+              )}
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition"
+              >
+                Log in
+              </Link>
+
+              <Link
+                href="/register"
+                className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
+              >
+                Sign up for free delivery
+              </Link>
+            </>
           )}
+
           <Language />
+
           <button
             disabled
             className="bg-gray-100 p-2 sm:p-3 rounded-full cursor-not-allowed opacity-50"
@@ -187,6 +215,15 @@ const Header = () => {
             <div className="mt-6 border-t pt-4">
               <Language />
             </div>
+
+            {status === "authenticated" && (
+  <button
+    onClick={() => signOut({ callbackUrl: "/" })}
+    className="w-full text-left text-red-500 hover:bg-gray-100 px-2 py-2 rounded-md text-sm transition"
+  >
+    Logout
+  </button>
+)}
           </div>
         </div>
       )}
