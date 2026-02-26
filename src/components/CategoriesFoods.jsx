@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// 🔹 Category Card
+// Category Card
 const CategoryCard = ({ img, name, onClick, active }) => {
   return (
     <div
@@ -25,7 +25,7 @@ const CategoryCard = ({ img, name, onClick, active }) => {
   );
 };
 
-// 🔥 Updated Food Card (With Title Added Properly)
+// Updated Food Card (With Title Added Properly)
 const FoodCard = ({ food }) => {
   const router = useRouter();
   return (
@@ -68,7 +68,7 @@ const CategoriesFoods = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
 
-  // 🔹 Load Categories
+  // Load Categories
   useEffect(() => {
     fetch("https://taxi-kitchen-api.vercel.app/api/v1/categories")
       .then((res) => res.json())
@@ -78,9 +78,9 @@ const CategoriesFoods = () => {
 
   // 🔹 Load Foods
   useEffect(() => {
-    fetch("https://taxi-kitchen-api.vercel.app/api/v1/foods/random")
+    fetch("http://localhost:3000/api/feedback")
       .then((res) => res.json())
-      .then((data) => setFoods(data.foods))
+      .then((data) => setFoods(data))
       .catch((err) => console.error(err));
   }, []);
 
@@ -110,7 +110,8 @@ const CategoriesFoods = () => {
 
   return (
     <div className="py-10 relative">
-      {/* ===== Categories Section ===== */}
+
+      {/* Categories Section */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         {categories.length} Food Categories
       </h2>
@@ -144,13 +145,13 @@ const CategoriesFoods = () => {
         <ChevronRight className="w-5 h-5" />
       </button>
 
-      {/* ===== Foods Section ===== */}
+      {/*Foods Section */}
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-6">
           {selectedCategory ? `${selectedCategory} Foods` : "All Foods"}
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filteredFoods.map((food) => (
             <FoodCard key={food.id} food={food} />
           ))}

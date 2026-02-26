@@ -18,23 +18,33 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+    if (!name || !email || !password || !confirmPassword) {
+      alert("❌ All fields are required");
       return;
     }
 
-    let imageUrl = "";
+    if (password.length < 6) {
+      alert("❌ Password must be at least 6 characters");
+      return;
+    }
 
-    // Image upload to imgbb
+    if (password !== confirmPassword) {
+      alert("❌ Passwords do not match");
+      return;
+    }
+
+    let imageUrl = null;
+
+    // ✅ Upload image to imgbb (if selected)
     if (image) {
-      const formData = new FormData();
-      formData.append("image", image);
+      const imageData = new FormData();
+      imageData.append("image", image);
 
       const res = await fetch(
         `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
         {
           method: "POST",
-          body: formData,
+          body: imageData,
         }
       );
 
@@ -42,34 +52,29 @@ export default function RegisterPage() {
       imageUrl = data?.data?.url;
     }
 
-    const userData = {
+    const formData = {
       name,
       email,
       password,
       image: imageUrl,
     };
 
-    const result = await postUser(userData);
+    const result = await postUser(formData);
 
-    if (result?.success) {
-      const loginResult = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (!loginResult?.error) {
-        router.push("/");
-      }
-    } else {
-      alert(result?.message || "Registration failed!");
+    if (!result?.success) {
+      alert("❌ " + result.message);
+      return;
     }
 
-    setName("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setImage(null);
+    alert("✅ Account created successfully");
+
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    router.push("/");
   };
 
   return (
@@ -114,7 +119,6 @@ export default function RegisterPage() {
             className="w-full px-4 py-2 border rounded-md"
           />
 
-          {/* ✅ File Upload Input */}
           <input
             type="file"
             accept="image/*"

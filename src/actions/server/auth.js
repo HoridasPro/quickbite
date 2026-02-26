@@ -51,7 +51,6 @@ export const postUser = async (payload) => {
       image: image || null,
       createdAt: new Date(),
     };
-
     const result = await db.collection("users").insertOne(newUser);
 
     if (result.acknowledged) {
