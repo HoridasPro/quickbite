@@ -78,7 +78,7 @@ const CategoriesFoods = () => {
 
   // 🔹 Load Foods
   useEffect(() => {
-    fetch("http://localhost:3000/api/feedback")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback`)
       .then((res) => res.json())
       .then((data) => setFoods(data))
       .catch((err) => console.error(err));
@@ -110,7 +110,6 @@ const CategoriesFoods = () => {
 
   return (
     <div className="py-10 relative">
-
       {/* Categories Section */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         {categories.length} Food Categories
