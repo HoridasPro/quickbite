@@ -1,92 +1,61 @@
-import { connect } from "@/app/lib/dbConnect";
-const feedbackCollection1 = connect("allFoods");
+import { dbConnect } from "@/app/lib/dbConnect";
+import bcrypt from "bcryptjs";
 
-// For the GET
-export async function GET(request) {
-  const result = await feedbackCollection1.find().toArray();
-  return Response.json(result);
-}
+export async function GET() {
+  try {
+    const users = await dbConnect("allFoods");
+    const allUsers = await users.find({}).toArray(); // MongoDB থেকে সব user
 
-//For the POST
-export async function POST(request) {
-  const { message } = await request.json();
-  if (!message || typeof message !== "string") {
-    return Response.json({
-      status: 400,
-      message: "plese sent a message",
+    return new Response(JSON.stringify(allUsers), {
+      status: 200,
+    });
+  } catch (err) {
+    console.error("GET USERS ERROR:", err);
+    return new Response(JSON.stringify({ message: "Server error" }), {
+      status: 500,
     });
   }
-  const newFeedback = { message, date: new Date().toISOString() };
-  const result = await feedbackCollection1.insertOne(newFeedback);
-
-  return Response.json(result);
 }
 
-// app/api/feedback/route.js
-// app/api/feedback/route.js
-// import { connect } from "@/app/lib/dbConnect";
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { name, email, password, image } = body;
 
-// export async function GET(request) {
-//   try {
-//     // ✅ Optional Authorization check (startsWith safe)
-//     const authHeader = request.headers.get("authorization");
-//     if (!authHeader?.startsWith("Bearer")) {
-//       return new Response(JSON.stringify({ message: "Unauthorized" }), {
-//         status: 401,
-//         headers: { "Content-Type": "application/json" },
-//       });
-//     }
+    if (!name || !email || !password)
+      return new Response(
+        JSON.stringify({ success: false, message: "All fields required" }),
+        { status: 400 },
+      );
 
-//     const feedbackCollection = await connect("allFoods"); // async connect
-//     const result = await feedbackCollection.find().toArray();
+    const users = await dbConnect("allFoods");
 
-//     return new Response(JSON.stringify(result), {
-//       status: 200,
-//       headers: { "Content-Type": "application/json" },
-//     });
-//   } catch (err) {
-//     console.error("GET /api/feedback error:", err);
-//     return new Response(
-//       JSON.stringify({ message: "Failed to fetch feedback" }),
-//       { status: 500, headers: { "Content-Type": "application/json" } },
-//     );
-//   }
-// }
+    const existingUser = await users.findOne({ email: email.toLowerCase() });
+    if (existingUser)
+      return new Response(
+        JSON.stringify({ success: false, message: "User already exists" }),
+        { status: 400 },
+      );
 
-// export async function POST(request) {
-//   try {
-//     // ✅ Optional Authorization check (startsWith safe)
-//     const authHeader = request.headers.get("authorization");
-//     if (!authHeader?.startsWith("Bearer")) {
-//       return new Response(JSON.stringify({ message: "Unauthorized" }), {
-//         status: 401,
-//         headers: { "Content-Type": "application/json" },
-//       });
-//     }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-//     const feedbackCollection = await connect("allFoods"); // async connect
-//     const body = await request.json();
-//     const message = body?.message; // ✅ optional chaining
+    await users.insertOne({
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      image: image || null,
+      createdAt: new Date(),
+    });
 
-//     if (!message || typeof message !== "string") {
-//       return new Response(
-//         JSON.stringify({ message: "Please send a valid message" }),
-//         { status: 400, headers: { "Content-Type": "application/json" } },
-//       );
-//     }
-
-//     const newFeedback = { message, date: new Date().toISOString() };
-//     const result = await feedbackCollection.insertOne(newFeedback);
-
-//     return new Response(JSON.stringify(result), {
-//       status: 201,
-//       headers: { "Content-Type": "application/json" },
-//     });
-//   } catch (err) {
-//     console.error("POST /api/feedback error:", err);
-//     return new Response(
-//       JSON.stringify({ message: "Failed to save feedback" }),
-//       { status: 500, headers: { "Content-Type": "application/json" } },
-//     );
-//   }
-// }
+    return new Response(
+      JSON.stringify({ success: true, message: "User created successfully" }),
+      { status: 201 },
+    );
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ success: false, message: "Server error" }),
+      { status: 500 },
+    );
+  }
+}
