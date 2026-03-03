@@ -5,7 +5,8 @@ import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect } from "react";
 
 const getFoods = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback`);
+  // FIXED: Changed absolute localhost URL to relative path for safe deployment
+  const res = await fetch("/api/foods");
   const data = await res.json();
   return data || [];
 };

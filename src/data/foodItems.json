@@ -37,7 +37,7 @@
     "title": "Creamy Chicken Mushroom Pizza",
     "description": "12-inch hand-tossed dough topped with alfredo sauce, grilled chicken, mushrooms, and extra mozzarella.",
     "price": 899,
-    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1002.jpg",
+    "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop",
     "tags": ["Pizza", "Italian", "Cheesy"],
     "variations": [
       {
@@ -70,7 +70,7 @@
     "title": "Hyderabadi Chicken Biryani",
     "description": "Aromatic basmati rice cooked with tender chicken pieces, saffron, and special Hyderabadi spices. Served with raita.",
     "price": 450,
-    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1003.jpg",
+    "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop",
     "tags": ["Indian", "Rice", "Spicy", "Bestseller"],
     "variations": [
       {
@@ -103,7 +103,7 @@
     "title": "Salmon Avocado Roll (8pcs)",
     "description": "Fresh salmon and creamy avocado rolled in sushi rice and seaweed. Served with soy sauce and wasabi.",
     "price": 650,
-    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1004.jpg",
+    "image": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format&fit=crop",
     "tags": ["Japanese", "Sushi", "Healthy"],
     "variations": [
       {
@@ -125,7 +125,7 @@
     "title": "Oreo Chocolate Cheesecake",
     "description": "Rich creamy cheesecake on an Oreo crust, topped with chocolate ganache.",
     "price": 280,
-    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1005.jpg",
+    "image": "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&auto=format&fit=crop",
     "tags": ["Dessert", "Sweet", "Cake"],
     "variations": []
   },
@@ -135,7 +135,7 @@
     "title": "Mango Lassi",
     "description": "Refreshing yogurt drink blended with sweet ripe mangoes.",
     "price": 120,
-    "image": "https://images.deliveryhero.io/image/fd-bd/Products/1006.jpg",
+    "image": "https://images.unsplash.com/photo-1546173159-315724a31696?w=800&auto=format&fit=crop",
     "tags": ["Beverage", "Cold", "Sweet"],
     "variations": [
       {

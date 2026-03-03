@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function OrderHistoryCard({
   image,
   restaurant,
@@ -22,10 +24,12 @@ export default function OrderHistoryCard({
   return (
     <div className="bg-white rounded-2xl p-5 flex gap-4 items-center border border-gray-100 hover:shadow-lg transition-all duration-300">
       {/* Image */}
-      <div className="w-20 h-20">
-        <img
-          src={image}
-          alt={restaurant}
+      <div className="w-20 h-20 shrink-0">
+        <Image
+          src={image || "https://via.placeholder.com/80"}
+          alt={restaurant || "Restaurant"}
+          width={80}
+          height={80}
           className="w-full h-full rounded-xl object-cover"
         />
       </div>

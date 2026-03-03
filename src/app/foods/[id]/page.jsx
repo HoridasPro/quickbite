@@ -2,33 +2,21 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantHero from "@/components/restaurant/RestaurantHero";
+import { useParams } from "next/navigation";
+import Image from "next/image";
 
-// Fetch all foods
+// 🔹 Fetch all foods from LOCAL API
 const getFoods = async () => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback`);
-    const data = await res.json();
-    if (Array.isArray(data)) return data;
-    else if (data?.result && Array.isArray(data.result)) return data.result;
-    return [];
-  } catch (err) {
-    console.error("Error fetching foods:", err);
-    return [];
-  }
+  const res = await fetch(`/api/foods`);
+  const data = await res.json();
+  return data || []; 
 };
 
-// Fetch categories
+// 🔹 Fetch categories from LOCAL API
 const getCategories = async () => {
-  try {
-    const res = await fetch(
-      `https://taxi-kitchen-api.vercel.app/api/v1/categories`,
-    );
-    const data = await res.json();
-    return data.categories || [];
-  } catch (err) {
-    console.error("Error fetching categories:", err);
-    return [];
-  }
+  const res = await fetch(`/api/categories`);
+  const data = await res.json();
+  return data.categories || [];
 };
 
 // Category Card Component
@@ -51,10 +39,12 @@ const FoodCard = ({ food, onClick }) => (
     className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
     onClick={onClick}
   >
-    <div className="w-full md:w-32 h-32 md:h-36 flex-shrink-0 overflow-hidden">
-      <img
+    <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
+      <Image
         src={food.foodImg}
-        alt={food.title}
+        alt={food.title || food.foodName || "Food Item"}
+        width={150} // Required by next/image
+        height={150} // Required by next/image
         className="w-full h-full object-cover hover:scale-110 transition duration-500"
       />
     </div>
@@ -164,8 +154,12 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
 
 // Product Page
 const ProductPage = () => {
+  const params = useParams();
+  const { id } = params || {};
+  
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
+  const [mainFood, setMainFood] = useState(null); 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -173,13 +167,23 @@ const ProductPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const cats = await getCategories();
-      const fds = await getFoods();
-      setCategories(cats);
-      setFoods(fds);
+      try {
+        const fds = await getFoods();
+        setFoods(fds);
+        
+        if (fds.length > 0) {
+          const currentItem = fds.find((f) => f.id.toString() === id);
+          setMainFood(currentItem || fds[0]); 
+        }
+
+        const cats = await getCategories();
+        setCategories(cats);
+      } catch (err) {
+        console.error("Failed to fetch page data", err);
+      }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
   const filteredFoods = selectedCategory
     ? foods.filter(
@@ -197,21 +201,16 @@ const ProductPage = () => {
     return acc;
   }, {});
 
-  // ✅ Safe scroll
-  const scrollRight = () => {
-    if (scrollRef.current)
-      scrollRef.current.scrollBy({ left: 900, behavior: "smooth" });
-  };
-  const scrollLeft = () => {
-    if (scrollRef.current)
-      scrollRef.current.scrollBy({ left: -900, behavior: "smooth" });
-  };
+  const scrollRight = () =>
+    scrollRef.current?.scrollBy({ left: 900, behavior: "smooth" });
+  const scrollLeft = () =>
+    scrollRef.current?.scrollBy({ left: -900, behavior: "smooth" });
 
   return (
     <div className="pb-20 px-2 sm:px-4">
       <div className="bg-[#FCFCFC] pt-4">
-        {foods[0] && (
-          <RestaurantHero foodImg={foods[0].foodImg} title={foods[0].title} />
+        {mainFood && (
+          <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} />
         )}
       </div>
 
@@ -231,11 +230,11 @@ const ProductPage = () => {
           ref={scrollRef}
           className="flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth scrollbar-hide mb-10"
         >
-          {categories.map((cat) => {
+          {categories.map((cat, index) => {
             const name = cat.categoryName || cat.name;
             return (
               <CategoryCard
-                key={cat.id}
+                key={cat.id || index}
                 name={name}
                 count={categoryCounts[name] || 0}
                 active={selectedCategory === name}
