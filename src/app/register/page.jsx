@@ -4,25 +4,88 @@ import { postUser } from "@/actions/server/auth";
 import SocialLogin from "@/components/SocialLogin";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Swal from "sweetalert2";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    photo: "",
+    password: "",
+  });
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
     const form = e.target;
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const photo = form.photo.value.trim();
+    const password = form.password.value.trim();
 
-    const formData = {
-      name: form.name.value,
-      email: form.email.value,
-      password: form.password.value,
-      image: form.image.value,
-    };
+    let hasError = false;
+    const newErrors = { name: "", email: "", photo: "", password: "" };
 
-    const result = await postUser(formData);
-    if (result.message) {
-      alert("Plaese Login");
+    // Name validation
+    if (!name) {
+      newErrors.name = "Name is required";
+      hasError = true;
+    }
+
+    // Email validation
+    if (!email) {
+      newErrors.email = "Email is required";
+      hasError = true;
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = "Invalid email format";
+      hasError = true;
+    }
+
+    // Photo URL validation
+    if (!photo) {
+      newErrors.photo = "Photo URL is required";
+      hasError = true;
+    } else if (
+      !/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(photo)
+    ) {
+      newErrors.photo = "Invalid photo URL";
+      hasError = true;
+    }
+
+    // Password validation
+    if (!password) {
+      newErrors.password = "Password is required";
+      hasError = true;
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+
+    if (hasError) return;
+
+    // Call server
+    const result = await postUser({ name, email, photo, password });
+
+    if (result?.message) {
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful",
+        text: "Please login",
+        confirmButtonColor: "#f97316",
+      }).then(() => {
+        router.push("/login");
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: result?.error || "Something went wrong",
+        confirmButtonColor: "#f97316",
+      });
     }
     router.push("/login");
   };
@@ -33,33 +96,61 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <input
-            name="name"
-            type="text"
-            placeholder="Enter your name"
-            className="w-full px-4 py-2 border rounded-md"
-          />
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Name</label>
+            <input
+              name="name"
+              type="text"
+              placeholder="Enter your name"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.name ? "border-red-500" : ""}`}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
+          </div>
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Enter your email"
-            className="w-full px-4 py-2 border rounded-md"
-          />
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.email ? "border-red-500" : ""}`}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Enter your password"
-            className="w-full px-4 py-2 border rounded-md"
-          />
+          {/* Photo URL */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Photo URL</label>
+            <input
+              name="photo"
+              type="url"
+              placeholder="Enter your photo URL"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.photo ? "border-red-500" : ""}`}
+            />
+            {errors.photo && (
+              <p className="text-red-500 text-sm mt-1">{errors.photo}</p>
+            )}
+          </div>
 
-          <input
-            name="image"
-            type="url"
-            accept="image/*"
-            className="w-full px-4 py-2 border rounded-md"
-          />
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Password</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.password ? "border-red-500" : ""}`}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
 
           <button
             type="submit"
