@@ -14,6 +14,7 @@ const FoodsPage = () => {
   const [foods, setFoods] = useState([]);
   const [selectedSort, setSelectedSort] = useState("");
   const [selectedOffer, setSelectedOffer] = useState("");
+  console.log("foods get", foods);
 
   useEffect(() => {
     const loadFoods = async () => {
