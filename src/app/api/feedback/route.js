@@ -1,48 +1,61 @@
-// import clientPromise from "@/app/lib/dbConnect";
+import { dbConnect } from "@/app/lib/dbConnect";
+import bcrypt from "bcryptjs";
 
-import clientPromise from "@/lib/dbConnect";
-
-// GET
 export async function GET() {
   try {
-    const client = await clientPromise;
-    const db = client.db(process.env.DB_NAME);
+    const users = await dbConnect("allFoods");
+    const allUsers = await users.find({}).toArray(); // MongoDB থেকে সব user
 
-    const result = await db.collection("allFoods").find().toArray();
-    return Response.json(result);
-  } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Server Error" }, { status: 500 });
+    return new Response(JSON.stringify(allUsers), {
+      status: 200,
+    });
+  } catch (err) {
+    console.error("GET USERS ERROR:", err);
+    return new Response(JSON.stringify({ message: "Server error" }), {
+      status: 500,
+    });
   }
 }
 
-// POST
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const client = await clientPromise;
-    const db = client.db(process.env.DB_NAME);
+    const body = await req.json();
+    const { name, email, password, image } = body;
 
-    const { message } = await request.json();
-
-    if (!message || typeof message !== "string") {
-      return Response.json(
-        { message: "Please send a valid message" },
-        { status: 400 }
+    if (!name || !email || !password)
+      return new Response(
+        JSON.stringify({ success: false, message: "All fields required" }),
+        { status: 400 },
       );
-    }
 
-    const newFeedback = {
-      message,
-      date: new Date().toISOString(),
-    };
+    const users = await dbConnect("allFoods");
 
-    const result = await db
-      .collection("allFoods")
-      .insertOne(newFeedback);
+    const existingUser = await users.findOne({ email: email.toLowerCase() });
+    if (existingUser)
+      return new Response(
+        JSON.stringify({ success: false, message: "User already exists" }),
+        { status: 400 },
+      );
 
-    return Response.json(result);
-  } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Server Error" }, { status: 500 });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await users.insertOne({
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      image: image || null,
+      createdAt: new Date(),
+    });
+
+    return new Response(
+      JSON.stringify({ success: true, message: "User created successfully" }),
+      { status: 201 },
+    );
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ success: false, message: "Server error" }),
+      { status: 500 },
+    );
   }
 }

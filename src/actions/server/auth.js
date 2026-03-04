@@ -1,75 +1,47 @@
 "use server";
 
-import clientPromise from "@/lib/dbConnect";
+import { dbConnect } from "@/app/lib/dbConnect";
 import bcrypt from "bcryptjs";
 
 export const postUser = async (payload) => {
   try {
-    const { name, email, password, image } = payload;
+    console.log("Payload received:", payload);
 
-    if (!name || !email || !password || !image) {
-      return {
-        success: false,
-        message: "All fields are required",
-      };
-    }
+    // Check if user already exists
+    const existUser = await dbConnect("users").findOne({
+      email: payload.email.toLowerCase(),
+    });
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return {
-        success: false,
-        message: "Invalid email format",
-      };
-    }
-
-    if (password.length < 6) {
-      return {
-        success: false,
-        message: "Password must be at least 6 characters",
-      };
-    }
-
-    const client = await clientPromise;
-    const db = client.db(process.env.DB_NAME);
-
-    const isExist = await db.collection("users").findOne({ email });
-
-    if (isExist) {
+    if (existUser) {
       return {
         success: false,
         message: "User already exists",
       };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password
+    const hashPassword = await bcrypt.hash(payload.password, 10);
+    console.log(hashPassword);
 
+    // Prepare new user object
     const newUser = {
-      name,
-      email,
-      password: hashedPassword,
+      name: payload.name,
+      email: payload.email.toLowerCase(),
+      password: hashPassword,
+      image: payload.image || null, // optional base64 image
       role: "user",
-      image: image || null,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
-    const result = await db.collection("users").insertOne(newUser);
 
+    // Insert into MongoDB
+    const result = await dbConnect("users").insertOne(newUser);
     if (result.acknowledged) {
       return {
         success: true,
-        message: "User created successfully",
+        message: `User Created with ${result.insertedId.toString()}`,
       };
     }
-
-    return {
-      success: false,
-      message: "Something went wrong",
-    };
-
   } catch (error) {
-    console.error(error);
-    return {
-      success: false,
-      message: "Server error",
-    };
+    console.error("Server error:", error);
   }
 };

@@ -1,116 +1,64 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/dbConnect";
+import { dbConnect } from "@/app/lib/dbConnect";
 
 export const authOptions = {
-  providers: [
-    // =============================
-    // 🔐 Credentials Login
-    // =============================
-    CredentialsProvider({
-      name: "Email & Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const client = await clientPromise;
-        const db = client.db(process.env.DB_NAME);
-
-        const user = await db
-          .collection("users")
-          .findOne({ email: credentials.email });
-
-        if (!user) return null;
-
-        const isPasswordOk = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordOk) return null;
-
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
-          image: user.image || null,
-          role: user.role || "user",
-        };
-      },
-    }),
-
-    // =============================
-    // 🐙 GitHub Login
-    // =============================
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
-
-    // =============================
-    // 🌍 Google Login
-    // =============================
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
-
   session: {
     strategy: "jwt",
   },
 
-  callbacks: {
-    // =============================
-    // Social Login DB Save
-    // =============================
-    async signIn({ user, account }) {
-      if (
-        account.provider === "google" ||
-        account.provider === "github"
-      ) {
-        const client = await clientPromise;
-        const db = client.db(process.env.DB_NAME);
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials) {
+        const user = await dbConnect("users").findOne({
+          email: credentials.email,
+        });
 
-        const existingUser = await db
-          .collection("users")
-          .findOne({ email: user.email });
-
-        if (!existingUser) {
-          await db.collection("users").insertOne({
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            role: "user",
-            provider: account.provider,
-            createdAt: new Date(),
-          });
-        } else {
-          // 🔥 Important: Role fetch korte hobe
-          user.role = existingUser.role || "user";
+        if (!user) {
+          throw new Error("User not found");
         }
-      }
 
-      return true;
-    },
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
 
-    // =============================
-    // JWT Token e Role Add
-    // =============================
+        if (!isValidPassword) {
+          throw new Error("Invalid password");
+        }
+
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          image: user.image || null,
+        };
+      },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
+  ],
+
+  callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.email = user.email;
-        token.role = user.role || "user";
+        token.id = user.id;
         token.name = user.name;
+        token.email = user.email;
         token.image = user.image;
       }
       return token;
@@ -121,9 +69,9 @@ export const authOptions = {
     // =============================
     async session({ session, token }) {
       if (token) {
-        session.user.email = token.email;
-        session.user.role = token.role;
+        session.user.id = token.id;
         session.user.name = token.name;
+        session.user.email = token.email;
         session.user.image = token.image;
       }
       return session;

@@ -5,7 +5,8 @@ import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect } from "react";
 
 const getFoods = async () => {
-  const res = await fetch("http://localhost:3000/api/feedback");
+  // FIXED: Changed absolute localhost URL to relative path for safe deployment
+  const res = await fetch("/api/foods");
   const data = await res.json();
   return data || [];
 };
@@ -14,6 +15,7 @@ const FoodsPage = () => {
   const [foods, setFoods] = useState([]);
   const [selectedSort, setSelectedSort] = useState("");
   const [selectedOffer, setSelectedOffer] = useState("");
+  console.log("foods get", foods);
 
   useEffect(() => {
     const loadFoods = async () => {

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image"; // ✅ Imported Next.js Image component
 
 // Category Card
 const CategoryCard = ({ img, name, onClick, active }) => {
@@ -13,9 +14,11 @@ const CategoryCard = ({ img, name, onClick, active }) => {
         active ? "border-2 border-orange-500" : ""
       }`}
     >
-      <img
+      <Image
         src={img}
         alt={name}
+        width={80} // Represents w-20 (20 * 4px = 80px)
+        height={80} // Represents h-20
         className="w-20 h-20 object-cover rounded-full mb-2"
       />
       <span className="text-sm font-medium text-gray-800 text-center">
@@ -25,7 +28,7 @@ const CategoryCard = ({ img, name, onClick, active }) => {
   );
 };
 
-// Updated Food Card (With Title Added Properly)
+// 🔥 Updated Food Card
 const FoodCard = ({ food }) => {
   const router = useRouter();
   return (
@@ -35,9 +38,11 @@ const FoodCard = ({ food }) => {
     >
       {/* Image */}
       <div className="overflow-hidden rounded-xl">
-        <img
+        <Image
           src={food.foodImg}
           alt={food.title || food.foodName}
+          width={400} // Standard width for cards
+          height={160} // Matches h-[160px]
           className="h-[160px] w-full object-cover hover:scale-110 transition duration-500"
         />
       </div>
@@ -56,7 +61,7 @@ const FoodCard = ({ food }) => {
         </p>
 
         {/* Price */}
-        <p className="text-orange-500 font-bold text-lg mt-2">${food.price}</p>
+        <p className="text-orange-500 font-bold text-lg mt-2">Tk {food.price}</p>
       </div>
     </div>
   );
@@ -68,20 +73,20 @@ const CategoriesFoods = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
 
-  // Load Categories
+  // 🔹 Load Categories from LOCAL API
   useEffect(() => {
-    fetch("https://taxi-kitchen-api.vercel.app/api/v1/categories")
+    fetch("/api/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data.categories))
-      .catch((err) => console.error(err));
+      .then((data) => setCategories(data.categories || []))
+      .catch((err) => console.error("Failed to load categories:", err));
   }, []);
 
-  // 🔹 Load Foods
+  // 🔹 Load Foods from LOCAL API
   useEffect(() => {
-    fetch("http://localhost:3000/api/feedback")
+    fetch("/api/foods")
       .then((res) => res.json())
-      .then((data) => setFoods(data))
-      .catch((err) => console.error(err));
+      .then((data) => setFoods(data)) 
+      .catch((err) => console.error("Failed to load foods:", err));
   }, []);
 
   // 🔥 Filter Foods by Selected Category
@@ -110,7 +115,6 @@ const CategoriesFoods = () => {
 
   return (
     <div className="py-10 relative">
-
       {/* Categories Section */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         {categories.length} Food Categories
