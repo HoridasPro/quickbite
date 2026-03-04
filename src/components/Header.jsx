@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession, signOut } from "next-auth/react";
 import React, { useState } from "react";
 import {
   MapPin,
@@ -7,64 +8,136 @@ import {
   Search,
   Bike,
   Store,
-  ShoppingBag,
   Menu,
+  X,
+  User,
+  Package,
+  Ticket,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
+import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
 import Link from "next/link";
 import { useCart } from "@/contexts/CartContext"; 
-import CartDrawer from "./CartDrawer"; // ✅ Import the new drawer
+import CartDrawer from "./CartDrawer"; 
 
 const Header = () => {
   const { cartCount } = useCart(); 
-  const [isCartOpen, setIsCartOpen] = useState(false); // ✅ State to manage drawer visibility
+  const [isCartOpen, setIsCartOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   return (
     <>
       <div className="w-full bg-white shadow-sm sticky top-0 z-40">
         {/* Top Navbar */}
         <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between px-4 xl:px-0">
-          {/* Left Side */}
-          <div className="flex items-center gap-6">
-            {/* Mobile Menu */}
+          {/* Left */}
+          <div className="flex items-center gap-4 md:gap-6">
             <div className="lg:hidden">
-              <Menu className="w-6 h-6 text-gray-700 cursor-pointer" />
+              <Menu
+                onClick={() => setOpen(true)}
+                className="w-6 h-6 text-gray-700 cursor-pointer"
+              />
             </div>
 
-            {/* Logo */}
             <Link
               href="/"
-              className="text-orange-500 font-bold text-2xl cursor-pointer"
+              className="text-orange-500 font-bold text-xl sm:text-2xl cursor-pointer"
             >
               🍔QuickBite
             </Link>
           </div>
 
-          {/* Address - Hidden on small screens */}
-          <div className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer">
+          {/* Address Desktop */}
+          <div className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] truncate">
             <MapPin className="w-4 h-4" />
-            <span>New Address Road 71, Dhaka, Bangladesh</span>
+            <span className="truncate">
+              New Address Road 71, Dhaka, Bangladesh
+            </span>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition"
-            >
-              Log in
-            </Link>
+          {/* Right */}
+          <div className="flex items-center gap-4 relative">
+            {status === "authenticated" && session?.user ? (
+              <div className="relative">
+                {/* Profile Pic + Arrow */}
+                <div
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <img
+                    src={session.user.image || "/default-avatar.png"}
+                    alt="User"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover border"
+                  />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      dropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
 
-            <Link
-              href="/register"
-              className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
-            >
-              Sign up for free delivery
-            </Link>
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border z-50">
+                    <Link
+                      href="/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <User className="w-4 h-4" /> Profile
+                    </Link>
+
+                    <Link
+                      href="/orders"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <Package className="w-4 h-4" /> Orders
+                    </Link>
+
+                    <Link
+                      href="/vouchers"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <Ticket className="w-4 h-4" /> Vouchers
+                    </Link>
+
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
+                >
+                  Sign up for free delivery
+                </Link>
+              </>
+            )}
 
             <Language />
 
-            {/* ✅ Cart Button that triggers the Drawer */}
+            {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative bg-gray-100 p-3 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
@@ -79,45 +152,53 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Bottom Menu */}
-        <div className="border-t border-gray-100 hidden md:block">
-          <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0">
-            <div className="flex items-center gap-8 text-gray-700 text-sm font-medium">
-              <Link href="/" className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition">
-                <Bike className="w-5 h-5 text-orange-500" />
-                Delivery
-              </Link>
-              <Link href="/pick-up" className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition">
-                <ShoppingBag className="w-5 h-5" />
-                Pick-up
-              </Link>
-              <Link href="/vouchers" className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition">
-                <ShoppingBag className="w-5 h-5" />
-                Vouchers
-              </Link>
-              <Link href="/pandamart" className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition">
-                <Store className="w-5 h-5" />
-                Pandamart
-              </Link>
-              <Link href="/shops" className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition">
-                <Store className="w-5 h-5" />
-                Shops
-              </Link>
-            </div>
+        {/* Bottom Navbar */}
+        <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
+          <div className="hidden lg:flex items-center gap-8 text-gray-700 text-sm font-medium">
+            <Link
+              href="/"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <MdOutlineDeliveryDining className="w-5 h-5 text-orange-500" /> Delivery
+            </Link>
+            <Link
+              href="/pick-up"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Bike className="w-5 h-5" /> Pick-up
+            </Link>
+            <Link
+              href="/vouchers"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Ticket className="w-5 h-5" /> Vouchers
+            </Link>
+            <Link
+              href="/pandamart"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
+            </Link>
+            <Link
+              href="/shops"
+              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+            >
+              <Store className="w-5 h-5" /> Shops
+            </Link>
+          </div>
 
-            <div className="relative w-full lg:w-[400px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search for restaurants, cuisines, and dishes"
-                className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
-              />
-            </div>
+          <div className="relative w-full lg:w-[400px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for restaurants, cuisines, and dishes"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
+            />
           </div>
         </div>
       </div>
 
-      {/* ✅ The Global Cart Drawer */}
+      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );

@@ -6,7 +6,6 @@ import Image from "next/image";
 const RestaurantHero = ({ foodImg, title, id }) => {
   return (
     <div className="max-w-[1380px] mx-auto">
-      {/* Breadcrumbs */}
       <nav className="text-sm text-gray-500 py-4 flex items-center gap-2 pb-4 ">
         <span className="text-secondary font-medium hover:text-primary cursor-pointer underline underline-offset-4">
           Dhaka
@@ -16,13 +15,10 @@ const RestaurantHero = ({ foodImg, title, id }) => {
           Restaurant List
         </span>
         <span>&gt;</span>
-        <span className="text-secondary font-medium">
-           {title}
-        </span>
+        <span className="text-secondary font-medium">{title}</span>
       </nav>
 
       <div className="flex flex-col md:flex-row gap-6 items-start pb-7 mt-2  border-gray-100 pb-4 max-w-[1380px] mx-auto">
-        {/* Restaurant Image */}
         <div className="w-full md:w-40 h-40 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
           <Image
             src={foodImg || "https://via.placeholder.com/160"}
@@ -33,7 +29,6 @@ const RestaurantHero = ({ foodImg, title, id }) => {
           />
         </div>
 
-        {/* Restaurant Details */}
         <div className="flex-1 w-full">
           <p className="text-xs text-gray-500 mb-1">
             Asian • Indian • Rice Dishes • Biryani
@@ -46,7 +41,10 @@ const RestaurantHero = ({ foodImg, title, id }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 mt-3">
-            <Link href="/delivery" className="flex items-center gap-1 bg-red-50 text-error px-2 py-1 rounded-md text-sm font-bold">
+            <Link
+              href="/delivery"
+              className="flex items-center gap-1 bg-red-50 text-error px-2 py-1 rounded-md text-sm font-bold"
+            >
               <ShoppingBag size={14} />
               Super Restaurant
             </Link>
@@ -64,7 +62,6 @@ const RestaurantHero = ({ foodImg, title, id }) => {
             </div>
           </div>
 
-          {/* info section  */}
           <div className="flex items-center justify-between gap-6 mt-4 pt-4 w-full">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
@@ -75,7 +72,6 @@ const RestaurantHero = ({ foodImg, title, id }) => {
                 </span>
               </div>
 
-              {/* ✅ THE FIX: Connect "More info" to your detailed Item page */}
               {id ? (
                 <Link href={`/items/${id}`} className="flex items-center gap-2 cursor-pointer hover:opacity-80 text-secondary font-bold hover:text-orange-500 transition-colors">
                   <Info size={18} className="text-primary" />
@@ -92,12 +88,10 @@ const RestaurantHero = ({ foodImg, title, id }) => {
         </div>
       </div>
 
-      {/* horizontal line */}
       <div className="border-t border-gray-200 my-4 "></div>
 
       <h2 className="font-bold text-2xl">Available deals</h2>
-      <div className="flex flex-col md:flex-row gap-4 w-[700px] mt-5 mb-10">
-        {/* Card 1: App-only deals */}
+      <div className="flex flex-col md:flex-row gap-4 md:w-[700px] mt-5 mb-10">
         <div className="flex-1 bg-gray-800 text-white rounded-xl p-6 flex items-center gap-4 shadow-md hover:shadow-xl transition">
           <div className="flex-1">
             <h3 className="font-bold text-lg mb-1">App-only deals</h3>
@@ -112,7 +106,6 @@ const RestaurantHero = ({ foodImg, title, id }) => {
           </div>
         </div>
 
-        {/* Card 2: 15% off */}
         <div className="flex-1 bg-pink-100 text-pink-700 rounded-xl p-6 flex items-center gap-4 shadow-md hover:shadow-xl transition">
           <div className="flex-1">
             <h3 className="font-bold text-lg mb-1">15% off</h3>

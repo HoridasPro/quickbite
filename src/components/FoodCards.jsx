@@ -24,7 +24,6 @@ const FoodCards = ({ food }) => {
       {/* Content */}
       <div className="mt-2">
         <h2 className="font-semibold text-gray-800 mb-2">{food.title}</h2>
-
         <p className="text-gray-600">
           <span className="font-medium text-gray-700">Category: </span>
           {food.category}
