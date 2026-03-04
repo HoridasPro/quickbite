@@ -1,31 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import SocialLogin from "@/components/SocialLogin";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // ✅ If already logged in → redirect to home
+  // If already logged in → redirect home
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/");
     }
   }, [status, router]);
 
-  // ✅ Email + Password Login
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const res = await signIn("credentials", {
       email,
@@ -33,14 +33,15 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    if (res?.error) {``
+    if (res?.error) {
       setError("Invalid email or password!");
+      setLoading(false);
     } else {
-      alert("Login successful!");
-      router.push("/");
+      // 🔥 Force session refresh
+      router.refresh();
+      router.replace("/");
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -48,7 +49,6 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
-
           {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
@@ -76,23 +76,22 @@ export default function LoginPage() {
           </div>
 
           <div className="text-right">
-            <a
-              href="/forgot-password"
+            <Link
+              href="/forgot-Password"
               className="text-sm text-blue-500 hover:underline"
             >
               Forgot Password?
-            </a>
+            </Link>
           </div>
 
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+            disabled={loading}
+            className="w-full px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors cursor-pointer"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -103,7 +102,7 @@ export default function LoginPage() {
           <div className="flex-grow border-t"></div>
         </div>
 
-        <SocialLogin></SocialLogin>
+        <SocialLogin />
 
         <p className="text-sm text-gray-500 mt-6 text-center">
           Don’t have an account?{" "}

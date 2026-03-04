@@ -1,80 +1,30 @@
 "use client";
 
 import { postUser } from "@/actions/server/auth";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import SocialLogin from "@/components/SocialLogin";
+
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [image, setImage] = useState(null);
-
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !password || !confirmPassword) {
-      alert("❌ All fields are required");
-      return;
-    }
-
-    if (password.length < 6) {
-      alert("❌ Password must be at least 6 characters");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      alert("❌ Passwords do not match");
-      return;
-    }
-
-    let imageUrl = null;
-
-    // ✅ Upload image to imgbb (if selected)
-    if (image) {
-      const imageData = new FormData();
-      imageData.append("image", image);
-
-      const res = await fetch(
-        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
-        {
-          method: "POST",
-          body: imageData,
-        }
-      );
-
-      const data = await res.json();
-      imageUrl = data?.data?.url;
-    }
+    const form = e.target;
 
     const formData = {
-      name,
-      email,
-      password,
-      image: imageUrl,
+      name: form.name.value,
+      email: form.email.value,
+      password: form.password.value,
+      image: form.image.value,
     };
 
     const result = await postUser(formData);
-
-    if (!result?.success) {
-      alert("❌ " + result.message);
-      return;
+    if (result.message) {
+      alert("Plaese Login");
     }
-
-    alert("✅ Account created successfully");
-
-    await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    router.push("/");
+    router.push("/login");
   };
 
   return (
@@ -84,57 +34,48 @@ export default function RegisterPage() {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <input
-            placeholder="Enter your name"
+            name="name"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+            placeholder="Enter your name"
             className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
-            placeholder="Enter your email"
+            name="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            placeholder="Enter your email"
             className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
+            name="password"
+            type="password"
             placeholder="Enter your password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
             className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
-            placeholder="Confirm your password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            type="file"
+            name="image"
+            type="url"
             accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
             className="w-full px-4 py-2 border rounded-md"
           />
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md cursor-pointer"
           >
             Register
           </button>
-
-          <SocialLogin />
         </form>
+        {/* Divider */}
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t"></div>
+          <span className="mx-3 text-sm text-gray-500">OR</span>
+          <div className="flex-grow border-t"></div>
+        </div>
+
+        <SocialLogin></SocialLogin>
 
         <p className="text-sm text-gray-500 mt-6 text-center">
           Already have an account?{" "}
