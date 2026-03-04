@@ -11,7 +11,7 @@ const HeroSection = () => {
         {/* Text Section */}
         <div className="md:w-1/2 text-center md:text-left">
           <h1 className="text-3xl md:text-3xl font-bold mb-6 text-gray-900">
-            Sign up for free delivery on your first order
+            Free delivery on your first order
           </h1>
 
           <p className="text-gray-700 mb-8 text-lg">
@@ -20,10 +20,10 @@ const HeroSection = () => {
           </p>
 
           <Link
-            href="/register"
+            href="/"
             className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition cursor-pointer"
           >
-            Sign Up
+            Explore Delivery
           </Link>
         </div>
 

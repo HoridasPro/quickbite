@@ -1,24 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { postUser } from "@/actions/server/auth";
+import SocialLogin from "@/components/SocialLogin";
+
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const router = useRouter();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
+    const form = e.target;
 
-    // এখানে তুমি API call দিতে পারো
-    console.log("Name:", name, "Email:", email, "Password:", password);
-    alert("Registration submitted!");
+    const formData = {
+      name: form.name.value,
+      email: form.email.value,
+      password: form.password.value,
+      image: form.image.value,
+    };
+
+    const result = await postUser(formData);
+    if (result?.message) {
+      alert(result.message);
+    }
+    router.push("/login");
   };
 
   return (
@@ -27,81 +33,51 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
-            </label>
-            <input
-              placeholder="Enter your name"
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          <input
+            name="name"
+            type="text"
+            placeholder="Enter your name"
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email
-            </label>
-            <input
-              placeholder="Enter your email"
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          <input
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-1"
-            >
-              Password
-            </label>
-            <input
-              placeholder="Enter your password"
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          <input
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium mb-1"
-            >
-              Confirm Password
-            </label>
-            <input
-              placeholder="Enter your confirm password"
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          <input
+            name="image"
+            type="url"
+            accept="image/*"
+            className="w-full px-4 py-2 border rounded-md"
+          />
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md transition-colors cursor-pointer"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md cursor-pointer"
           >
             Register
           </button>
         </form>
+        {/* Divider */}
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t"></div>
+          <span className="mx-3 text-sm text-gray-500">OR</span>
+          <div className="flex-grow border-t"></div>
+        </div>
 
-        <p className="text-sm text-gray-500 mt-4 text-center">
+        <SocialLogin></SocialLogin>
+
+        <p className="text-sm text-gray-500 mt-6 text-center">
           Already have an account?{" "}
           <a href="/login" className="text-blue-500 underline">
             Login

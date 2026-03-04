@@ -1,10 +1,9 @@
-import React from 'react';
-import ItemDetailView from '@/components/items/ItemDetailView';
-import foodItems from '@/data/foodItems.json';
-import { notFound } from 'next/navigation';
+import React from "react";
+import ItemDetailView from "@/components/items/ItemDetailView";
+import foodItems from "@/data/foodItems.json";
+import { notFound } from "next/navigation";
 
 export default async function ItemPage({ params }) {
-  
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
