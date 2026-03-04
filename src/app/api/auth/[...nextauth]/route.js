@@ -7,7 +7,9 @@ import clientPromise from "@/lib/dbConnect";
 
 export const authOptions = {
   providers: [
-    // Credentials Login
+    // =============================
+    // 🔐 Credentials Login
+    // =============================
     CredentialsProvider({
       name: "Email & Password",
       credentials: {
@@ -39,20 +41,24 @@ export const authOptions = {
         return {
           id: user._id.toString(),
           email: user.email,
-          name: user.name || "User",
+          name: user.name,
           image: user.image || null,
           role: user.role || "user",
         };
       },
     }),
 
-    // GitHub Login
+    // =============================
+    // 🐙 GitHub Login
+    // =============================
     GithubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
 
-    // Google Login
+    // =============================
+    // 🌍 Google Login
+    // =============================
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -64,6 +70,9 @@ export const authOptions = {
   },
 
   callbacks: {
+    // =============================
+    // Social Login DB Save
+    // =============================
     async signIn({ user, account }) {
       if (
         account.provider === "google" ||
@@ -83,13 +92,20 @@ export const authOptions = {
             image: user.image,
             role: "user",
             provider: account.provider,
+            createdAt: new Date(),
           });
+        } else {
+          // 🔥 Important: Role fetch korte hobe
+          user.role = existingUser.role || "user";
         }
       }
 
       return true;
     },
 
+    // =============================
+    // JWT Token e Role Add
+    // =============================
     async jwt({ token, user }) {
       if (user) {
         token.email = user.email;
@@ -100,6 +116,9 @@ export const authOptions = {
       return token;
     },
 
+    // =============================
+    // Session e Role Add
+    // =============================
     async session({ session, token }) {
       if (token) {
         session.user.email = token.email;
@@ -110,6 +129,7 @@ export const authOptions = {
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
 

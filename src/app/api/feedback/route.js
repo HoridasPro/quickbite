@@ -1,23 +1,48 @@
-import { connect } from "@/app/lib/dbConnect";
-const feedbackCollection1 = connect("allFoods");
+// import clientPromise from "@/app/lib/dbConnect";
 
-// For the GET
-export async function GET(request) {
-  const result = await feedbackCollection1.find().toArray();
-  return Response.json(result);
+import clientPromise from "@/lib/dbConnect";
+
+// GET
+export async function GET() {
+  try {
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
+
+    const result = await db.collection("allFoods").find().toArray();
+    return Response.json(result);
+  } catch (error) {
+    console.error(error);
+    return Response.json({ error: "Server Error" }, { status: 500 });
+  }
 }
 
-//For the POST
+// POST
 export async function POST(request) {
-  const { message } = await request.json();
-  if (!message || typeof message !== "string") {
-    return Response.json({
-      status: 400,
-      message: "plese sent a message",
-    });
-  }
-  const newFeedback = { message, date: new Date().toISOString() };
-  const result = await feedbackCollection1.insertOne(newFeedback);
+  try {
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
 
-  return Response.json(result);
+    const { message } = await request.json();
+
+    if (!message || typeof message !== "string") {
+      return Response.json(
+        { message: "Please send a valid message" },
+        { status: 400 }
+      );
+    }
+
+    const newFeedback = {
+      message,
+      date: new Date().toISOString(),
+    };
+
+    const result = await db
+      .collection("allFoods")
+      .insertOne(newFeedback);
+
+    return Response.json(result);
+  } catch (error) {
+    console.error(error);
+    return Response.json({ error: "Server Error" }, { status: 500 });
+  }
 }
