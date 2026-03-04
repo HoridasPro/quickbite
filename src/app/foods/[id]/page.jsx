@@ -3,20 +3,21 @@
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantHero from "@/components/restaurant/RestaurantHero";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+// import Image from "next/image";
 
 // 🔹 Fetch all foods from LOCAL API
 const getFoods = async () => {
-  const res = await fetch(`/api/foods`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback`);
   const data = await res.json();
-  return data || []; 
+  return data || [];
 };
 
 // 🔹 Fetch categories from LOCAL API
 const getCategories = async () => {
-  const res = await fetch(`/api/categories`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`);
   const data = await res.json();
-  return data.categories || [];
+  console.log(data);
+  return data || [];
 };
 
 // Category Card Component
@@ -40,7 +41,7 @@ const FoodCard = ({ food, onClick }) => (
     onClick={onClick}
   >
     <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
-      <Image
+      <img
         src={food.foodImg}
         alt={food.title || food.foodName || "Food Item"}
         width={150} // Required by next/image
@@ -156,10 +157,10 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
 const ProductPage = () => {
   const params = useParams();
   const { id } = params || {};
-  
+
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
-  const [mainFood, setMainFood] = useState(null); 
+  const [mainFood, setMainFood] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -170,10 +171,10 @@ const ProductPage = () => {
       try {
         const fds = await getFoods();
         setFoods(fds);
-        
+
         if (fds.length > 0) {
           const currentItem = fds.find((f) => f.id.toString() === id);
-          setMainFood(currentItem || fds[0]); 
+          setMainFood(currentItem || fds[0]);
         }
 
         const cats = await getCategories();

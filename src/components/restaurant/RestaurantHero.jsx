@@ -1,7 +1,7 @@
 import React from "react";
 import { Star, Info, Bike, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 const RestaurantHero = ({ foodImg, title }) => {
   return (
@@ -22,7 +22,7 @@ const RestaurantHero = ({ foodImg, title }) => {
       <div className="flex flex-col md:flex-row gap-6 items-start pb-7 mt-2  border-gray-100 pb-4 max-w-[1380px] mx-auto">
         {/* Restaurant Image */}
         <div className="w-full md:w-40 h-40 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
-          <Image
+          <img
             src={foodImg || "https://via.placeholder.com/160"}
             alt={title || "Restaurant Logo"}
             width={160}

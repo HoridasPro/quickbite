@@ -1,25 +1,38 @@
-import { NextResponse } from "next/server";
-import foodItems from "@/data/foodItems.json";
+import { dbConnect } from "@/app/lib/dbConnect";
 
 export async function GET() {
-  const categoriesSet = new Set();
-  const categoriesList = [];
+  try {
+    const usersCollection = await dbConnect("categories");
+    const allCategories = await usersCollection.find({}).toArray();
 
-  foodItems.forEach((item, index) => {
-    // Extract the primary tag to use as the category name
-    const mainCategory = item.tags && item.tags.length > 0 ? item.tags[0] : "General";
-    
-    if (!categoriesSet.has(mainCategory)) {
-      categoriesSet.add(mainCategory);
-      categoriesList.push({
-        id: index + 1,
-        categoryName: mainCategory,
-        // Re-use the food image as the category image for visual consistency
-        categoryImg: item.image || "https://via.placeholder.com/150",
-      });
+    return Response.json(allCategories, { status: 200 });
+  } catch (err) {
+    console.error("GET USERS ERROR:", err);
+    return Response.json(
+      { success: false, message: "Server error" },
+      { status: 500 },
+    );
+  }
+}
+export async function POST(req) {
+  try {
+    const usersCollection = await dbConnect("categories");
+    const { message } = await req.json();
+    if (!message || typeof message !== "string") {
+      return Response.json(
+        { success: false, message: "Please sent a message" },
+        { status: 400 },
+      );
     }
-  });
 
-  // Wrap in an object with a 'categories' key to match the frontend's expectation
-  return NextResponse.json({ categories: categoriesList });
+    const newFeedback = { message, date: new Date().toISOString() };
+    const result = await usersCollection.insertOne(newFeedback);
+    return Response.json(result);
+  } catch (err) {
+    console.error("POST USER ERROR:", err);
+    return Response.json(
+      { success: false, message: "Server error" },
+      { status: 500 },
+    );
+  }
 }
