@@ -1,58 +1,74 @@
 "use client";
 
 import OrderHistoryCard from "@/components/orders/OrderHistoryCard";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function OrdersPage() {
-  const activeOrders = [
-    {
-      image: "https://i.ibb.co.com/qL2pycTr/Hot-Honey-Pimento-Cheese-Fried-Chicken-Sandwich.jpg",
-      restaurant: "KFC",
-      items: "Zinger Burger, Wings",
-      date: "Arriving in 20 mins",
-      status: "On the way",
-      price: 620,
-    },
-    {
-      image: "https://i.ibb.co.com/5X5FFwvH/download.jpg",
-      restaurant: "Pizza Hut",
-      items: "Cheese Pizza, Garlic Bread",
-      date: "Preparing your order",
-      status: "Pending",
-      price: 890,
-    },
-  ];
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const pastOrders = [
-    {
-      image: "https://i.ibb.co.com/qL2pycTr/Hot-Honey-Pimento-Cheese-Fried-Chicken-Sandwich.jpg",
-      restaurant: "Burger King",
-      items: "Chicken Burger, Fries",
-      date: "18 Feb 2026 • 8:30 PM",
-      status: "Delivered",
-      price: 450,
-    },
-    {
-      image: "https://i.ibb.co.com/5X5FFwvH/download.jpg",
-      restaurant: "Pizza Hut",
-      items: "Cheese Pizza, Coke",
-      date: "16 Feb 2026 • 9:10 PM",
-      status: "Cancelled",
-      price: 890,
-    },
-    {
-      image: "https://i.ibb.co.com/TMWkCf20/image.jpg",
-      restaurant: "Sultan Dine",
-      items: "Kacchi, Borhani",
-      date: "14 Feb 2026 • 2:00 PM",
-      status: "Delivered",
-      price: 750,
-    },
-  ];
+  useEffect(() => {
+    // Redirect if not logged in
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+
+    // Fetch orders if we have the user's email
+    if (session?.user?.email) {
+      fetch(`/api/orders?email=${session.user.email}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setOrders(data.orders);
+          }
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch orders", err);
+          setLoading(false);
+        });
+    } else if (status !== "loading") {
+      setLoading(false);
+    }
+  }, [session, status, router]);
+
+  // Separate orders by status
+  const activeOrders = orders
+    .filter((o) => o.status === "Pending" || o.status === "On the way")
+    .map(formatOrderForCard);
+
+  const pastOrders = orders
+    .filter((o) => o.status === "Delivered" || o.status === "Cancelled")
+    .map(formatOrderForCard);
+
+  // Helper function to format MongoDB data to match your OrderHistoryCard props
+  function formatOrderForCard(order) {
+    return {
+      id: order._id,
+      image: order.items?.[0]?.image || "https://via.placeholder.com/80",
+      restaurant: order.items?.[0]?.restaurant || "QuickBite",
+      items: order.items?.map((i) => `${i.quantity}x ${i.title}`).join(", "),
+      date: new Date(order.timestamp).toLocaleString(),
+      status: order.status,
+      price: order.totalAmount,
+    };
+  }
+
+  if (loading || status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading orders...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f7f7f7]">
       <div className="max-w-[680px] mx-auto px-6 py-10">
-
         {/* Active Orders */}
         <OrdersSection
           title="Active orders"
@@ -66,19 +82,15 @@ export default function OrdersPage() {
           orders={pastOrders}
           emptyText="No past orders yet."
         />
-
       </div>
     </div>
   );
 }
 
-
 function OrdersSection({ title, orders, emptyText }) {
   return (
     <div className="mb-12">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        {title}
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">{title}</h2>
 
       {orders?.length ? (
         <div className="space-y-4">

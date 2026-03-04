@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const router = useRouter();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     street: "",
@@ -18,6 +20,18 @@ export default function CheckoutPage() {
     mobile: "",
   });
 
+  // Pre-fill form if user is logged in
+  useEffect(() => {
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        email: prev.email || session.user.email || "",
+        firstName: prev.firstName || session.user.name?.split(" ")[0] || "",
+        lastName: prev.lastName || session.user.name?.split(" ").slice(1).join(" ") || "",
+      }));
+    }
+  }, [session]);
+
   const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
 
   const handleInputChange = (e) => {
@@ -27,6 +41,12 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
       alert("Your cart is empty!");
+      return;
+    }
+
+    const finalEmail = session?.user?.email || formData.email;
+    if (!finalEmail) {
+      alert("Please login or provide an email to place an order.");
       return;
     }
 
@@ -42,6 +62,7 @@ export default function CheckoutPage() {
           items: cartItems,
           totalAmount,
           customerInfo: formData,
+          email: finalEmail, // Appended for the backend DB lookup
         }),
       });
 
@@ -127,6 +148,7 @@ export default function CheckoutPage() {
             <input
               type="email"
               name="email"
+              value={formData.email}
               onChange={handleInputChange}
               placeholder="Email"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black"
@@ -135,6 +157,7 @@ export default function CheckoutPage() {
               <input
                 type="text"
                 name="firstName"
+                value={formData.firstName}
                 onChange={handleInputChange}
                 placeholder="First name"
                 className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm text-black"
@@ -142,6 +165,7 @@ export default function CheckoutPage() {
               <input
                 type="text"
                 name="lastName"
+                value={formData.lastName}
                 onChange={handleInputChange}
                 placeholder="Last name"
                 className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm text-black"
