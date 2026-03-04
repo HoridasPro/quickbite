@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   ShoppingCart,
@@ -9,7 +9,6 @@ import {
   Bike,
   Store,
   Menu,
-  X,
   User,
   Package,
   Ticket,
@@ -19,22 +18,46 @@ import {
 import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
 import Link from "next/link";
-import { useCart } from "@/contexts/CartContext"; 
-import CartDrawer from "./CartDrawer"; 
+import { useCart } from "@/contexts/CartContext";
+import CartDrawer from "./CartDrawer";
 
 const Header = () => {
-  const { cartCount } = useCart(); 
-  const [isCartOpen, setIsCartOpen] = useState(false); 
+  const { cartCount } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
+  const [deliveryAddress, setDeliveryAddress] = useState("Add Delivery Address");
+
+  useEffect(() => {
+    const fetchDefaultAddress = () => {
+      if (session?.user?.email) {
+        fetch(`/api/user/addresses?email=${session.user.email}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.addresses.length > 0) {
+              setDeliveryAddress(`${data.addresses[0].address}, ${data.addresses[0].city}`);
+            } else {
+              setDeliveryAddress("Add Delivery Address");
+            }
+          })
+          .catch((err) => console.error(err));
+      }
+    };
+
+    fetchDefaultAddress();
+
+    window.addEventListener("addressUpdated", fetchDefaultAddress);
+
+    return () => {
+      window.removeEventListener("addressUpdated", fetchDefaultAddress);
+    };
+  }, [session]);
 
   return (
     <>
       <div className="w-full bg-white shadow-sm sticky top-0 z-40">
-        {/* Top Navbar */}
         <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between px-4 xl:px-0">
-          {/* Left */}
           <div className="flex items-center gap-4 md:gap-6">
             <div className="lg:hidden">
               <Menu
@@ -51,19 +74,16 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Address Desktop */}
-          <div className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] truncate">
-            <MapPin className="w-4 h-4" />
+          <Link href="/profile/addresses" className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] transition">
+            <MapPin className="w-4 h-4 shrink-0" />
             <span className="truncate">
-              New Address Road 71, Dhaka, Bangladesh
+              {status === "authenticated" ? deliveryAddress : "Add Delivery Address"}
             </span>
-          </div>
+          </Link>
 
-          {/* Right */}
           <div className="flex items-center gap-4 relative">
             {status === "authenticated" && session?.user ? (
               <div className="relative">
-                {/* Profile Pic + Arrow */}
                 <div
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 cursor-pointer"
@@ -82,7 +102,6 @@ const Header = () => {
                   />
                 </div>
 
-                {/* Dropdown */}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border z-50">
                     <Link
@@ -137,7 +156,6 @@ const Header = () => {
 
             <Language />
 
-            {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative bg-gray-100 p-3 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
@@ -152,7 +170,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Bottom Navbar */}
         <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
           <div className="hidden lg:flex items-center gap-8 text-gray-700 text-sm font-medium">
             <Link
@@ -198,7 +215,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
