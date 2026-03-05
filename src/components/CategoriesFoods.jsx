@@ -119,7 +119,7 @@ const CategoriesFoods = () => {
     <div className="py-10 relative">
       {/* Categories Section */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        {categories.length} Food Cat
+        {categories.length} Food Catetogies
       </h2>
 
       <button
