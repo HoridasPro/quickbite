@@ -2,7 +2,6 @@
 
 import { dbConnect } from "@/app/lib/dbConnect";
 import bcrypt from "bcryptjs";
-
 export const postUser = async (payload) => {
   try {
     console.log("Payload received:", payload);

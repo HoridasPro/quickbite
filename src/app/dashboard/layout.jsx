@@ -8,7 +8,6 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      
       {/* Sidebar */}
       <div
         className={`fixed md:static z-40 bg-white shadow-xl h-full transition-all duration-300 ${
@@ -28,7 +27,6 @@ export default function DashboardLayout({ children }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        
         {/* Top Navbar */}
         <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b">
           <button
