@@ -1,35 +1,71 @@
 import { NextResponse } from "next/server";
-import foodItems from "@/data/foodItems.json";
+import { dbConnect } from "@/app/lib/dbConnect";
 
 export async function GET(request) {
-  // 1. Extract page and limit from URL (default to page 1, 3 items per page)
-  const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "3");
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "3");
+    const sort = searchParams.get("sort") || "";
+    const offer = searchParams.get("offer") || "";
+    const category = searchParams.get("category") || "";
+    const search = searchParams.get("search") || "";
 
-  // 2. Map the local JSON schema
-  const mappedFoods = foodItems.map((item) => {
-    return {
+    const query = {};
+    if (offer) {
+      query.offer = offer;
+    }
+    if (category) {
+      query.tags = { $regex: new RegExp(`^${category}$`, "i") };
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    let sortOption = {};
+    switch (sort) {
+      case "Price: Low to High":
+        sortOption = { price: 1 };
+        break;
+      case "Price: High to Low":
+        sortOption = { price: -1 };
+        break;
+      case "Rating":
+        sortOption = { rating: -1 };
+        break;
+      case "Delivery Time":
+        sortOption = { deliveryTime: 1 };
+        break;
+      default:
+        sortOption = { _id: 1 };
+    }
+
+    const skip = (page - 1) * limit;
+    const collection = dbConnect("foods");
+    
+    const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
+    const totalItems = await collection.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const mappedFoods = foods.map((item) => ({
       ...item,
-      foodImg: item.image,
-      foodName: item.title,
+      id: item.id || item._id.toString(),
+      foodImg: item.image || item.foodImg,
+      foodName: item.title || item.foodName,
       category: item.tags && item.tags.length > 0 ? item.tags[0] : "General",
       categoryName: item.tags && item.tags.length > 0 ? item.tags[0] : "General",
-    };
-  });
+    }));
 
-  // 3. Slice array for pagination
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const paginatedFoods = mappedFoods.slice(startIndex, endIndex);
-  
-  const totalPages = Math.ceil(mappedFoods.length / limit);
-
-  // 4. Return paginated response
-  return NextResponse.json({
-    foods: paginatedFoods,
-    currentPage: page,
-    totalPages: totalPages,
-    totalItems: mappedFoods.length
-  });
+    return NextResponse.json({
+      foods: mappedFoods,
+      currentPage: page,
+      totalPages: totalPages,
+      totalItems: totalItems
+    });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
 }

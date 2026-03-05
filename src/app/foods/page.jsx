@@ -1,32 +1,50 @@
 "use client";
+
 import CategoriesFoods from "@/components/CategoriesFoods";
 import FoodCards from "@/components/FoodCards";
 import HeroSection from "@/components/HeroSection";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-const FoodsPage = () => {
+const FoodsPageContent = () => {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+
   const [foods, setFoods] = useState([]);
   const [selectedSort, setSelectedSort] = useState("");
   const [selectedOffer, setSelectedOffer] = useState("");
-
-  // Pagination States
+  const [selectedCategory, setSelectedCategory] = useState("");
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSort, selectedOffer, selectedCategory, searchQuery]);
+
+  useEffect(() => {
     const loadFoods = async () => {
       try {
-        // Fetch from our local API with pagination query params
-        const res = await fetch(`/api/foods?page=${currentPage}&limit=3`);
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: 3,
+        });
+        
+        if (selectedSort) params.append("sort", selectedSort);
+        if (selectedOffer) params.append("offer", selectedOffer);
+        if (selectedCategory) params.append("category", selectedCategory);
+        if (searchQuery) params.append("search", searchQuery);
+
+        const res = await fetch(`/api/foods?${params.toString()}`);
         const data = await res.json();
         setFoods(data.foods || []);
         setTotalPages(data.totalPages || 1);
       } catch (error) {
-        console.error("Failed to fetch foods:", error);
+        console.error(error);
       }
     };
     loadFoods();
-  }, [currentPage]); // Re-fetches whenever currentPage changes
+  }, [currentPage, selectedSort, selectedOffer, selectedCategory, searchQuery]);
 
   const sortOptions = [
     "Relevance",
@@ -40,7 +58,6 @@ const FoodsPage = () => {
 
   return (
     <div className="grid grid-cols-12 gap-5 h-screen mt-5">
-      {/* Sidebar */}
       <div className="col-span-3 bg-white shadow-lg rounded-2xl p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-bold text-2xl">Filters</h2>
@@ -48,6 +65,7 @@ const FoodsPage = () => {
             onClick={() => {
               setSelectedSort("");
               setSelectedOffer("");
+              setSelectedCategory("");
             }}
             className="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
           >
@@ -55,14 +73,13 @@ const FoodsPage = () => {
           </button>
         </div>
 
-        {/* Sort By */}
         <div className="mb-6">
           <h4 className="font-semibold mb-3 text-gray-700">Sort By</h4>
           <div className="space-y-3">
             {sortOptions.map((option) => (
               <div
                 key={option}
-                onClick={() => setSelectedSort(option)}
+                onClick={() => setSelectedSort(option === selectedSort ? "" : option)}
                 className="flex items-center gap-3 cursor-pointer group hover:bg-gray-100 p-1 rounded-xl"
               >
                 <div
@@ -78,14 +95,13 @@ const FoodsPage = () => {
           </div>
         </div>
 
-        {/* Offers */}
         <div>
           <h4 className="font-semibold mb-3 text-gray-700">Offers</h4>
           <div className="space-y-3">
             {offerOptions.map((option) => (
               <div
                 key={option}
-                onClick={() => setSelectedOffer(option)}
+                onClick={() => setSelectedOffer(option === selectedOffer ? "" : option)}
                 className="flex items-center gap-3 cursor-pointer group hover:bg-gray-100 p-1 rounded-xl"
               >
                 <div
@@ -102,22 +118,24 @@ const FoodsPage = () => {
         </div>
       </div>
 
-      {/* Right Side Products Section */}
       <div className="col-span-9 overflow-y-auto px-6">
         <HeroSection />
-        <CategoriesFoods />
+        
+        <CategoriesFoods 
+          onCategorySelect={setSelectedCategory} 
+          hideFoods={true} 
+        />
         
         <h2 className="font-bold text-2xl mt-10 mb-5">
-          {foods.length} Restaurants Found
+          {foods.length} Restaurants Found {selectedCategory && `for "${selectedCategory}"`} {searchQuery && `matching "${searchQuery}"`}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {foods.map((food) => (
-            <FoodCards key={food.id} food={food} />
+            <FoodCards key={food.id || food._id} food={food} />
           ))}
         </div>
 
-        {/* Pagination Controls */}
         <div className="flex justify-center items-center gap-4 mt-10 pb-20">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -142,4 +160,10 @@ const FoodsPage = () => {
   );
 };
 
-export default FoodsPage;
+export default function FoodsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FoodsPageContent />
+    </Suspense>
+  );
+}

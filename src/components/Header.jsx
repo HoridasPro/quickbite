@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   MapPin,
   ShoppingCart,
@@ -14,6 +15,7 @@ import {
   Ticket,
   LogOut,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
@@ -28,6 +30,12 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
   const [deliveryAddress, setDeliveryAddress] = useState("Add Delivery Address");
+  
+  const pathname = usePathname();
+  const router = useRouter();
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const fetchDefaultAddress = () => {
@@ -53,6 +61,23 @@ const Header = () => {
       window.removeEventListener("addressUpdated", fetchDefaultAddress);
     };
   }, [session]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (searchQuery.trim() !== "") {
+        router.push(`/foods?search=${encodeURIComponent(searchQuery.trim())}`);
+      } else if (searchQuery === "" && pathname.startsWith("/foods")) {
+        router.push(`/foods`);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   return (
     <>
@@ -174,31 +199,41 @@ const Header = () => {
           <div className="hidden lg:flex items-center gap-8 text-gray-700 text-sm font-medium">
             <Link
               href="/"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
+                pathname === "/" || pathname.startsWith("/foods") ? "text-orange-500" : ""
+              }`}
             >
-              <MdOutlineDeliveryDining className="w-5 h-5 text-orange-500" /> Delivery
+              <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
             </Link>
             <Link
               href="/pick-up"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
+                pathname === "/pick-up" ? "text-orange-500" : ""
+              }`}
             >
               <Bike className="w-5 h-5" /> Pick-up
             </Link>
             <Link
               href="/vouchers"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
+                pathname === "/vouchers" ? "text-orange-500" : ""
+              }`}
             >
               <Ticket className="w-5 h-5" /> Vouchers
             </Link>
             <Link
               href="/pandamart"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
+                pathname === "/pandamart" ? "text-orange-500" : ""
+              }`}
             >
               <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
             </Link>
             <Link
               href="/shops"
-              className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
+                pathname === "/shops" ? "text-orange-500" : ""
+              }`}
             >
               <Store className="w-5 h-5" /> Shops
             </Link>
@@ -209,11 +244,78 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search for restaurants, cuisines, and dishes"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
             />
           </div>
         </div>
       </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setOpen(false)}
+          ></div>
+          <div className="relative w-64 bg-white h-full shadow-lg flex flex-col pt-5 pb-4 overflow-y-auto">
+            <div className="flex items-center justify-between px-4 pb-4 border-b">
+              <span className="text-orange-500 font-bold text-xl">🍔QuickBite</span>
+              <X
+                className="w-6 h-6 text-gray-700 cursor-pointer"
+                onClick={() => setOpen(false)}
+              />
+            </div>
+            <div className="flex flex-col gap-2 p-4">
+              <Link
+                href="/"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-xl transition ${
+                  pathname === "/" || pathname.startsWith("/foods") ? "text-orange-500 bg-orange-50" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
+              </Link>
+              <Link
+                href="/pick-up"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-xl transition ${
+                  pathname === "/pick-up" ? "text-orange-500 bg-orange-50" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Bike className="w-5 h-5" /> Pick-up
+              </Link>
+              <Link
+                href="/vouchers"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-xl transition ${
+                  pathname === "/vouchers" ? "text-orange-500 bg-orange-50" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Ticket className="w-5 h-5" /> Vouchers
+              </Link>
+              <Link
+                href="/pandamart"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-xl transition ${
+                  pathname === "/pandamart" ? "text-orange-500 bg-orange-50" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
+              </Link>
+              <Link
+                href="/shops"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2 p-2 rounded-xl transition ${
+                  pathname === "/shops" ? "text-orange-500 bg-orange-50" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Store className="w-5 h-5" /> Shops
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
