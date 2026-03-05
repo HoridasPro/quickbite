@@ -5,21 +5,18 @@ import RestaurantHero from "@/components/restaurant/RestaurantHero";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 
-// 🔹 Fetch all foods from LOCAL API
 const getFoods = async () => {
-  const res = await fetch(`/api/foods`);
+  const res = await fetch(`/api/foods?limit=100`);
   const data = await res.json();
   return data.foods || [];  
 };
 
-// 🔹 Fetch categories from LOCAL API
 const getCategories = async () => {
   const res = await fetch(`/api/categories`);
   const data = await res.json();
   return data.categories || [];
 };
 
-// Category Card Component
 const CategoryCard = ({ name, count, onClick, active }) => (
   <div
     onClick={onClick}
@@ -33,7 +30,6 @@ const CategoryCard = ({ name, count, onClick, active }) => (
   </div>
 );
 
-// Food Card Component
 const FoodCard = ({ food, onClick }) => (
   <div
     className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
@@ -43,8 +39,8 @@ const FoodCard = ({ food, onClick }) => (
       <Image
         src={food.foodImg}
         alt={food.title || food.foodName || "Food Item"}
-        width={150} // Required by next/image
-        height={150} // Required by next/image
+        width={150} 
+        height={150} 
         className="w-full h-full object-cover hover:scale-110 transition duration-500"
       />
     </div>
@@ -65,7 +61,6 @@ const FoodCard = ({ food, onClick }) => (
   </div>
 );
 
-// Sidebar Component
 const Sidebar = () => (
   <div className="w-full md:w-80 bg-white shadow-md rounded-xl p-4 sticky top-24 h-auto md:h-[calc(100vh-6rem)] overflow-y-auto">
     <h3 className="text-xl font-bold mb-4">Your Cart</h3>
@@ -79,7 +74,6 @@ const Sidebar = () => (
   </div>
 );
 
-// Food Modal Component
 const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
   const price = food?.price || 0;
   const increaseQty = () => setQuantity((prev) => prev + 1);
@@ -152,7 +146,6 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
   );
 };
 
-// Product Page
 const ProductPage = () => {
   const params = useParams();
   const { id } = params || {};
