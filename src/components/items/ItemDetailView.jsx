@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
@@ -8,10 +8,12 @@ import ReviewSection from "@/components/items/ReviewSection";
 import CartActions from "@/components/items/CartActions";
 
 const ItemDetailView = ({ item }) => {
-  const cart = useCart(); // safer
+  const cart = useCart();
   const addToCart = cart?.addToCart;
 
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
 
   const [selections, setSelections] = useState(() => {
     const defaults = {};
@@ -24,6 +26,30 @@ const ItemDetailView = ({ item }) => {
     }
     return defaults;
   });
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`/api/reviews?itemId=${item?.id || item?._id}`);
+      const data = await res.json();
+      if (data.success) {
+        setReviews(data.reviews);
+        if (data.reviews.length > 0) {
+          const avg = data.reviews.reduce((acc, curr) => acc + curr.rating, 0) / data.reviews.length;
+          setAverageRating(avg.toFixed(1));
+        } else {
+          setAverageRating(0);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (item?.id || item?._id) {
+      fetchReviews();
+    }
+  }, [item]);
 
   const handleOptionSelect = (variationId, type, option) => {
     setSelections((prev) => {
@@ -98,7 +124,7 @@ const ItemDetailView = ({ item }) => {
 
     const orderPayload = {
       cartItemId: Date.now(),
-      itemId: item?._id || item?.id, // 🔥 FIXED
+      itemId: item?._id || item?.id,
       title: item?.title,
       restaurant: item?.restaurant_name,
       image: item?.image,
@@ -109,7 +135,6 @@ const ItemDetailView = ({ item }) => {
     };
 
     addToCart(orderPayload);
-
     alert(`Added to Cart! Total: Tk ${orderPayload.totalPrice}`);
   };
 
@@ -118,37 +143,147 @@ const ItemDetailView = ({ item }) => {
   return (
     <div className="bg-white min-h-screen pb-32 md:pb-20">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-4">{item.title}</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{item.title}</h1>
+              
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+                <span className="font-bold text-gray-700">{averageRating > 0 ? averageRating : "New"}</span>
+                <span className="text-gray-400 text-sm">({reviews.length} Reviews)</span>
+              </div>
 
-        <div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden relative">
-          {item.image && (
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              className="object-cover"
-            />
-          )}
+              <div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden relative">
+                {item.image && (
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="mt-6">
+                <p className="text-gray-600 mb-4">{item.description}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="text-[#D70F64] font-bold text-2xl">
+                    Tk {item.price}
+                  </span>
+                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span>Base Price</span>
+                </div>
+              </div>
+
+              <div className="mt-10">
+                <ReviewSection itemId={item?._id || item?.id} reviews={reviews} onReviewAdded={fetchReviews} />
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sticky top-24">
+              <h3 className="font-bold text-gray-900 text-lg mb-6 pb-3 border-b border-gray-100">
+                Customize your Order
+              </h3>
+
+              <div className="space-y-8 mb-8">
+                {item.variations?.map((variant) => (
+                  <div key={variant.id}>
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <h4 className="font-bold text-gray-800 text-md">
+                          {variant.title}
+                        </h4>
+                        {variant.type === "checkbox" && (
+                          <p className="text-xs text-gray-400">
+                            Select multiple options
+                          </p>
+                        )}
+                      </div>
+                      {variant.required ? (
+                        <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded">
+                          Required
+                        </span>
+                      ) : (
+                        <span className="bg-gray-50 text-gray-400 text-xs px-2 py-1 rounded">
+                          Optional
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      {variant.options.map((opt, idx) => {
+                        const active = isSelected(variant.id, opt.name);
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() =>
+                              handleOptionSelect(variant.id, variant.type, opt)
+                            }
+                            className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all duration-200 
+                                ${active ? "border-[#D70F64] bg-pink-50 ring-1 ring-[#D70F64]" : "border-gray-200 hover:border-gray-300 bg-white"}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-5 h-5 rounded-full border flex items-center justify-center ${active ? "border-[#D70F64] bg-[#D70F64]" : "border-gray-300"}`}
+                              >
+                                {active && (
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                )}
+                              </div>
+                              <span
+                                className={`text-sm ${active ? "font-medium text-gray-900" : "text-gray-700"}`}
+                              >
+                                {opt.name}
+                              </span>
+                            </div>
+                            <span className="text-sm text-gray-500 font-medium">
+                              {opt.price > 0 ? `+ Tk ${opt.price}` : "Free"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between font-bold text-gray-900 text-lg">
+                  <span>Total</span>
+                  <span className="text-[#D70F64]">Tk {calculateTotal()}</span>
+                </div>
+
+                <CartActions
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  onAdd={handleAddToCart}
+                />
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="mt-6">
-          <p className="text-gray-600 mb-4">{item.description}</p>
-          <p className="text-xl font-bold text-[#D70F64]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-bold text-gray-900">Total</span>
+          <span className="font-bold text-[#D70F64] text-xl">
             Tk {calculateTotal()}
-          </p>
+          </span>
         </div>
 
-        <div className="mt-6">
-          <CartActions
-            quantity={quantity}
-            setQuantity={setQuantity}
-            onAdd={handleAddToCart}
-          />
-        </div>
-
-        <div className="mt-10">
-          <ReviewSection itemId={item?._id || item?.id} />
-        </div>
+        <CartActions
+          quantity={quantity}
+          setQuantity={setQuantity}
+          onAdd={handleAddToCart}
+        />
       </div>
     </div>
   );
