@@ -18,6 +18,22 @@ const FoodsPageContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const calculateHeaderHeight = () => {
+      const headerElement = document.getElementById('main-header');
+      if (headerElement) {
+        setHeaderHeight(headerElement.offsetHeight);
+      }
+    };
+
+    calculateHeaderHeight();
+    window.addEventListener('resize', calculateHeaderHeight);
+    
+    return () => window.removeEventListener('resize', calculateHeaderHeight);
+  }, []);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedSort, selectedOffer, selectedCategory, searchQuery]);
@@ -57,8 +73,14 @@ const FoodsPageContent = () => {
   const offerOptions = ["Discount", "Free Delivery", "Buy 1 Get 1", "Cashback"];
 
   return (
-    <div className="grid grid-cols-12 gap-5 h-screen mt-5">
-      <div className="col-span-3 bg-white shadow-lg rounded-2xl p-6 overflow-y-auto">
+    <div className="grid grid-cols-12 gap-5 mt-5 mb-20 items-start">
+      <div 
+        className="col-span-3 bg-white shadow-lg rounded-2xl p-6 sticky self-start overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{
+          top: `${headerHeight + 20}px`,
+          maxHeight: `calc(100vh - ${headerHeight + 40}px)`
+        }}
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-bold text-2xl">Filters</h2>
           <button
@@ -118,7 +140,7 @@ const FoodsPageContent = () => {
         </div>
       </div>
 
-      <div className="col-span-9 overflow-y-auto px-6">
+      <div className="col-span-9 px-6">
         <HeroSection />
         
         <CategoriesFoods 

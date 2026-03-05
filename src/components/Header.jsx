@@ -81,7 +81,7 @@ const Header = () => {
 
   return (
     <>
-      <div className="w-full bg-white shadow-sm sticky top-0 z-40">
+      <div id="main-header" className="w-full bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between px-4 xl:px-0">
           <div className="flex items-center gap-4 md:gap-6">
             <div className="lg:hidden">
