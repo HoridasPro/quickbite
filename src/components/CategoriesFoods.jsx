@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // ✅ Imported Next.js Image component
+// import Image from "next/image"; // ✅ Imported Next.js Image component
 
 // Category Card
 const CategoryCard = ({ img, name, onClick, active }) => {
@@ -14,7 +14,7 @@ const CategoryCard = ({ img, name, onClick, active }) => {
         active ? "border-2 border-orange-500" : ""
       }`}
     >
-      <Image
+      <img
         src={img}
         alt={name}
         width={80} // Represents w-20 (20 * 4px = 80px)
@@ -38,7 +38,7 @@ const FoodCard = ({ food }) => {
     >
       {/* Image */}
       <div className="overflow-hidden rounded-xl">
-        <Image
+        <img
           src={food.foodImg}
           alt={food.title || food.foodName}
           width={400} // Standard width for cards
@@ -56,12 +56,14 @@ const FoodCard = ({ food }) => {
 
         {/* Category */}
         <p className="text-sm text-gray-600">
-          <span className="font-medium">Category:</span>{" "}
+          <span className="font-medium"></span>{" "}
           {food.category || food.categoryName}
         </p>
 
         {/* Price */}
-        <p className="text-orange-500 font-bold text-lg mt-2">Tk {food.price}</p>
+        <p className="text-orange-500 font-bold text-lg mt-2">
+          Tk {food.price}
+        </p>
       </div>
     </div>
   );
@@ -75,17 +77,17 @@ const CategoriesFoods = () => {
 
   // 🔹 Load Categories from LOCAL API
   useEffect(() => {
-    fetch("/api/categories")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`)
       .then((res) => res.json())
-      .then((data) => setCategories(data.categories || []))
+      .then((data) => setCategories(data || []))
       .catch((err) => console.error("Failed to load categories:", err));
   }, []);
 
   // 🔹 Load Foods from LOCAL API
   useEffect(() => {
-    fetch("/api/foods")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback`)
       .then((res) => res.json())
-      .then((data) => setFoods(data)) 
+      .then((data) => setFoods(data))
       .catch((err) => console.error("Failed to load foods:", err));
   }, []);
 
@@ -117,7 +119,7 @@ const CategoriesFoods = () => {
     <div className="py-10 relative">
       {/* Categories Section */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        {categories.length} Food Categories
+        {categories.length} Food Catetogies
       </h2>
 
       <button

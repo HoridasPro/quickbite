@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+// import Image from "next/image";
 
 const FoodCards = ({ food }) => {
   const router = useRouter();
@@ -12,7 +12,7 @@ const FoodCards = ({ food }) => {
     >
       {/* Image */}
       <figure className="overflow-hidden rounded-xl">
-        <Image
+        <img
           className="h-[150px] w-full flex object-cover hover:scale-110 transition duration-500"
           src={food.foodImg || "https://via.placeholder.com/150"}
           alt={food.title || "Foods"}
@@ -25,7 +25,7 @@ const FoodCards = ({ food }) => {
       <div className="mt-2">
         <h2 className="font-semibold text-gray-800 mb-2">{food.title}</h2>
         <p className="text-gray-600">
-          <span className="font-medium text-gray-700">Category: </span>
+          <span className="font-medium text-gray-700"></span>
           {food.category}
         </p>
 

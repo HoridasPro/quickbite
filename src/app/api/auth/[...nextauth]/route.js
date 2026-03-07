@@ -64,6 +64,9 @@ export const authOptions = {
       return token;
     },
 
+    // =============================
+    // Session e Role Add
+    // =============================
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
