@@ -15,7 +15,7 @@ const FoodCards = ({ food }) => {
         <img
           className="h-[150px] w-full flex object-cover hover:scale-110 transition duration-500"
           src={food.foodImg || "https://via.placeholder.com/150"}
-          alt={food.title || "Food"}
+          alt={food.title || "Foods"}
           width={400}
           height={150}
         />
