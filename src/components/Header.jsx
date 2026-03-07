@@ -138,7 +138,7 @@ const Header = () => {
                 href="/register"
                 className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer"
               >
-                Sign up for free delivery
+                foods for delivery
               </Link>
             </>
           )}
