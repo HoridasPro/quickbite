@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCart } from "@/contexts/CartContext";
 import ReviewSection from "@/components/items/ReviewSection";
 import CartActions from "@/components/items/CartActions";
+import CustomizeOrder from "@/components/items/CustomizeOrder";
 
 const ItemDetailView = ({ item }) => {
   const cart = useCart();
@@ -172,7 +173,7 @@ const ItemDetailView = ({ item }) => {
               <div className="mt-6">
                 <p className="text-gray-600 mb-4">{item.description}</p>
                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span className="text-[#D70F64] font-bold text-2xl">
+                  <span className="text-orange-500 font-bold text-2xl">
                     Tk {item.price}
                   </span>
                   <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
@@ -192,72 +193,16 @@ const ItemDetailView = ({ item }) => {
                 Customize your Order
               </h3>
 
-              <div className="space-y-8 mb-8">
-                {item.variations?.map((variant) => (
-                  <div key={variant.id}>
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <h4 className="font-bold text-gray-800 text-md">
-                          {variant.title}
-                        </h4>
-                        {variant.type === "checkbox" && (
-                          <p className="text-xs text-gray-400">
-                            Select multiple options
-                          </p>
-                        )}
-                      </div>
-                      {variant.required ? (
-                        <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded">
-                          Required
-                        </span>
-                      ) : (
-                        <span className="bg-gray-50 text-gray-400 text-xs px-2 py-1 rounded">
-                          Optional
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="space-y-3">
-                      {variant.options.map((opt, idx) => {
-                        const active = isSelected(variant.id, opt.name);
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() =>
-                              handleOptionSelect(variant.id, variant.type, opt)
-                            }
-                            className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all duration-200 
-                                ${active ? "border-[#D70F64] bg-pink-50 ring-1 ring-[#D70F64]" : "border-gray-200 hover:border-gray-300 bg-white"}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-full border flex items-center justify-center ${active ? "border-[#D70F64] bg-[#D70F64]" : "border-gray-300"}`}
-                              >
-                                {active && (
-                                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                                )}
-                              </div>
-                              <span
-                                className={`text-sm ${active ? "font-medium text-gray-900" : "text-gray-700"}`}
-                              >
-                                {opt.name}
-                              </span>
-                            </div>
-                            <span className="text-sm text-gray-500 font-medium">
-                              {opt.price > 0 ? `+ Tk ${opt.price}` : "Free"}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CustomizeOrder 
+                variations={item.variations}
+                handleOptionSelect={handleOptionSelect}
+                isSelected={isSelected}
+              />
 
               <div className="hidden md:block space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between font-bold text-gray-900 text-lg">
                   <span>Total</span>
-                  <span className="text-[#D70F64]">Tk {calculateTotal()}</span>
+                  <span className="text-orange-500">Tk {calculateTotal()}</span>
                 </div>
 
                 <CartActions
@@ -274,7 +219,7 @@ const ItemDetailView = ({ item }) => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
         <div className="flex items-center justify-between mb-3">
           <span className="font-bold text-gray-900">Total</span>
-          <span className="font-bold text-[#D70F64] text-xl">
+          <span className="font-bold text-orange-500 text-xl">
             Tk {calculateTotal()}
           </span>
         </div>

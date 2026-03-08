@@ -78,13 +78,13 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="Share your experience with this item..."
-                            className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#D70F64] resize-none h-24"
+                            className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 resize-none h-24"
                             required
                         />
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="bg-[#D70F64] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#c20d5a] transition disabled:bg-gray-400 cursor-pointer"
+                            className="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition disabled:bg-gray-400 cursor-pointer"
                         >
                             {submitting ? "Submitting..." : "Submit Review"}
                         </button>
