@@ -6,12 +6,11 @@ import { useCart } from "@/contexts/CartContext";
 import CartContent from "./CartContent";
 
 export default function CartDrawer({ isOpen, onClose }) {
-  // Only need cartCount for the header badge
   const { cartCount } = useCart();
 
   return (
     <>
-      {/* Dark Overlay - closes drawer when clicking outside */}
+      {/* Dark Overlay */}
       <div 
         className={`fixed inset-0 bg-black/50 transition-opacity z-50 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={onClose}
@@ -31,9 +30,9 @@ export default function CartDrawer({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Body & Footer via CartContent */}
+        {/* Body & Footer */}
         <div className="flex-1 overflow-hidden">
-          <CartContent onClose={onClose} />
+          <CartContent onClose={onClose} isDrawer={true} />
         </div>
         
       </div>
