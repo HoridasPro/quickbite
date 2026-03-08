@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState({
     name: "",
     email: "",
-    photo: "",
+    image: "",
     password: "",
   });
 
@@ -22,11 +22,11 @@ export default function RegisterPage() {
     const form = e.target;
     const name = form.name.value.trim();
     const email = form.email.value.trim();
-    const photo = form.photo.value.trim();
+    const image = form.image.value.trim();
     const password = form.password.value.trim();
 
     let hasError = false;
-    const newErrors = { name: "", email: "", photo: "", password: "" };
+    const newErrors = { name: "", email: "", image: "", password: "" };
 
     // Name validation
     if (!name) {
@@ -44,13 +44,13 @@ export default function RegisterPage() {
     }
 
     // Photo URL validation
-    if (!photo) {
-      newErrors.photo = "Photo URL is required";
+    if (!image) {
+      newErrors.image = "Photo URL is required";
       hasError = true;
     } else if (
-      !/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(photo)
+      !/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(image)
     ) {
-      newErrors.photo = "Invalid photo URL";
+      newErrors.image = "Invalid photo URL";
       hasError = true;
     }
 
@@ -68,7 +68,7 @@ export default function RegisterPage() {
     if (hasError) return;
 
     // Call server
-    const result = await postUser({ name, email, photo, password });
+    const result = await postUser({ name, email, image, password });
 
     if (result?.message) {
       Swal.fire({
@@ -128,13 +128,13 @@ export default function RegisterPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Photo URL</label>
             <input
-              name="photo"
+              name="image"
               type="url"
               placeholder="Enter your photo URL"
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.photo ? "border-red-500" : ""}`}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${errors.image ? "border-red-500" : ""}`}
             />
-            {errors.photo && (
-              <p className="text-red-500 text-sm mt-1">{errors.photo}</p>
+            {errors.image && (
+              <p className="text-red-500 text-sm mt-1">{errors.image}</p>
             )}
           </div>
 
