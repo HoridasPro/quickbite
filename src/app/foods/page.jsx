@@ -3,9 +3,7 @@ import CategoriesFoods from "@/components/CategoriesFoods";
 import FoodCards from "@/components/FoodCards";
 import React, { useState, useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
-// import InputSearch from "@/components/InputSearch";
 import { useSearchParams } from "next/navigation";
-import OrderHistoryCard from "@/components/orders/OrderHistoryCard";
 
 const getFoods = async (search = "") => {
   const res = await fetch(
@@ -125,7 +123,6 @@ const FoodsPage = () => {
 
       {/* Product section for the right side*/}
       <div className="col-span-9 overflow-y-auto px-6">
-        <OrderHistoryCard></OrderHistoryCard>
         <HeroSection></HeroSection>
         <CategoriesFoods></CategoriesFoods>
 
