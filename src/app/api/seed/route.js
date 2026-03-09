@@ -1,24 +1,31 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/app/lib/dbConnect";
+import { dbConnect } from "@/lib/dbConnect";
 import foodItems from "@/data/foodItems.json";
 
 export async function GET() {
   try {
-    const collection = dbConnect("foods");
+    // FIX: Await the async dbConnect to get the actual collection
+    const collection = await dbConnect("foods");
 
+    // Clear the existing collection
     await collection.deleteMany({});
 
-    await collection.insertMany(foodItems);
+    // Seed the database with items from the JSON file
+    const result = await collection.insertMany(foodItems);
 
     return NextResponse.json(
       { 
         success: true, 
         message: "Data seeded to MongoDB successfully", 
-        insertedCount: foodItems.length 
+        insertedCount: result.insertedCount 
       }, 
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("Seeding error:", error);
+    return NextResponse.json(
+      { success: false, error: error.message }, 
+      { status: 500 }
+    );
   }
 }
