@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/app/lib/dbConnect";
+import { dbConnect } from "@/lib/dbConnect";
 
 export async function GET(request) {
   try {
@@ -44,7 +44,9 @@ export async function GET(request) {
     }
 
     const skip = (page - 1) * limit;
-    const collection = dbConnect("foods");
+    
+    // Await the collection from the new async dbConnect
+    const collection = await dbConnect("foods");
     
     const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
     const totalItems = await collection.countDocuments(query);
@@ -66,6 +68,7 @@ export async function GET(request) {
       totalItems: totalItems
     });
   } catch (error) {
+    console.error("Foods list fetch error:", error);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }

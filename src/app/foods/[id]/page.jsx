@@ -6,8 +6,15 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import SidebarCart from "@/components/SidebarCart";
 
+const getFoodById = async (id) => {
+  const res = await fetch(`/api/foods/${id}`);
+  const data = await res.json();
+  return data.success ? data.food : null;
+};
+
 const getFoods = async () => {
-  const res = await fetch(`/api/foods?limit=100`);
+  // Restore reasonable limit now that we fetch the main item separately
+  const res = await fetch(`/api/foods?limit=50`);
   const data = await res.json();
   return data.foods || [];  
 };
@@ -144,23 +151,28 @@ const ProductPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!id) return;
+      setLoading(true);
       try {
+        // Fetch the specific item for the Hero directly by ID
+        const item = await getFoodById(id);
+        setMainFood(item); 
+
+        // Fetch the rest of the list for the grid
         const fds = await getFoods();
         setFoods(fds);
-        
-        if (fds.length > 0) {
-          const currentItem = fds.find((f) => f.id.toString() === id);
-          setMainFood(currentItem || fds[0]); 
-        }
 
         const cats = await getCategories();
         setCategories(cats);
       } catch (err) {
         console.error("Failed to fetch page data", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -187,12 +199,13 @@ const ProductPage = () => {
   const scrollLeft = () =>
     scrollRef.current?.scrollBy({ left: -900, behavior: "smooth" });
 
+  if (loading) return <div className="p-10 text-center">Loading restaurant details...</div>;
+  if (!mainFood) return <div className="p-10 text-center text-red-500">Restaurant not found.</div>;
+
   return (
     <div className="pb-20 px-2 sm:px-4">
       <div className="bg-[#FCFCFC] pt-4">
-        {mainFood && (
-          <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} id={mainFood.id} />
-        )}
+        <RestaurantHero foodImg={mainFood.foodImg} title={mainFood.title} id={mainFood.id} />
       </div>
 
       <div className="py-5 relative max-w-[1380px] mx-auto">

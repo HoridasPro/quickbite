@@ -1,25 +1,39 @@
 import { NextResponse } from "next/server";
-import foodItems from "@/data/foodItems.json";
+import { dbConnect } from "@/lib/dbConnect"; 
+
+// FIX: Force Next.js to fetch fresh data on every request instead of caching
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const categoriesSet = new Set();
-  const categoriesList = [];
+  try {
+    const collection = await dbConnect("foods");
 
-  foodItems.forEach((item, index) => {
-    // Extract the primary tag to use as the category name
-    const mainCategory = item.tags && item.tags.length > 0 ? item.tags[0] : "General";
+    const uniqueTags = await collection.distinct("tags");
     
-    if (!categoriesSet.has(mainCategory)) {
-      categoriesSet.add(mainCategory);
-      categoriesList.push({
-        id: index + 1,
-        categoryName: mainCategory,
-        // Re-use the food image as the category image for visual consistency
-        categoryImg: item.image || "https://via.placeholder.com/150",
-      });
-    }
-  });
+    console.log("Found unique tags:", uniqueTags);
 
-  // Wrap in an object with a 'categories' key to match the frontend's expectation
-  return NextResponse.json({ categories: categoriesList });
+    if (!uniqueTags || uniqueTags.length === 0) {
+      return NextResponse.json({ categories: [] });
+    }
+
+    const categoriesList = await Promise.all(
+      uniqueTags.map(async (tag, index) => {
+        const sampleItem = await collection.findOne({ tags: tag });
+        
+        return {
+          id: index + 1,
+          categoryName: tag,
+          categoryImg: sampleItem?.image || sampleItem?.foodImg || "https://via.placeholder.com/150",
+        };
+      })
+    );
+
+    return NextResponse.json({ categories: categoriesList });
+  } catch (error) {
+    console.error("Category fetch error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch dynamic categories" },
+      { status: 500 }
+    );
+  }
 }
