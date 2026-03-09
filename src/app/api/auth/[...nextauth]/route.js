@@ -18,7 +18,6 @@ export const authOptions = {
         password: {},
       },
       async authorize(credentials) {
-        // FIX: Await the async dbConnect connection
         const collection = await dbConnect("users");
         const user = await collection.findOne({
           email: credentials.email,
@@ -57,20 +56,52 @@ export const authOptions = {
   ],
 
   callbacks: {
+    async signIn({ user, account }) {
+      if (account.provider === "google" || account.provider === "github") {
+        const { name, email, image } = user;
+        try {
+          const collection = await dbConnect("users");
+          const userExists = await collection.findOne({ email });
+
+          if (!userExists) {
+            // New user: Create account
+            await collection.insertOne({
+              name,
+              email,
+              image,
+              role: "user",
+              createdAt: new Date(),
+            });
+          } else {
+            // Existing user: Sync/Link account by updating missing image or name
+            await collection.updateOne(
+              { email },
+              { 
+                $set: { 
+                  image: userExists.image || image, 
+                  name: userExists.name || name 
+                } 
+              }
+            );
+          }
+        } catch (error) {
+          console.error("Error persisting/linking social user:", error);
+        }
+      }
+      return true;
+    },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
         token.image = user.image;
-        token.role = user.role;
+        token.role = user.role || "user";
       }
       return token;
     },
 
-    // =============================
-    // Session e Role Add
-    // =============================
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
