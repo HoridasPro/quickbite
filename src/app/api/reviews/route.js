@@ -10,13 +10,19 @@ export async function GET(request) {
       return NextResponse.json({ success: false, message: "Item ID is required" }, { status: 400 });
     }
 
-    const reviews = await dbConnect("reviews")
-      .find({ itemId: parseInt(itemId) })
+    // Convert to number if possible to match the team's numeric IDs
+    const queryId = isNaN(itemId) ? itemId : parseInt(itemId);
+
+    // FIX: Must await the dbConnect call
+    const collection = await dbConnect("reviews");
+    const reviews = await collection
+      .find({ itemId: queryId })
       .sort({ date: -1 })
       .toArray();
 
     return NextResponse.json({ success: true, reviews }, { status: 200 });
   } catch (error) {
+    console.error("Fetch reviews error:", error);
     return NextResponse.json({ success: false, message: "Failed to fetch reviews" }, { status: 500 });
   }
 }
@@ -30,18 +36,24 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
+    // Convert to number if possible to match the team's numeric IDs
+    const storedId = isNaN(itemId) ? itemId : parseInt(itemId);
+
     const newReview = {
-      itemId: parseInt(itemId),
+      itemId: storedId,
       user,
       rating: parseInt(rating),
       comment: comment || "",
       date: new Date().toISOString()
     };
 
-    const result = await dbConnect("reviews").insertOne(newReview);
+    // FIX: Must await the dbConnect call
+    const collection = await dbConnect("reviews");
+    const result = await collection.insertOne(newReview);
     
     return NextResponse.json({ success: true, message: "Review added", review: newReview }, { status: 201 });
   } catch (error) {
+    console.error("Post review error:", error);
     return NextResponse.json({ success: false, message: "Failed to add review" }, { status: 500 });
   }
 }

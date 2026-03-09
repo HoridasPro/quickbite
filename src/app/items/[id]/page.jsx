@@ -8,11 +8,10 @@ export default async function ItemPage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  const collection = await dbConnect("foods");
+  const collection = await dbConnect("allFoods");
 
   let query = {};
   
-  // Support both legacy numeric IDs and new MongoDB ObjectIds
   if (!isNaN(id)) {
     query = { id: parseInt(id) };
   } else {
@@ -29,12 +28,16 @@ export default async function ItemPage({ params }) {
     return notFound();
   }
 
-  // Ensure fields match what ItemDetailView expects
   const mappedItem = {
-    ...food,
-    id: food.id || food._id.toString(),
-    image: food.image || food.foodImg,
-    title: food.title || food.foodName,
+    _id: food._id.toString(),
+    id: food.id?.toString() || food._id.toString(),
+    image: food.foodImg || "https://via.placeholder.com/800x450",
+    title: food.title || "Untitled Dish",
+    price: food.price || 0,
+    description: food.description || "No description available.",
+    category: food.category || "General",
+    variations: food.variations || [],
+    restaurant_name: food.restaurant_name || "QuickBite"
   };
 
   return (

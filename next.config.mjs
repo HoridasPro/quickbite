@@ -37,6 +37,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'i.ibb.co.com',
+      },
+      {
+        protocol: "https",
+        hostname: "www.themealdb.com",
       }
     ],
   },

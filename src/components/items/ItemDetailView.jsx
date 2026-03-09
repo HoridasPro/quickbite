@@ -9,7 +9,7 @@ import CartActions from "@/components/items/CartActions";
 import CustomizeOrder from "@/components/items/CustomizeOrder";
 
 const ItemDetailView = ({ item }) => {
-  const cart = useCart(); // safer
+  const cart = useCart();
   const addToCart = cart?.addToCart;
 
   const [quantity, setQuantity] = useState(1);
@@ -29,8 +29,11 @@ const ItemDetailView = ({ item }) => {
   });
 
   const fetchReviews = async () => {
+    if (!item?.id) return;
+    
     try {
-      const res = await fetch(`/api/reviews?itemId=${item?.id || item?._id}`);
+      // FIX: Use item.id consistently (standardized in ItemPage)
+      const res = await fetch(`/api/reviews?itemId=${item.id}`);
       const data = await res.json();
       if (data.success) {
         setReviews(data.reviews);
@@ -42,15 +45,13 @@ const ItemDetailView = ({ item }) => {
         }
       }
     } catch (error) {
-      console.error(error);
+      console.error("Fetch reviews error:", error);
     }
   };
 
   useEffect(() => {
-    if (item?.id || item?._id) {
-      fetchReviews();
-    }
-  }, [item]);
+    fetchReviews();
+  }, [item?.id]);
 
   const handleOptionSelect = (variationId, type, option) => {
     setSelections((prev) => {
@@ -104,32 +105,26 @@ const ItemDetailView = ({ item }) => {
   };
 
   const handleAddToCart = () => {
-    if (!addToCart) {
-      console.error("Cart context not found");
-      return;
-    }
+    if (!addToCart) return;
 
     const missingRequirements = item?.variations?.filter((variant) => {
       if (!variant.required) return false;
-
       const selection = selections[variant.id];
       return !selection || (Array.isArray(selection) && selection.length === 0);
     });
 
     if (missingRequirements?.length > 0) {
-      alert(
-        `Please select: ${missingRequirements.map((v) => v.title).join(", ")}`,
-      );
+      alert(`Please select: ${missingRequirements.map((v) => v.title).join(", ")}`);
       return;
     }
 
     const orderPayload = {
       cartItemId: Date.now(),
-      itemId: item?._id || item?.id, // 🔥 FIXED
-      title: item?.title,
-      restaurant: item?.restaurant_name,
-      image: item?.image,
-      basePrice: item?.price,
+      itemId: item.id,
+      title: item.title,
+      restaurant: item.restaurant_name,
+      image: item.image,
+      basePrice: item.price,
       selectedVariations: selections,
       quantity,
       totalPrice: calculateTotal(),
@@ -145,7 +140,6 @@ const ItemDetailView = ({ item }) => {
     <div className="bg-white min-h-screen pb-32 md:pb-20">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Item Details & Reviews */}
           <div className="lg:col-span-2 space-y-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{item.title}</h1>
@@ -183,12 +177,12 @@ const ItemDetailView = ({ item }) => {
               </div>
 
               <div className="mt-10">
-                <ReviewSection itemId={item?._id || item?.id} reviews={reviews} onReviewAdded={fetchReviews} />
+                {/* FIX: Use item.id consistently here as well */}
+                <ReviewSection itemId={item.id} reviews={reviews} onReviewAdded={fetchReviews} />
               </div>
             </div>
           </div>
 
-          {/* Right Column - Customize Order (Sticky) */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 sticky top-24">
               <h3 className="font-bold text-gray-900 text-lg mb-6 pb-3 border-b border-gray-100">
@@ -218,7 +212,6 @@ const ItemDetailView = ({ item }) => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
         <div className="flex items-center justify-between mb-3">
           <span className="font-bold text-gray-900">Total</span>

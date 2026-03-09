@@ -6,11 +6,12 @@ export async function GET(request, { params }) {
   try {
     const { id } = await params;
     
-    // FIX: Must await the async dbConnect to get the actual collection
-    const collection = await dbConnect("foods");
+    // FIX: Point to the actual team collection 'allFoods'
+    const collection = await dbConnect("allFoods");
 
     let query = {};
     
+    // Support both the team's numeric 'id' and MongoDB '_id'
     if (!isNaN(id)) {
       query = { id: parseInt(id) };
     } else {
@@ -33,13 +34,18 @@ export async function GET(request, { params }) {
       );
     }
 
+    // FIX: Mapping values based on team schema examples
     const mappedFood = {
       ...food,
       id: food.id || food._id.toString(),
-      foodImg: food.image || food.foodImg,
-      foodName: food.title || food.foodName,
-      category: food.tags && food.tags.length > 0 ? food.tags[0] : "General",
-      categoryName: food.tags && food.tags.length > 0 ? food.tags[0] : "General",
+      image: food.foodImg || "https://via.placeholder.com/150",
+      foodImg: food.foodImg || "https://via.placeholder.com/150",
+      title: food.title || "Untitled Dish",
+      foodName: food.title || "Untitled Dish",
+      category: food.category || "General",
+      categoryName: food.category || "General",
+      price: food.price || 0,
+      ratings: food.ratings || "0",
     };
 
     return NextResponse.json({ success: true, food: mappedFood });

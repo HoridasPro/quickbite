@@ -15,9 +15,12 @@ export async function GET(request) {
     if (offer) {
       query.offer = offer;
     }
+    
+    // FIX: Search by 'category' field instead of 'tags'
     if (category) {
-      query.tags = { $regex: new RegExp(`^${category}$`, "i") };
+      query.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -34,7 +37,8 @@ export async function GET(request) {
         sortOption = { price: -1 };
         break;
       case "Rating":
-        sortOption = { rating: -1 };
+        // FIX: The team schema uses 'ratings' (string/number)
+        sortOption = { ratings: -1 };
         break;
       case "Delivery Time":
         sortOption = { deliveryTime: 1 };
@@ -44,19 +48,22 @@ export async function GET(request) {
     }
 
     const skip = (page - 1) * limit;
-    const collection = await dbConnect("foods");
+    
+    // FIX: Point to the actual team collection 'allFoods'
+    const collection = await dbConnect("allFoods");
     
     const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
     const totalItems = await collection.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
+    // FIX: Mapping values based on team schema examples
     const mappedFoods = foods.map((item) => ({
       ...item,
       id: item.id || item._id.toString(),
-      foodImg: item.image || item.foodImg,
-      foodName: item.title || item.foodName,
-      category: item.tags && item.tags.length > 0 ? item.tags[0] : "General",
-      categoryName: item.tags && item.tags.length > 0 ? item.tags[0] : "General",
+      foodImg: item.foodImg || "https://via.placeholder.com/150",
+      foodName: item.title || "Untitled Dish",
+      category: item.category || "General",
+      categoryName: item.category || "General",
     }));
 
     return NextResponse.json({
