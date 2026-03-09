@@ -43,7 +43,7 @@ const FoodsPageContent = () => {
       try {
         const params = new URLSearchParams({
           page: currentPage,
-          limit: 3,
+          limit: 9,
         });
         
         if (selectedSort) params.append("sort", selectedSort);
