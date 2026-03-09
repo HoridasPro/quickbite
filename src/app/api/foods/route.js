@@ -5,7 +5,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "3");
+    const limit = parseInt(searchParams.get("limit") || "9");
     const sort = searchParams.get("sort") || "";
     const offer = searchParams.get("offer") || "";
     const category = searchParams.get("category") || "";
@@ -16,7 +16,6 @@ export async function GET(request) {
       query.offer = offer;
     }
     
-    // FIX: Search by 'category' field instead of 'tags'
     if (category) {
       query.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
@@ -37,7 +36,6 @@ export async function GET(request) {
         sortOption = { price: -1 };
         break;
       case "Rating":
-        // FIX: The team schema uses 'ratings' (string/number)
         sortOption = { ratings: -1 };
         break;
       case "Delivery Time":
@@ -49,14 +47,12 @@ export async function GET(request) {
 
     const skip = (page - 1) * limit;
     
-    // FIX: Point to the actual team collection 'allFoods'
     const collection = await dbConnect("allFoods");
     
     const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
     const totalItems = await collection.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
-    // FIX: Mapping values based on team schema examples
     const mappedFoods = foods.map((item) => ({
       ...item,
       id: item.id || item._id.toString(),
