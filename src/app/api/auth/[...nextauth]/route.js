@@ -18,7 +18,9 @@ export const authOptions = {
         password: {},
       },
       async authorize(credentials) {
-        const user = await dbConnect("users").findOne({
+        // FIX: Await the async dbConnect connection
+        const collection = await dbConnect("users");
+        const user = await collection.findOne({
           email: credentials.email,
         });
 
@@ -40,6 +42,7 @@ export const authOptions = {
           name: user.name,
           email: user.email,
           image: user.image || null,
+          role: user.role || "user",
         };
       },
     }),
@@ -60,16 +63,21 @@ export const authOptions = {
         token.name = user.name;
         token.email = user.email;
         token.image = user.image;
+        token.role = user.role;
       }
       return token;
     },
 
+    // =============================
+    // Session e Role Add
+    // =============================
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.image;
+        session.user.role = token.role;
       }
       return session;
     },

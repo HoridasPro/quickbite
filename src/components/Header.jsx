@@ -1,12 +1,11 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   MapPin,
   ShoppingCart,
-  Search,
   Bike,
   Store,
   Menu,
@@ -17,11 +16,13 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
+import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
 import Link from "next/link";
 import { useCart } from "@/contexts/CartContext";
 import CartDrawer from "./CartDrawer";
+import InputSearch from "./InputSearch";
 
 const Header = () => {
   const { cartCount } = useCart();
@@ -32,10 +33,6 @@ const Header = () => {
   const [deliveryAddress, setDeliveryAddress] = useState("Add Delivery Address");
   
   const pathname = usePathname();
-  const router = useRouter();
-  
-  const [searchQuery, setSearchQuery] = useState("");
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const fetchDefaultAddress = () => {
@@ -61,23 +58,6 @@ const Header = () => {
       window.removeEventListener("addressUpdated", fetchDefaultAddress);
     };
   }, [session]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      if (searchQuery.trim() !== "") {
-        router.push(`/foods?search=${encodeURIComponent(searchQuery.trim())}`);
-      } else if (searchQuery === "" && pathname.startsWith("/foods")) {
-        router.push(`/foods`);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   return (
     <>
@@ -137,6 +117,16 @@ const Header = () => {
                       <User className="w-4 h-4" /> Profile
                     </Link>
 
+                    {session.user.role === "admin" && (
+                      <Link
+                        href="/dashboard/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <MdOutlineDashboardCustomize className="w-4 h-4" /> Dashboard
+                      </Link>
+                    )}
+
                     <Link
                       href="/orders"
                       onClick={() => setDropdownOpen(false)}
@@ -195,7 +185,7 @@ const Header = () => {
           </div>
         </div>
 
-        <div className="max-w-[1380px] mx-auto py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
+        <div className="max-w-[1380px] mx-auto py-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
           <div className="hidden lg:flex items-center gap-8 text-gray-700 text-sm font-medium">
             <Link
               href="/"
@@ -240,14 +230,7 @@ const Header = () => {
           </div>
 
           <div className="relative w-full lg:w-[400px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search for restaurants, cuisines, and dishes"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
-            />
+            <InputSearch />
           </div>
         </div>
       </div>
@@ -312,6 +295,62 @@ const Header = () => {
               >
                 <Store className="w-5 h-5" /> Shops
               </Link>
+
+              <hr className="my-2 border-gray-100" />
+              
+              {status === "authenticated" && session?.user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 p-2 rounded-xl text-gray-700 hover:bg-gray-100"
+                  >
+                    <User className="w-5 h-5" /> Profile
+                  </Link>
+                  {session.user.role === "admin" && (
+                    <Link
+                      href="/dashboard/admin"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 p-2 rounded-xl text-gray-700 hover:bg-gray-100"
+                    >
+                      <MdOutlineDashboardCustomize className="w-5 h-5" /> Dashboard
+                    </Link>
+                  )}
+                  <Link
+                    href="/orders"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 p-2 rounded-xl text-gray-700 hover:bg-gray-100"
+                  >
+                    <Package className="w-5 h-5" /> Orders
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut({ callbackUrl: "/" });
+                      setOpen(false);
+                    }}
+                    className="flex items-center gap-2 p-2 rounded-xl text-red-500 hover:bg-gray-100 text-left w-full cursor-pointer"
+                  >
+                    <LogOut className="w-5 h-5" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 p-2 rounded-xl text-gray-700 hover:bg-gray-100"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 p-2 rounded-xl text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

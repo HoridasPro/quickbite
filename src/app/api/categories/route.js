@@ -1,38 +1,51 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/dbConnect"; 
+import { dbConnect } from "@/lib/dbConnect";
 
-// FIX: Force Next.js to fetch fresh data on every request instead of caching
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const collection = await dbConnect("foods");
+    // 1. Try to fetch from the team's dedicated categories collection
+    const categoryCollection = await dbConnect("categories");
+    const allCategories = await categoryCollection.find({}).toArray();
 
-    const uniqueTags = await collection.distinct("tags");
+    if (allCategories.length > 0) {
+      return NextResponse.json(allCategories);
+    }
+
+    // 2. FALLBACK: If 'categories' collection is empty, use your dynamic generation!
+    // We point to 'allFoods' since that is what the team uses for foods.
+    const foodsCollection = await dbConnect("allFoods");
     
-    console.log("Found unique tags:", uniqueTags);
+    // Check for 'category' field first, fallback to 'tags' array
+    let uniqueTags = await foodsCollection.distinct("category");
+    if (!uniqueTags || uniqueTags.length === 0) {
+      uniqueTags = await foodsCollection.distinct("tags");
+    }
 
     if (!uniqueTags || uniqueTags.length === 0) {
-      return NextResponse.json({ categories: [] });
+      return NextResponse.json([]);
     }
 
     const categoriesList = await Promise.all(
       uniqueTags.map(async (tag, index) => {
-        const sampleItem = await collection.findOne({ tags: tag });
+        const sampleItem = await foodsCollection.findOne({ 
+          $or: [{ category: tag }, { tags: tag }] 
+        });
         
         return {
-          id: index + 1,
+          _id: (index + 1).toString(),
           categoryName: tag,
           categoryImg: sampleItem?.image || sampleItem?.foodImg || "https://via.placeholder.com/150",
         };
       })
     );
 
-    return NextResponse.json({ categories: categoriesList });
-  } catch (error) {
-    console.error("Category fetch error:", error);
+    return NextResponse.json(categoriesList);
+  } catch (err) {
+    console.error("Category fetch error:", err);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch dynamic categories" },
+      { success: false, message: "Server error" },
       { status: 500 }
     );
   }

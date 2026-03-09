@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
@@ -9,8 +9,8 @@ export function CartProvider({ children }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('quickbite_cart');
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("quickbite_cart");
       if (savedCart) {
         try {
           setCartItems(JSON.parse(savedCart));
@@ -23,8 +23,8 @@ export function CartProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (isLoaded && typeof window !== 'undefined') {
-      localStorage.setItem('quickbite_cart', JSON.stringify(cartItems));
+    if (isLoaded && typeof window !== "undefined") {
+      localStorage.setItem("quickbite_cart", JSON.stringify(cartItems));
     }
   }, [cartItems, isLoaded]);
 
@@ -33,7 +33,9 @@ export function CartProvider({ children }) {
   };
 
   const removeFromCart = (cartItemId) => {
-    setCartItems((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
+    setCartItems((prev) =>
+      prev.filter((item) => item.cartItemId !== cartItemId),
+    );
   };
 
   const clearCart = () => {
@@ -43,7 +45,9 @@ export function CartProvider({ children }) {
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, cartCount }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, clearCart, cartCount }}
+    >
       {children}
     </CartContext.Provider>
   );

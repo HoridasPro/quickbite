@@ -44,8 +44,6 @@ export async function GET(request) {
     }
 
     const skip = (page - 1) * limit;
-    
-    // Await the collection from the new async dbConnect
     const collection = await dbConnect("foods");
     
     const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();

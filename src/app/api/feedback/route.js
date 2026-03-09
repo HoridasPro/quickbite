@@ -1,61 +1,44 @@
 import { dbConnect } from "@/lib/dbConnect";
-import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const users = await dbConnect("allFoods");
-    const allUsers = await users.find({}).toArray(); // MongoDB থেকে সব user
+    // Keeping this returning allFoods because the team's UI currently fetches foods from here
+    const collection = await dbConnect("allFoods");
+    const allFoods = await collection.find({}).toArray();
 
-    return new Response(JSON.stringify(allUsers), {
-      status: 200,
-    });
+    return NextResponse.json(allFoods, { status: 200 });
   } catch (err) {
-    console.error("GET USERS ERROR:", err);
-    return new Response(JSON.stringify({ message: "Server error" }), {
-      status: 500,
-    });
+    console.error("GET FOODS ERROR:", err);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const { name, email, password, image } = body;
-
-    if (!name || !email || !password)
-      return new Response(
-        JSON.stringify({ success: false, message: "All fields required" }),
-        { status: 400 },
+    // FIX: Save actual feedback to a 'feedback' collection, NOT 'allFoods'
+    const collection = await dbConnect("feedback");
+    const { message } = await req.json();
+    
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { success: false, message: "Please send a valid message" },
+        { status: 400 }
       );
+    }
 
-    const users = await dbConnect("allFoods");
-
-    const existingUser = await users.findOne({ email: email.toLowerCase() });
-    if (existingUser)
-      return new Response(
-        JSON.stringify({ success: false, message: "User already exists" }),
-        { status: 400 },
-      );
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await users.insertOne({
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      image: image || null,
-      createdAt: new Date(),
-    });
-
-    return new Response(
-      JSON.stringify({ success: true, message: "User created successfully" }),
-      { status: 201 },
-    );
+    const newFeedback = { message, date: new Date().toISOString() };
+    const result = await collection.insertOne(newFeedback);
+    
+    return NextResponse.json(result, { status: 201 });
   } catch (err) {
-    console.error(err);
-    return new Response(
-      JSON.stringify({ success: false, message: "Server error" }),
-      { status: 500 },
+    console.error("POST FEEDBACK ERROR:", err);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
     );
   }
 }

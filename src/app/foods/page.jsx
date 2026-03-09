@@ -73,9 +73,10 @@ const FoodsPageContent = () => {
   const offerOptions = ["Discount", "Free Delivery", "Buy 1 Get 1", "Cashback"];
 
   return (
-    <div className="grid grid-cols-12 gap-5 mt-5 mb-20 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 mb-20 items-start">
+      {/* Sidebar Filter - Hidden on mobile, shown on large screens */}
       <div 
-        className="col-span-3 bg-white shadow-lg rounded-2xl p-6 sticky self-start overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="hidden lg:block lg:col-span-3 bg-white shadow-lg rounded-2xl p-6 sticky self-start overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{
           top: `${headerHeight + 20}px`,
           maxHeight: `calc(100vh - ${headerHeight + 40}px)`
@@ -140,7 +141,7 @@ const FoodsPageContent = () => {
         </div>
       </div>
 
-      <div className="col-span-9 px-6">
+      <div className="col-span-1 lg:col-span-9 px-4 lg:px-6">
         <HeroSection />
         
         <CategoriesFoods 
@@ -184,7 +185,7 @@ const FoodsPageContent = () => {
 
 export default function FoodsPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="flex justify-center mt-10 text-gray-500">Loading...</div>}>
       <FoodsPageContent />
     </Suspense>
   );

@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "development") {
     client = new MongoClient(uri, {
       serverApi: {
         version: ServerApiVersion.v1,
-        strict: false,
+        strict: false, // Required for .distinct() to work
         deprecationErrors: true,
       },
     });
@@ -32,3 +32,6 @@ export async function dbConnect(collectionName) {
   const db = connectedClient.db(dbName);
   return db.collection(collectionName);
 }
+
+// Added this to support the team's Admin stats routes
+export default clientPromise;

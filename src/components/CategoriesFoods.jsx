@@ -10,12 +10,12 @@ const CategoryCard = ({ img, name, onClick, active }) => {
     <div
       onClick={onClick}
       className={`flex-shrink-0 w-40 flex flex-col items-center bg-white shadow-md rounded-lg p-4 cursor-pointer transition hover:shadow-xl ${
-        active ? "border-2 border-orange-500" : ""
+        active ? "border-2 border-orange-500 ring-2 ring-orange-100" : ""
       }`}
     >
-      <Image
-        src={img}
-        alt={name}
+      <img
+        src={img || "https://via.placeholder.com/80"}
+        alt={name || "Category"}
         width={80}
         height={80}
         className="w-20 h-20 object-cover rounded-full mb-2"
@@ -34,10 +34,10 @@ const FoodCard = ({ food }) => {
       onClick={() => router.push(`/foods/${food.id || food._id}`)}
       className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 p-3 cursor-pointer"
     >
-      <div className="overflow-hidden rounded-xl">
-        <Image
-          src={food.foodImg || food.image}
-          alt={food.title || food.foodName}
+      <div className="overflow-hidden rounded-xl bg-gray-50">
+        <img
+          src={food.foodImg || food.image || "https://via.placeholder.com/400x160"}
+          alt={food.title || food.foodName || "Food Item"}
           width={400}
           height={160}
           className="h-[160px] w-full object-cover hover:scale-110 transition duration-500"
@@ -45,11 +45,11 @@ const FoodCard = ({ food }) => {
       </div>
 
       <div className="mt-3 space-y-1">
-        <h3 className="font-semibold text-gray-800 text-lg">
+        <h3 className="font-semibold text-gray-800 text-lg line-clamp-1">
           {food.title || food.foodName}
         </h3>
 
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 line-clamp-1">
           <span className="font-medium">Category:</span>{" "}
           {food.category || food.categoryName || (food.tags && food.tags[0])}
         </p>
@@ -67,9 +67,13 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    fetch("/api/categories")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/categories`)
       .then((res) => res.json())
-      .then((data) => setCategories(data.categories || []))
+      .then((data) => {
+        // Handle array or object structure safely
+        const catArray = Array.isArray(data) ? data : data.categories || [];
+        setCategories(catArray);
+      })
       .catch((err) => console.error(err));
   }, []);
 
@@ -81,7 +85,10 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
 
     fetch(url)
       .then((res) => res.json())
-      .then((data) => setFoods(data.foods || []))
+      .then((data) => {
+        const foodArray = Array.isArray(data) ? data : data.foods || [];
+        setFoods(foodArray);
+      })
       .catch((err) => console.error(err));
   }, [selectedCategory, hideFoods]);
 
@@ -95,17 +102,19 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
 
   const scrollRight = () => {
     scrollRef.current?.scrollBy({
-      left: 900,
+      left: 600,
       behavior: "smooth",
     });
   };
 
   const scrollLeft = () => {
     scrollRef.current?.scrollBy({
-      left: -900,
+      left: -600,
       behavior: "smooth",
     });
   };
+
+  if (categories.length === 0) return null;
 
   return (
     <div className="py-10">
@@ -113,17 +122,17 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
         {categories.length} Food Categories
       </h2>
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center group">
         <button
           onClick={scrollLeft}
-          className="absolute -left-4 z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 top-1/2 -translate-y-1/2"
+          className="absolute -left-4 z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
         </button>
 
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-2 py-4"
+          className="flex gap-6 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-2 py-4 w-full"
         >
           {categories.map((cat) => (
             <CategoryCard
@@ -138,19 +147,19 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
 
         <button
           onClick={scrollRight}
-          className="absolute -right-4 z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 top-1/2 -translate-y-1/2"
+          className="absolute -right-4 z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-gray-600" />
         </button>
       </div>
 
-      {!hideFoods && (
+      {!hideFoods && foods.length > 0 && (
         <div className="mt-12">
           <h2 className="text-xl font-bold mb-6">
             {selectedCategory ? `${selectedCategory} Foods` : "All Foods"}
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {foods.map((food) => (
               <FoodCard key={food.id || food._id} food={food} />
             ))}

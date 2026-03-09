@@ -8,14 +8,14 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch(
-      `${process.env.EMAIL_PASS}/api/forgot-password`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      },
-    );
+    
+    // FIX: Use relative path. Do not use process.env.EMAIL_PASS here!
+    const res = await fetch("/api/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    
     const data = await res.json();
     setMessage(data.message);
   };
@@ -31,13 +31,13 @@ export default function ForgotPassword() {
         <input
           type="email"
           placeholder="Enter your email"
-          className="w-full border p-2 mb-3 rounded"
+          className="w-full border p-2 mb-3 rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <button className="w-full bg-orange-500 text-white py-2 rounded">
+        <button className="w-full bg-orange-500 hover:bg-orange-600 transition text-white py-2 rounded cursor-pointer">
           Send Reset Link
         </button>
 
