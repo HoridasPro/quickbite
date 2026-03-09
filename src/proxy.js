@@ -9,8 +9,8 @@ export async function middleware(req) {
 
   const { pathname } = req.nextUrl;
 
-  // 🔒 Protect /admin route
-  if (pathname.startsWith("/admin")) {
+  // Aligning logic with the matcher in the config below
+  if (pathname.startsWith("/dashboard/admin")) {
     if (!token || token.role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
     }
