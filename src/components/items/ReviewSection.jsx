@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Swal from 'sweetalert2';
 
@@ -9,6 +9,39 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    
+    // Eligibility States
+    const [isEligible, setIsEligible] = useState(false);
+    const [checkingEligibility, setCheckingEligibility] = useState(true);
+
+    // Verify if the user has actually purchased and received this item
+    useEffect(() => {
+        const verifyPurchase = async () => {
+            if (!session?.user?.email) {
+                setCheckingEligibility(false);
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/orders?email=${session.user.email}`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    const hasPurchasedAndReceived = data.orders.some(order => 
+                        order.status === "Delivered" && 
+                        order.items.some(item => String(item.itemId) === String(itemId))
+                    );
+                    setIsEligible(hasPurchasedAndReceived);
+                }
+            } catch (error) {
+                console.error("Failed to verify purchase history", error);
+            } finally {
+                setCheckingEligibility(false);
+            }
+        };
+
+        verifyPurchase();
+    }, [session, itemId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,13 +51,18 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
             return;
         }
 
+        if (!isEligible) {
+            Swal.fire("Not Eligible", "You can only review items you have received.", "error");
+            return;
+        }
+
         setSubmitting(true);
         try {
             const res = await fetch('/api/reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    itemId: itemId, // This must match the ID used in the GET request
+                    itemId: itemId,
                     user: session.user.name || "Anonymous",
                     rating,
                     comment
@@ -35,7 +73,6 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
             if (data.success) {
                 setComment("");
                 setRating(5);
-                // Trigger the parent to re-fetch the reviews list
                 if (onReviewAdded) onReviewAdded();
                 
                 Swal.fire({
@@ -61,11 +98,20 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                 Ratings & Reviews <span className="text-gray-400 text-sm font-normal">({reviews.length})</span>
             </h3>
 
-            {/* Review Form */}
+            {/* Review Form Area */}
             <div className="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-100">
                 <h4 className="font-semibold text-gray-900 mb-3">Leave a Review</h4>
-                {!session ? (
+                
+                {checkingEligibility ? (
+                    <p className="text-sm text-gray-500 italic animate-pulse">Verifying purchase history...</p>
+                ) : !session ? (
                     <p className="text-sm text-gray-500 italic">Please log in to leave a review.</p>
+                ) : !isEligible ? (
+                    <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg">
+                        <p className="text-sm text-orange-800 font-medium">
+                            Only customers who have purchased and received this item can leave a review.
+                        </p>
+                    </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="flex items-center gap-2">
