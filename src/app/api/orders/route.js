@@ -168,7 +168,8 @@ export async function GET(request) {
     const email = searchParams.get("email");
     
     let query = {};
-    if (session.user.role === "admin") {
+    // Allow Admins, Restaurants, and Riders to view the wider pool of orders
+    if (["admin", "restaurant", "rider"].includes(session.user.role)) {
       if (email) query.email = email;
     } else {
       query.email = session.user.email;
@@ -193,7 +194,8 @@ export async function PATCH(request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== "admin") {
+    // Security: Only staff roles can update order statuses
+    if (!session || !["admin", "restaurant", "rider"].includes(session.user.role)) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" }, 
         { status: 401 }
@@ -201,7 +203,7 @@ export async function PATCH(request) {
     }
 
     const body = await request.json();
-    const { orderId, status } = body;
+    const { orderId, status, riderEmail, riderName } = body;
 
     if (!orderId || !status) {
       return NextResponse.json(
@@ -211,8 +213,6 @@ export async function PATCH(request) {
     }
 
     const collection = await dbConnect("orders");
-
-    // --- SECURITY FIX: Check existing order before updating ---
     const existingOrder = await collection.findOne({ orderId: orderId });
 
     if (!existingOrder) {
@@ -222,7 +222,6 @@ export async function PATCH(request) {
       );
     }
 
-    // Prevent Unpaid orders from being processed
     if (existingOrder.paymentStatus !== "Paid") {
       const allowedUnpaidStatuses = ["Pending", "Cancelled"];
       if (!allowedUnpaidStatuses.includes(status)) {
@@ -233,9 +232,14 @@ export async function PATCH(request) {
       }
     }
 
+    // Build the update payload (supports linking a rider to the order)
+    let updateFields = { status };
+    if (riderEmail) updateFields.riderEmail = riderEmail;
+    if (riderName) updateFields.riderName = riderName;
+
     const result = await collection.updateOne(
       { orderId: orderId },
-      { $set: { status } }
+      { $set: updateFields }
     );
 
     return NextResponse.json(
