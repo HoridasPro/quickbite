@@ -1,5 +1,5 @@
 import React from "react";
-const CartSideBar = async () => {
+const CartSideBar = () => {
   return (
     <div className="w-full md:w-80 bg-white shadow-md rounded-xl p-4 sticky top-24 h-auto md:h-[calc(100vh-6rem)] overflow-y-auto">
       <h3 className="text-xl font-bold mb-4">Your Cart</h3>
