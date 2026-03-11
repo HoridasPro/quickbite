@@ -53,6 +53,10 @@ const Header = () => {
     return () => window.removeEventListener("addressUpdated", fetchDefaultAddress);
   }, [session]);
 
+  // Determine if the user has access to any dashboard
+  const userRole = session?.user?.role || "user";
+  const hasDashboard = ["admin", "restaurant", "rider"].includes(userRole);
+
   return (
     <>
       <div id="main-header" className="w-full bg-white shadow-sm sticky top-0 z-40">
@@ -104,9 +108,10 @@ const Header = () => {
                       <User className="w-4 h-4" /> Profile
                     </NavLink>
 
-                    {session.user.role === "admin" && (
+                    {/* ROLE-AWARE DASHBOARD LINK */}
+                    {hasDashboard && (
                       <NavLink
-                        href="/dashboard/admin"
+                        href={`/dashboard/${userRole}`}
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
                         activeClassName="text-orange-600 bg-orange-50 font-medium"
@@ -302,9 +307,10 @@ const Header = () => {
                     <User className="w-5 h-5" /> Profile
                   </NavLink>
                   
-                  {session.user.role === "admin" && (
+                  {/* ROLE-AWARE DASHBOARD LINK (MOBILE) */}
+                  {hasDashboard && (
                     <NavLink
-                      href="/dashboard/admin"
+                      href={`/dashboard/${userRole}`}
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-3 p-3 rounded-xl transition"
                       activeClassName="text-orange-600 bg-orange-50"
