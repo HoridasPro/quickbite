@@ -3,8 +3,15 @@
 import CategoriesFoods from "@/components/CategoriesFoods";
 import FoodCards from "@/components/FoodCards";
 import HeroSection from "@/components/HeroSection";
-import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+
+const getFoods = async (search = "") => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback?search=${search}`,
+  );
+  const data = await res.json();
+  return data || [];
+};
 
 const FoodsPageContent = () => {
   const searchParams = useSearchParams();
@@ -141,14 +148,11 @@ const FoodsPageContent = () => {
         </div>
       </div>
 
-      <div className="col-span-1 lg:col-span-9 px-4 lg:px-6">
-        <HeroSection />
-        
-        <CategoriesFoods 
-          onCategorySelect={setSelectedCategory} 
-          hideFoods={true} 
-        />
-        
+      {/* Product section for the right side*/}
+      <div className="col-span-9 overflow-y-auto px-6">
+        <HeroSection></HeroSection>
+        <CategoriesFoods></CategoriesFoods>
+
         <h2 className="font-bold text-2xl mt-10 mb-5">
           {foods.length} Restaurants Found {selectedCategory && `for "${selectedCategory}"`} {searchQuery && `matching "${searchQuery}"`}
         </h2>
