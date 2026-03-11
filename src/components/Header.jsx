@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   MapPin,
@@ -37,7 +37,7 @@ const Header = () => {
   useEffect(() => {
     const fetchDefaultAddress = () => {
       if (session?.user?.email) {
-        fetch(`/api/user/addresses?email=${session.user.email}`)
+        fetch(`/api/users/addresses?email=${session.user.email}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.success && data.addresses.length > 0) {
@@ -230,7 +230,9 @@ const Header = () => {
           </div>
 
           <div className="relative w-full lg:w-[400px]">
-            <InputSearch />
+            <Suspense fallback={<div className="h-10 bg-gray-100 rounded-full w-full"></div>}>
+              <InputSearch />
+            </Suspense>
           </div>
         </div>
       </div>

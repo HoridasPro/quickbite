@@ -64,7 +64,6 @@ export const authOptions = {
           const userExists = await collection.findOne({ email });
 
           if (!userExists) {
-            // New user: Create account
             await collection.insertOne({
               name,
               email,
@@ -73,7 +72,6 @@ export const authOptions = {
               createdAt: new Date(),
             });
           } else {
-            // Existing user: Sync/Link account by updating missing image or name
             await collection.updateOne(
               { email },
               { 
@@ -85,19 +83,34 @@ export const authOptions = {
             );
           }
         } catch (error) {
-          console.error("Error persisting/linking social user:", error);
+          console.error(error);
         }
       }
       return true;
     },
 
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-        token.role = user.role || "user";
+    async jwt({ token, user, account }) {
+      if (account || user) {
+        token.id = user?.id || token.id;
+        token.name = user?.name || token.name;
+        token.email = user?.email || token.email;
+        token.image = user?.image || token.image;
+        token.role = user?.role || "user";
+
+        if (account?.provider === "google" || account?.provider === "github") {
+          try {
+            const collection = await dbConnect("users");
+            const dbUser = await collection.findOne({ email: token.email });
+            if (dbUser) {
+              token.role = dbUser.role || "user";
+              token.id = dbUser._id.toString();
+              token.name = dbUser.name || token.name;
+              token.image = dbUser.image || token.image;
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        }
       }
       return token;
     },

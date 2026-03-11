@@ -8,7 +8,7 @@ const InputSearch = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentSearch = searchParams.get("search") || "";
-  
+
   const [searchTerm, setSearchTerm] = useState(currentSearch);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const InputSearch = () => {
   const handleChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
-    
+
     if (val.trim()) {
       router.push(`/foods?search=${encodeURIComponent(val)}`);
     } else {
