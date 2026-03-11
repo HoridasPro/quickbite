@@ -165,13 +165,17 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
     
-    const targetEmail = session.user.role === "admin" 
-      ? (searchParams.get("email") || session.user.email) 
-      : session.user.email;
+    let query = {};
+    if (session.user.role === "admin") {
+      if (email) query.email = email;
+    } else {
+      query.email = session.user.email;
+    }
 
     const collection = await dbConnect("orders");
-    const orders = await collection.find({ email: targetEmail }).sort({ timestamp: -1 }).toArray();
+    const orders = await collection.find(query).sort({ timestamp: -1 }).toArray();
 
     return NextResponse.json(
       { success: true, orders },
@@ -208,17 +212,31 @@ export async function PATCH(request) {
 
     const collection = await dbConnect("orders");
 
-    const result = await collection.updateOne(
-      { orderId: orderId },
-      { $set: { status } }
-    );
+    // --- SECURITY FIX: Check existing order before updating ---
+    const existingOrder = await collection.findOne({ orderId: orderId });
 
-    if (result.matchedCount === 0) {
+    if (!existingOrder) {
        return NextResponse.json(
         { success: false, message: "Order not found" },
         { status: 404 }
       );
     }
+
+    // Prevent Unpaid orders from being processed
+    if (existingOrder.paymentStatus !== "Paid") {
+      const allowedUnpaidStatuses = ["Pending", "Cancelled"];
+      if (!allowedUnpaidStatuses.includes(status)) {
+        return NextResponse.json(
+          { success: false, message: "Unpaid orders can only be set to Pending or Cancelled." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const result = await collection.updateOne(
+      { orderId: orderId },
+      { $set: { status } }
+    );
 
     return NextResponse.json(
       { success: true, message: "Order updated successfully" },
