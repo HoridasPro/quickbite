@@ -166,13 +166,21 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
+    const orderId = searchParams.get("orderId");
     
     let query = {};
-    // Allow Admins, Restaurants, and Riders to view the wider pool of orders
-    if (["admin", "restaurant", "rider"].includes(session.user.role)) {
-      if (email) query.email = email;
+
+    if (orderId) {
+      query.orderId = orderId;
+      if (!["admin", "restaurant", "rider"].includes(session.user.role)) {
+        query.email = session.user.email;
+      }
     } else {
-      query.email = session.user.email;
+      if (["admin", "restaurant", "rider"].includes(session.user.role)) {
+        if (email) query.email = email;
+      } else {
+        query.email = session.user.email;
+      }
     }
 
     const collection = await dbConnect("orders");

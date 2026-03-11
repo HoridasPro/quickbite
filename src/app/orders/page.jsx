@@ -44,7 +44,7 @@ export default function OrdersPage() {
 
   function formatOrderForCard(order) {
     return {
-      id: order._id,
+      id: order.orderId,
       image: order.items?.[0]?.image || "https://via.placeholder.com/80",
       restaurant: order.items?.[0]?.restaurant || "QuickBite",
       items: order.items?.map((i) => `${i.quantity}x ${i.title}`).join(", "),
