@@ -10,7 +10,6 @@ export default function CartContent({ onClose, isDrawer = false }) {
   const { cartItems, removeFromCart } = useCart();
   const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
 
-  // EMPTY STATE
   if (cartItems.length === 0) {
     return (
       <div

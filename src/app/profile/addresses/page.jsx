@@ -8,16 +8,16 @@ import Map from "@/components/Map";
 export default function AddressesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  
+
   const [label, setLabel] = useState("Home");
   const [addressText, setAddressText] = useState("");
   const [city, setCity] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  
+
   const [mapPosition, setMapPosition] = useState([23.8103, 90.4125]);
 
   const dragItem = useRef(null);
@@ -26,7 +26,9 @@ export default function AddressesPage() {
   const fetchAddresses = async () => {
     if (session?.user?.email) {
       try {
-        const res = await fetch(`/api/user/addresses?email=${session.user.email}`);
+        const res = await fetch(
+          `/api/user/addresses?email=${session.user.email}`,
+        );
         const data = await res.json();
         if (data.success) {
           setAddresses(data.addresses);
@@ -50,11 +52,19 @@ export default function AddressesPage() {
   const handleLocationSelect = async (lat, lng) => {
     setMapPosition([lat, lng]);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+      );
       const data = await res.json();
       if (data && data.address) {
-        setAddressText(data.address.road || data.address.suburb || data.display_name.split(",")[0]);
-        setCity(data.address.city || data.address.state || data.address.county || "");
+        setAddressText(
+          data.address.road ||
+            data.address.suburb ||
+            data.display_name.split(",")[0],
+        );
+        setCity(
+          data.address.city || data.address.state || data.address.county || "",
+        );
       }
     } catch (err) {
       console.error("Geocoding failed", err);
@@ -99,7 +109,7 @@ export default function AddressesPage() {
       prevAddresses.map((addr) => ({
         ...addr,
         isDefault: addr._id === id,
-      }))
+      })),
     );
 
     try {
@@ -126,7 +136,7 @@ export default function AddressesPage() {
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this address?")) return;
-    
+
     try {
       const res = await fetch(`/api/user/addresses?id=${id}`, {
         method: "DELETE",
@@ -153,20 +163,20 @@ export default function AddressesPage() {
 
   const handleDragEnd = async () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
-    
+
     const copyAddresses = [...addresses];
     const draggedItemContent = copyAddresses[dragItem.current];
     copyAddresses.splice(dragItem.current, 1);
     copyAddresses.splice(dragOverItem.current, 0, draggedItemContent);
-    
+
     dragItem.current = null;
     dragOverItem.current = null;
-    
+
     setAddresses(copyAddresses);
 
     const updates = copyAddresses.map((addr, index) => ({
       id: addr._id,
-      order: index
+      order: index,
     }));
 
     try {
@@ -184,21 +194,29 @@ export default function AddressesPage() {
   };
 
   if (loading || status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading addresses...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading addresses...
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] py-10">
       <div className="max-w-[680px] mx-auto px-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Saved Addresses</h1>
-        
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">
+          Saved Addresses
+        </h1>
+
         <div className="space-y-4">
           {addresses.length === 0 && !showForm ? (
-            <p className="text-gray-500 text-center py-4">No saved addresses yet.</p>
+            <p className="text-gray-500 text-center py-4">
+              No saved addresses yet.
+            </p>
           ) : (
             addresses.map((addr, index) => (
-              <div 
-                key={addr._id} 
+              <div
+                key={addr._id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragEnter={(e) => handleDragEnter(e, index)}
@@ -206,7 +224,9 @@ export default function AddressesPage() {
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => handleSetDefault(addr._id)}
                 className={`bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4 cursor-pointer transition-all ${
-                  addr.isDefault ? "border-2 border-orange-500" : "border border-gray-100 hover:border-orange-300"
+                  addr.isDefault
+                    ? "border-2 border-orange-500"
+                    : "border border-gray-100 hover:border-orange-300"
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -221,18 +241,22 @@ export default function AddressesPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-gray-900">📍 {addr.label}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        📍 {addr.label}
+                      </h3>
                       {addr.isDefault && (
                         <span className="bg-orange-100 text-orange-700 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md">
                           Default
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{addr.address}, {addr.city}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {addr.address}, {addr.city}
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-center pl-9 sm:pl-0">
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(addr._id);
@@ -248,14 +272,22 @@ export default function AddressesPage() {
         </div>
 
         {showForm ? (
-          <form onSubmit={handleAddAddress} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6 space-y-4">
+          <form
+            onSubmit={handleAddAddress}
+            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6 space-y-4"
+          >
             <h3 className="font-bold text-lg mb-2">Add New Address</h3>
 
             <div className="w-full h-48 rounded-xl overflow-hidden border border-gray-300 mb-2 relative">
-              <Map position={mapPosition} onLocationSelect={handleLocationSelect} />
+              <Map
+                position={mapPosition}
+                onLocationSelect={handleLocationSelect}
+              />
             </div>
-            <p className="text-xs text-gray-500 text-right -mt-2">Click map to auto-fill</p>
-            
+            <p className="text-xs text-gray-500 text-right -mt-2">
+              Click map to auto-fill
+            </p>
+
             <div>
               <label className="block text-sm text-gray-600 mb-2">Label</label>
               <div className="flex gap-2">
@@ -265,7 +297,9 @@ export default function AddressesPage() {
                     key={lbl}
                     onClick={() => setLabel(lbl)}
                     className={`px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
-                      label === lbl ? "border-orange-500 bg-orange-50 text-orange-600 font-medium" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                      label === lbl
+                        ? "border-orange-500 bg-orange-50 text-orange-600 font-medium"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
                     }`}
                   >
                     {lbl}
@@ -296,14 +330,14 @@ export default function AddressesPage() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition cursor-pointer"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 type="submit"
                 disabled={submitting}
                 className="flex-1 bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition disabled:bg-gray-400 cursor-pointer"
@@ -313,7 +347,7 @@ export default function AddressesPage() {
             </div>
           </form>
         ) : (
-          <button 
+          <button
             onClick={() => setShowForm(true)}
             className="mt-6 w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition cursor-pointer"
           >

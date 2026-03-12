@@ -25,7 +25,6 @@ const getCategories = async () => {
   return data || [];
 };
 
- 
 const CategoryCard = ({ nameEn, nameBn, count, onClick, active }) => (
   <div
     onClick={onClick}
@@ -43,7 +42,7 @@ const CategoryCard = ({ nameEn, nameBn, count, onClick, active }) => (
 
 const FoodCard = ({ food, onClick }) => (
   <div
-    className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse hover:bg-red-600"
+    className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
     onClick={onClick}
   >
     <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
+import { NextResponse } from "next/server";
 
 export async function GET(request) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request) {
     if (offer) {
       query.offer = offer;
     }
-    
+
     if (category) {
       query.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
@@ -23,7 +23,7 @@ export async function GET(request) {
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -46,10 +46,15 @@ export async function GET(request) {
     }
 
     const skip = (page - 1) * limit;
-    
+
     const collection = await dbConnect("allFoods");
-    
-    const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
+
+    const foods = await collection
+      .find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .toArray();
     const totalItems = await collection.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
@@ -66,10 +71,13 @@ export async function GET(request) {
       foods: mappedFoods,
       currentPage: page,
       totalPages: totalPages,
-      totalItems: totalItems
+      totalItems: totalItems,
     });
   } catch (error) {
     console.error("Foods list fetch error:", error);
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 },
+    );
   }
 }
