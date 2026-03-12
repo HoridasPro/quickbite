@@ -26,9 +26,7 @@ export default function AddressesPage() {
   const fetchAddresses = async () => {
     if (session?.user?.email) {
       try {
-        const res = await fetch(
-          `/api/user/addresses?email=${session.user.email}`,
-        );
+        const res = await fetch(`/api/users/addresses?email=${session.user.email}`);
         const data = await res.json();
         if (data.success) {
           setAddresses(data.addresses);
@@ -77,7 +75,7 @@ export default function AddressesPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/user/addresses", {
+      const res = await fetch("/api/users/addresses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -113,7 +111,7 @@ export default function AddressesPage() {
     );
 
     try {
-      const res = await fetch("/api/user/addresses", {
+      const res = await fetch("/api/users/addresses", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -138,7 +136,7 @@ export default function AddressesPage() {
     if (!confirm("Are you sure you want to delete this address?")) return;
 
     try {
-      const res = await fetch(`/api/user/addresses?id=${id}`, {
+      const res = await fetch(`/api/users/addresses?id=${id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -180,7 +178,7 @@ export default function AddressesPage() {
     }));
 
     try {
-      await fetch("/api/user/addresses", {
+      await fetch("/api/users/addresses", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

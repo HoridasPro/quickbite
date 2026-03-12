@@ -12,12 +12,10 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Redirect if not logged in
     if (status === "unauthenticated") {
       router.push("/login");
     }
 
-    // Fetch orders if we have the user's email
     if (session?.user?.email) {
       fetch(`/api/orders?email=${session.user.email}`)
         .then((res) => res.json())
@@ -36,19 +34,17 @@ export default function OrdersPage() {
     }
   }, [session, status, router]);
 
-  // Separate orders by status
   const activeOrders = orders
-    .filter((o) => o.status === "Pending" || o.status === "On the way")
+    .filter((o) => ["Pending", "Confirmed", "Cooking", "On the way"].includes(o.status))
     .map(formatOrderForCard);
 
   const pastOrders = orders
-    .filter((o) => o.status === "Delivered" || o.status === "Cancelled")
+    .filter((o) => ["Delivered", "Cancelled"].includes(o.status))
     .map(formatOrderForCard);
 
-  // Helper function to format MongoDB data to match your OrderHistoryCard props
   function formatOrderForCard(order) {
     return {
-      id: order._id,
+      id: order.orderId,
       image: order.items?.[0]?.image || "https://via.placeholder.com/80",
       restaurant: order.items?.[0]?.restaurant || "QuickBite",
       items: order.items?.map((i) => `${i.quantity}x ${i.title}`).join(", "),
@@ -69,14 +65,12 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-[#f7f7f7]">
       <div className="max-w-[680px] mx-auto px-6 py-10">
-        {/* Active Orders */}
         <OrdersSection
           title="Active orders"
           orders={activeOrders}
           emptyText="You have no active orders."
         />
 
-        {/* Past Orders */}
         <OrdersSection
           title="Past orders"
           orders={pastOrders}

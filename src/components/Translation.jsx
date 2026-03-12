@@ -1,9 +1,21 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageProvider";
 
-const Translation = ({ en, bn }) => {
+const Translation = ({ tid }) => {
   const { language } = useLanguage();
-  return <>{language === "bn" ? bn : en}</>;
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    fetch(`/api/translations?lang=${language}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setText(data[tid]);
+      });
+  }, [language, tid]);
+
+  return text || tid;
 };
 
 export default Translation;

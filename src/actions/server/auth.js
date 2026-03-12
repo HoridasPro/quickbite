@@ -20,12 +20,19 @@ export const postUser = async (payload) => {
 
     const hashPassword = await bcrypt.hash(payload.password, 10);
 
+    // SECURITY: Only allow specific roles to be passed. Default to 'user'. 
+    // Explicitly prevents someone from passing role: "admin" via API tools.
+    const requestedRole = payload.role?.toLowerCase() || "user";
+    const assignedRole = ["user", "rider", "restaurant"].includes(requestedRole) 
+      ? requestedRole 
+      : "user";
+
     const newUser = {
       name: payload.name,
       email: payload.email.toLowerCase(),
       password: hashPassword,
       image: payload.image || null,
-      role: "user",
+      role: assignedRole,
       createdAt: new Date(),
     };
 

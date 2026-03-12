@@ -3,10 +3,18 @@
 import CategoriesFoods from "@/components/CategoriesFoods";
 import FoodCards from "@/components/FoodCards";
 import HeroSection from "@/components/HeroSection";
-import Translation from "@/components/Translation";
-import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageProvider";
+import { Suspense, useEffect, useState } from "react";
+import Translation from "@/components/Translation";
+
+const getFoods = async (search = "") => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/feedback?search=${search}`,
+  );
+  const data = await res.json();
+  return data || [];
+};
 
 const FoodsPageContent = () => {
   const { language } = useLanguage(); // <-- get current language
@@ -172,13 +180,10 @@ const FoodsPageContent = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="col-span-1 lg:col-span-9 px-4 lg:px-6">
-        <HeroSection />
-        <CategoriesFoods
-          onCategorySelect={setSelectedCategory}
-          hideFoods={true}
-        />
+      {/* Product section for the right side*/}
+      <div className="col-span-9 overflow-y-auto px-6">
+        <HeroSection></HeroSection>
+        <CategoriesFoods></CategoriesFoods>
 
         <h2 className="font-bold text-2xl mt-10 mb-5">
           {foods.length} <Translation en="Restaurants" bn="রেস্তোরাঁ" />

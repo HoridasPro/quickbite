@@ -8,114 +8,98 @@ import {
   Store, 
   CreditCard, 
   Truck, 
-  X 
+  X,
+  ChefHat,
+  Bike
 } from "lucide-react";
-import Link from "next/link";
+import NavLink from "./NavLink";
+import { useSession } from "next-auth/react";
 
 export default function Sidebar({ closeSidebar }) {
+  const { data: session } = useSession();
+  const role = session?.user?.role || "user";
+
+  const baseClass = "flex items-center gap-3 p-3 rounded-xl transition-all font-medium";
+  const activeClass = "text-orange-500 bg-orange-50";
+  const inactiveClass = "text-gray-700 hover:bg-gray-100";
+
   return (
     <div className="h-full text-gray-800 p-6 relative">
-
-      {/* Close Button (Mobile only) */}
       <button
-        className="md:hidden absolute top-4 right-4"
+        className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
         onClick={closeSidebar}
       >
         <X size={22} />
       </button>
 
-      {/* Title */}
       <div className="mb-10 mt-8 md:mt-0">
         <h2 className="text-3xl font-extrabold text-orange-500">
-          Admin Panel
+          {role === "admin" ? "Admin Panel" : role === "restaurant" ? "Kitchen KDS" : "Rider App"}
         </h2>
-        <p className="text-sm text-gray-400 mt-1">
-          QuickBite Dashboard
+        <p className="text-sm text-gray-400 mt-1 font-medium capitalize">
+          QuickBite {role}
         </p>
       </div>
 
-      {/* Menu */}
-      <ul className="space-y-4">
+      <ul className="space-y-2">
+        {/* ADMIN LINKS */}
+        {role === "admin" && (
+          <>
+            <li>
+              <NavLink href="/dashboard/admin" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <LayoutDashboard size={20} /> Dashboard
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/users" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <Users size={20} /> Users
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/products" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <ShoppingBag size={20} /> Foods
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/orders" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <Package size={20} /> Orders
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/restaurants" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <Store size={20} /> Restaurants
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/payments" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <CreditCard size={20} /> Payment
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/delivery" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <Truck size={20} /> Delivery
+              </NavLink>
+            </li>
+          </>
+        )}
 
-        <li>
-          <Link
-            href="/dashboard/admin"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <LayoutDashboard size={20} />
-            Dashboard
-          </Link>
-        </li>
+        {/* RESTAURANT LINKS */}
+        {role === "restaurant" && (
+          <li>
+            <NavLink href="/dashboard/restaurant" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+              <ChefHat size={20} /> Kitchen Display
+            </NavLink>
+          </li>
+        )}
 
-        <li>
-          <Link
-            href="/dashboard/admin/users"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <Users size={20} />
-            Users
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            href="/dashboard/admin/products"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <ShoppingBag size={20} />
-            Foods
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            href="/dashboard/admin/orders"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <Package size={20} />
-            Orders
-          </Link>
-        </li>
-
-        {/* NEW ITEMS */}
-
-        <li>
-          <Link
-            href="/dashboard/admin/restaurants"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <Store size={20} />
-            Restaurants
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            href="/dashboard/admin/payments"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <CreditCard size={20} />
-            Payment
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            href="/dashboard/admin/delivery"
-            onClick={closeSidebar}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-300 transition-all"
-          >
-            <Truck size={20} />
-            Delivery
-          </Link>
-        </li>
-
+        {/* RIDER LINKS */}
+        {role === "rider" && (
+          <li>
+            <NavLink href="/dashboard/rider" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+              <Bike size={20} /> Delivery Pool
+            </NavLink>
+          </li>
+        )}
       </ul>
     </div>
   );

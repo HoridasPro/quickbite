@@ -1,25 +1,22 @@
- "use client";
+"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Map from "@/components/Map";
-import Translation from "@/components/Translation";
-import { useLanguage } from "@/contexts/LanguageProvider";
+import Swal from "sweetalert2";
+import AddressDropdown from "@/components/checkout/AddressDropdown";
 
 export default function CheckoutPage() {
-  const { cartItems, clearCart } = useCart();
+  const { cartItems } = useCart();
   const router = useRouter();
-  const { data: session } = useSession();
-  const { lang } = useLanguage();
-
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [mapPosition, setMapPosition] = useState([23.8103, 90.4125]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [orderId] = useState(() => `ORD-${Date.now()}`);
 
   const [formData, setFormData] = useState({
     street: "",
@@ -33,7 +30,13 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (session?.user) {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (session?.user?.email) {
       setFormData((prev) => ({
         ...prev,
         email: prev.email || session.user.email || "",
@@ -44,7 +47,7 @@ export default function CheckoutPage() {
           "",
       }));
 
-      fetch(`/api/user/addresses?email=${session.user.email}`)
+      fetch(`/api/users/addresses?email=${session.user.email}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.addresses.length > 0) {
@@ -65,6 +68,15 @@ export default function CheckoutPage() {
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCustomAddressSelect = (addr) => {
+    setSelectedAddressId(addr._id);
+    setFormData((prev) => ({
+      ...prev,
+      street: addr.address,
+      city: addr.city || "",
+    }));
   };
 
   const handleLocationSelect = async (lat, lng) => {
@@ -93,57 +105,82 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePlaceOrder = async () => {
+  const handleCheckoutRedirect = async () => {
     if (cartItems.length === 0) {
-      alert(lang === "bn" ? "আপনার কার্ট খালি!" : "Your cart is empty!");
+      Swal.fire("Empty Cart", "Your cart is empty!", "error");
       return;
     }
 
-    const finalEmail = session?.user?.email || formData.email;
-    if (!finalEmail) {
-      alert(
-        lang === "bn"
-          ? "অর্ডার করতে লগইন করুন বা ইমেইল দিন"
-          : "Please login or provide an email to place an order.",
-      );
+    if (status === "unauthenticated" || !session?.user?.email) {
+      Swal.fire(
+        "Login Required",
+        "Please log in to complete your purchase.",
+        "info",
+      ).then(() => {
+        router.push("/login");
+      });
       return;
     }
 
     setLoading(true);
 
+    const orderData = {
+      orderId: orderId,
+      items: cartItems,
+      totalAmount,
+      customerInfo: formData,
+      email: session.user.email,
+      status: "Pending",
+      paymentStatus: "Unpaid",
+      timestamp: new Date().toISOString(),
+    };
+
     try {
-      const response = await fetch("/api/orders", {
+      const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cartItems,
-          totalAmount,
-          customerInfo: formData,
-          email: finalEmail,
-        }),
+        body: JSON.stringify(orderData),
       });
 
-      const data = await response.json();
+      const savedOrder = await orderRes.json();
 
-      if (data.success) {
-        clearCart();
-        alert(
-          lang === "bn"
-            ? `অর্ডার সফল! Order ID: ${data.order.orderId}`
-            : `Order placed successfully! Order ID: ${data.order.orderId}`,
-        );
-        router.push("/orders");
+      if (!savedOrder.success) {
+        Swal.fire("Error", "Failed to save order.", "error");
+        setLoading(false);
+        return;
+      }
+
+      const stripeRes = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: orderData }),
+      });
+
+      const data = await stripeRes.json();
+
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        alert(
-          lang === "bn" ? "অর্ডার ব্যর্থ হয়েছে" : "Failed to place order.",
+        Swal.fire(
+          "Error",
+          data.error || "Failed to initialize payment",
+          "error",
         );
+        setLoading(false);
       }
     } catch (error) {
-      alert(lang === "bn" ? "একটি ত্রুটি ঘটেছে" : "An error occurred.");
-    } finally {
+      Swal.fire("Error", "Checkout failed", "error");
       setLoading(false);
     }
   };
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading secure checkout...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] flex justify-center py-10 text-gray-800 px-4">
@@ -151,10 +188,18 @@ export default function CheckoutPage() {
         {/* Delivery Address */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-xl font-extrabold mb-4 text-black">
-            <Translation en="Delivery address" bn="ডেলিভারি ঠিকানা" />
+            Delivery address
           </h2>
 
-          <div className="w-full h-48 rounded-xl overflow-hidden mb-2 border border-gray-300">
+          {savedAddresses.length > 0 && (
+            <AddressDropdown
+              savedAddresses={savedAddresses}
+              selectedAddressId={selectedAddressId}
+              onSelect={handleCustomAddressSelect}
+            />
+          )}
+
+          <div className="w-full h-48 rounded-xl overflow-hidden mb-2 border border-gray-300 relative z-0">
             <Map
               position={mapPosition}
               onLocationSelect={handleLocationSelect}
@@ -180,78 +225,74 @@ export default function CheckoutPage() {
               name="street"
               value={formData.street}
               onChange={handleInputChange}
-              placeholder={
-                lang === "bn" ? "রাস্তা / বাড়ি নম্বর" : "Street / House Number"
-              }
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="Street / House Number"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
             />
-
             <input
               type="text"
               name="city"
               value={formData.city}
               onChange={handleInputChange}
-              placeholder={lang === "bn" ? "শহর / এলাকা" : "City / Area"}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="City / Area"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
             />
-
             <input
               type="text"
               name="apartment"
               value={formData.apartment}
               onChange={handleInputChange}
-              placeholder={lang === "bn" ? "অ্যাপার্টমেন্ট #" : "Apartment #"}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="Apartment #"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
             />
-
             <textarea
               rows="3"
               name="note"
               value={formData.note}
               onChange={handleInputChange}
-              placeholder={
-                lang === "bn"
-                  ? "রাইডারের জন্য নোট (ল্যান্ডমার্ক ইত্যাদি)"
-                  : "Note to rider - e.g. building, landmark"
-              }
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="Note to rider - e.g. building, landmark"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black resize-none focus:outline-none focus:border-gray-600"
             />
+          </div>
+        </div>
 
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-semibold mb-4 text-black">
+            Personal details
+          </h2>
+          <div className="space-y-4">
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder={lang === "bn" ? "ইমেইল" : "Email"}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="Email"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
             />
-
             <div className="flex gap-3">
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
-                placeholder={lang === "bn" ? "নামের প্রথম অংশ" : "First name"}
-                className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm"
+                placeholder="First name"
+                className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
               />
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
-                placeholder={lang === "bn" ? "নামের শেষ অংশ" : "Last name"}
-                className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm"
+                placeholder="Last name"
+                className="w-1/2 border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
               />
             </div>
-
             <input
               type="text"
               name="mobile"
               value={formData.mobile}
               onChange={handleInputChange}
-              placeholder={lang === "bn" ? "মোবাইল নম্বর" : "Mobile number"}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+              placeholder="Mobile number"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-gray-600"
             />
           </div>
         </div>
@@ -269,12 +310,40 @@ export default function CheckoutPage() {
           ) : (
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <div key={item.cartItemId} className="flex justify-between">
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <div className="font-semibold">
-                    {lang === "bn"
-                      ? `৳ ${item.totalPrice}`
-                      : `Tk ${item.totalPrice}`}
+                <div
+                  key={item.cartItemId}
+                  className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                >
+                  <div className="flex gap-3">
+                    <div className="bg-gray-100 text-gray-800 font-bold px-3 py-1 rounded-lg h-fit text-sm">
+                      {item.quantity}x
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {item.title}
+                      </h3>
+                      {item.selectedVariations &&
+                        Object.values(item.selectedVariations).map(
+                          (variant, i) => {
+                            if (Array.isArray(variant))
+                              return variant.map((v, j) => (
+                                <p
+                                  key={`${i}-${j}`}
+                                  className="text-xs text-gray-500"
+                                >
+                                  + {v.name}
+                                </p>
+                              ));
+                            else if (variant)
+                              return (
+                                <p key={i} className="text-xs text-gray-500">
+                                  + {variant.name}
+                                </p>
+                              );
+                            return null;
+                          },
+                        )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -291,26 +360,24 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* Place Order Button */}
-        <button
-          onClick={handlePlaceOrder}
-          disabled={loading || cartItems.length === 0}
-          className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold"
-        >
-          {loading
-            ? lang === "bn"
-              ? "প্রক্রিয়াকরণ চলছে..."
-              : "Processing..."
-            : lang === "bn"
-              ? `অর্ডার করুন (৳ ${totalAmount})`
-              : `Place order (Tk ${totalAmount})`}
-        </button>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-extrabold mb-4 text-black">Payment</h2>
+          <p className="text-gray-600 text-sm mb-6">
+            You will be redirected to Stripe to securely complete your purchase.
+          </p>
+          <button
+            onClick={handleCheckoutRedirect}
+            disabled={loading || cartItems.length === 0}
+            className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold disabled:bg-gray-400 hover:bg-orange-700 transition cursor-pointer"
+          >
+            {loading
+              ? "Redirecting to Stripe..."
+              : `Proceed to Payment (Tk ${totalAmount})`}
+          </button>
+        </div>
 
         <p className="text-gray-600 text-sm">
-          <Translation
-            en="By making this purchase you agree to our terms and conditions."
-            bn="এই ক্রয় করার মাধ্যমে আপনি আমাদের শর্তাবলীতে সম্মত হচ্ছেন।"
-          />
+          By making this purchase you agree to our terms and conditions.
         </p>
       </div>
     </div>
