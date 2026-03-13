@@ -2,10 +2,23 @@
 
 import Sidebar from "@/components/Sidebar";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function DashboardLayout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
+  
+  const { data: session } = useSession();
+  const { t } = useTranslation();
+  
+  const role = session?.user?.role || "user";
+
+  const roleTitles = {
+    admin: t("adminPanel"),
+    restaurant: t("kitchenKds"),
+    rider: t("riderApp")
+  };
 
   useEffect(() => {
     const calculateHeaderHeight = () => {
@@ -65,11 +78,11 @@ export default function DashboardLayout({ children }) {
           </button>
 
           <h1 className="text-xl font-semibold text-gray-800 tracking-wide">
-            Dashboard
+            {t("dashboard")}
           </h1>
 
           <div className="text-sm font-medium text-orange-600 bg-orange-50 px-4 py-1.5 rounded-full hidden sm:block">
-            Admin Panel
+            {roleTitles[role] || t("dashboard")}
           </div>
         </div>
 

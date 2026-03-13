@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import { MapPin, Bike, CheckCircle, Package, Phone, Navigation, Store } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RiderDashboard() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   const fetchOrders = async () => {
     try {
@@ -26,7 +28,7 @@ export default function RiderDashboard() {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 15000); // Refresh every 15s for riders
+    const interval = setInterval(fetchOrders, 15000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -36,7 +38,6 @@ export default function RiderDashboard() {
       status: newStatus,
     };
 
-    // If accepting the order, attach the rider's info
     if (newStatus === "On the way") {
       payload.riderEmail = session?.user?.email;
       payload.riderName = session?.user?.name;
@@ -53,7 +54,7 @@ export default function RiderDashboard() {
       if (data.success) {
         Swal.fire({
           icon: "success",
-          title: newStatus === "On the way" ? "Delivery Accepted!" : "Order Delivered!",
+          title: newStatus === "On the way" ? t("deliveryAcceptedToast") : t("orderDeliveredToast"),
           toast: true,
           position: "top-end",
           timer: 2000,
@@ -62,81 +63,75 @@ export default function RiderDashboard() {
         fetchOrders();
       }
     } catch (error) {
-      Swal.fire("Error", "Failed to update order", "error");
+      Swal.fire(t("error"), t("failedUpdateOrder"), "error");
     }
   };
 
-  // Filter 1: Orders ready for pickup and not yet assigned to anyone
   const availableOrders = orders.filter(
     (o) => o.status === "Ready for Pickup" && !o.riderEmail
   );
 
-  // Filter 2: Orders currently assigned to THIS specific rider
   const myActiveOrders = orders.filter(
     (o) => o.status === "On the way" && o.riderEmail === session?.user?.email
   );
 
-  if (loading) return <div className="p-10 text-center text-gray-500">Loading Delivery Pool...</div>;
+  if (loading) return <div className="p-10 text-center text-gray-500">{t("loadingDeliveryPool")}</div>;
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-8 pb-10">
       
-      {/* MY ACTIVE DELIVERIES SECTION */}
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Bike className="text-orange-500" /> My Active Delivery
+          <Bike className="text-orange-500" /> {t("myActiveDelivery")}
         </h2>
         
         {myActiveOrders.length === 0 ? (
           <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-6 text-center text-orange-600 font-medium">
-            You have no active deliveries. Grab one from the pool below!
+            {t("noActiveDeliveries")}
           </div>
         ) : (
           <div className="space-y-4">
             {myActiveOrders.map((order) => (
               <div key={order.orderId} className="bg-white border-2 border-orange-400 shadow-md rounded-2xl overflow-hidden">
                 <div className="bg-orange-500 text-white px-4 py-2 flex justify-between items-center font-bold text-sm">
-                  <span>Order: {order.orderId}</span>
+                  <span>{t("orderPrefix")}: {order.orderId}</span>
                   <span className="bg-white/20 px-2 py-0.5 rounded">Tk {order.totalAmount}</span>
                 </div>
                 
                 <div className="p-5 space-y-4">
-                  {/* Restaurant Pickup */}
                   <div className="flex gap-3">
                     <Store className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Pickup From</p>
-                      <p className="font-semibold text-gray-900">{order.items[0]?.restaurant || "QuickBite Hub"}</p>
-                      <p className="text-sm text-gray-600">{order.items.length} items to collect</p>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{t("pickupFrom")}</p>
+                      <p className="font-semibold text-gray-900">{order.items[0]?.restaurant || t("quickBite")}</p>
+                      <p className="text-sm text-gray-600">{order.items.length} {t("itemsToCollect")}</p>
                     </div>
                   </div>
 
                   <div className="border-l-2 border-dashed border-gray-200 ml-2.5 h-6 my-1"></div>
 
-                  {/* Customer Dropoff */}
                   <div className="flex gap-3">
                     <MapPin className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs text-orange-500 font-bold uppercase tracking-wider">Deliver To</p>
+                      <p className="text-xs text-orange-500 font-bold uppercase tracking-wider">{t("deliverTo")}</p>
                       <p className="font-semibold text-gray-900">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</p>
                       <p className="text-sm text-gray-600">{order.customerInfo?.street}, {order.customerInfo?.city}</p>
-                      {order.customerInfo?.apartment && <p className="text-sm text-gray-600">Apt: {order.customerInfo.apartment}</p>}
+                      {order.customerInfo?.apartment && <p className="text-sm text-gray-600">{t("aptPrefix")} {order.customerInfo.apartment}</p>}
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                     <a 
                       href={`tel:${order.customerInfo?.mobile}`}
                       className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold transition"
                     >
-                      <Phone size={18} /> Call
+                      <Phone size={18} /> {t("callBtn")}
                     </a>
                     <button 
                       onClick={() => handleUpdateOrder(order.orderId, "Delivered")}
                       className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-sm shadow-green-200"
                     >
-                      <CheckCircle size={18} /> Delivered
+                      <CheckCircle size={18} /> {t("deliveredBtn")}
                     </button>
                   </div>
                 </div>
@@ -148,16 +143,15 @@ export default function RiderDashboard() {
 
       <hr className="border-gray-200" />
 
-      {/* AVAILABLE DELIVERY POOL SECTION */}
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Package className="text-gray-500" /> Available for Pickup
+          <Package className="text-gray-500" /> {t("availableForPickup")}
           <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">{availableOrders.length}</span>
         </h2>
 
         {availableOrders.length === 0 ? (
           <div className="bg-gray-50 border border-gray-100 rounded-2xl p-10 text-center text-gray-500">
-            No orders are currently ready for pickup. Check back soon.
+            {t("noOrdersReadyPickup")}
           </div>
         ) : (
           <div className="space-y-4">
@@ -171,7 +165,7 @@ export default function RiderDashboard() {
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Store size={14} /> {order.items[0]?.restaurant || "QuickBite Hub"}
+                    <Store size={14} /> {order.items[0]?.restaurant || t("quickBite")}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Navigation size={14} /> {order.customerInfo?.city}
@@ -182,7 +176,7 @@ export default function RiderDashboard() {
                   onClick={() => handleUpdateOrder(order.orderId, "On the way")}
                   className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition cursor-pointer whitespace-nowrap"
                 >
-                  Accept Delivery
+                  {t("acceptDeliveryBtn")}
                 </button>
 
               </div>

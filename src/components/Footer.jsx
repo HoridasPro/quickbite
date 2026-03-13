@@ -1,53 +1,55 @@
+"use client";
+
 import React from "react";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-gray-900 text-gray-300 py-10">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         
-        {/* Section 1 */}
         <div>
-          <h3 className="text-white font-bold mb-4">Help Center</h3>
+          <h3 className="text-white font-bold mb-4">{t("helpCenter")}</h3>
           <ul className="space-y-2">
             <li>
               <a href="#" className="hover:text-white">
-                FAQ
+                {t("faq")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-white">
-                Support
+                {t("support")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-white">
-                Contact Us
+                {t("contactUs")}
               </a>
             </li>
           </ul>
         </div>
 
-        {/* Section 2 */}
         <div>
-          <h3 className="text-white font-bold mb-4">Legal</h3>
+          <h3 className="text-white font-bold mb-4">{t("legal")}</h3>
           <ul className="space-y-2">
             <li>
               <a href="#" className="hover:text-white">
-                Terms & Conditions
+                {t("termsConditions")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-white">
-                Privacy Policy
+                {t("privacyPolicy")}
               </a>
             </li>
           </ul>
         </div>
 
-        {/* Section 3 */}
         <div>
-          <h3 className="text-white font-bold mb-4">Follow Us</h3>
+          <h3 className="text-white font-bold mb-4">{t("followUs")}</h3>
           <div className="flex gap-4">
             <a
               href="https://facebook.com"
@@ -84,26 +86,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Section 4 */}
         <div>
-          <h3 className="text-white font-bold mb-4">Newsletter</h3>
-          <p className="text-gray-400 mb-2">Subscribe to our newsletter</p>
+          <h3 className="text-white font-bold mb-4">{t("newsletter")}</h3>
+          <p className="text-gray-400 mb-2">{t("subscribeNewsletter")}</p>
           <form className="flex gap-2">
             <input
               type="email"
-              placeholder="Your email"
+              placeholder={t("yourEmailPlaceholder")}
               className="px-3 py-2 rounded-md w-full text-gray-900"
             />
             <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-md cursor-pointer">
-              Subscribe
+              {t("subscribeBtn")}
             </button>
           </form>
         </div>
       </div>
 
       <div className="mt-10 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} Food Delivery Platform. All rights
-        reserved.
+        &copy; {new Date().getFullYear()} {t("allRightsReserved")}
       </div>
     </footer>
   );
