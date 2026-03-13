@@ -4,11 +4,14 @@ import { useEffect, useState, Suspense, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import Swal from "sweetalert2";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { clearCart } = useCart();
+  
+  const { t, mounted } = useTranslation();
   
   const [verifying, setVerifying] = useState(true);
   const [verificationFailed, setVerificationFailed] = useState(false);
@@ -35,25 +38,40 @@ function SuccessContent() {
         clearCart();
         Swal.fire({
           icon: "success",
-          title: "Payment Successful!",
-          text: `Your order ${orderId} is confirmed.`,
+          title: t("paymentSuccessfulTitle"),
+          text: `${t("orderConfirmedPart1")} ${orderId} ${t("orderConfirmedPart2")}`,
           confirmButtonColor: "#f97316",
+          confirmButtonText: t("okBtn") // FIX: Restored the button and translated it
         }).then(() => {
           router.push("/orders");
         });
       } else {
-        Swal.fire("Verification Failed", data.message || "Could not verify payment.", "error");
+        Swal.fire({
+          title: t("verificationFailedTitle"),
+          text: t("couldNotVerify"),
+          icon: "error",
+          confirmButtonText: t("okBtn"),
+          confirmButtonColor: "#f97316"
+        });
         setVerificationFailed(true);
         setVerifying(false);
       }
     } catch (error) {
-      Swal.fire("Error", "A network error occurred during verification.", "error");
+      Swal.fire({
+        title: t("error"),
+        text: t("networkError"),
+        icon: "error",
+        confirmButtonText: t("okBtn"),
+        confirmButtonColor: "#f97316"
+      });
       setVerificationFailed(true);
       setVerifying(false);
     }
-  }, [sessionId, orderId, clearCart, router]);
+  }, [sessionId, orderId, clearCart, router, t]);
 
   useEffect(() => {
+    if (!mounted) return; 
+
     if (!sessionId || !orderId) {
       setVerifying(false);
       setVerificationFailed(true);
@@ -64,7 +82,7 @@ function SuccessContent() {
     hasVerified.current = true;
 
     verifyPayment();
-  }, [sessionId, orderId, verifyPayment]);
+  }, [sessionId, orderId, verifyPayment, mounted]); 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -72,28 +90,28 @@ function SuccessContent() {
         {verifying ? (
           <>
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying Payment...</h2>
-            <p className="text-gray-500">Please do not close this window.</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("verifyingPayment")}</h2>
+            <p className="text-gray-500">{t("doNotCloseWindow")}</p>
           </>
         ) : verificationFailed ? (
           <>
             <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold">!</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Verification Incomplete</h2>
-            <p className="text-gray-500 mb-6">We could not confirm your transaction. If you were charged, please retry.</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("verificationIncomplete")}</h2>
+            <p className="text-gray-500 mb-6">{t("verificationIncompleteDesc")}</p>
             <div className="space-y-3">
               {sessionId && orderId && (
                 <button 
                   onClick={verifyPayment} 
                   className="w-full bg-orange-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-orange-600 transition cursor-pointer"
                 >
-                  Retry Verification
+                  {t("retryVerificationBtn")}
                 </button>
               )}
               <button 
                 onClick={() => router.push("/")} 
                 className="w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-medium hover:bg-gray-300 transition cursor-pointer"
               >
-                Return to Home
+                {t("returnToHomeBtn")}
               </button>
             </div>
           </>

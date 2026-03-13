@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import StatusDropdown from "@/components/orders/StatusDropdown";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function OrdersManagementPage() {
   const [orders, setOrders] = useState([]);
+  const { t } = useTranslation();
 
   const fetchOrders = async () => {
     const res = await fetch("/api/orders");
@@ -30,8 +32,8 @@ export default function OrdersManagementPage() {
     if (data.success) {
       Swal.fire({
         icon: "success",
-        title: "Status Updated",
-        text: `Order ${orderId} is now ${status}`,
+        title: t("statusUpdated"),
+        text: `${t("orderPrefix")} ${orderId} - ${status}`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -43,23 +45,22 @@ export default function OrdersManagementPage() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
-          Order Management
+          {t("orderManagement")}
         </h2>
         <span className="text-sm text-gray-500 font-medium bg-gray-100 px-4 py-1.5 rounded-full">
-          Total Orders: {orders.length}
+          {t("totalOrders")}: {orders.length}
         </span>
       </div>
 
-      {/* Removed pb-32. Used sm:overflow-visible so dropdowns aren't clipped on desktop */}
       <div className="w-full overflow-x-auto sm:overflow-visible min-h-[400px]"> 
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-4 font-semibold text-gray-600 rounded-tl-xl">Order ID</th>
-              <th className="py-4 px-4 font-semibold text-gray-600">Customer</th>
-              <th className="py-4 px-4 font-semibold text-gray-600">Amount</th>
-              <th className="py-4 px-4 font-semibold text-gray-600 text-center">Payment</th>
-              <th className="py-4 px-4 font-semibold text-gray-600 text-center rounded-tr-xl">Status Action</th>
+              <th className="py-4 px-4 font-semibold text-gray-600 rounded-tl-xl">{t("tableOrderId")}</th>
+              <th className="py-4 px-4 font-semibold text-gray-600">{t("tableCustomer")}</th>
+              <th className="py-4 px-4 font-semibold text-gray-600">{t("tableAmount")}</th>
+              <th className="py-4 px-4 font-semibold text-gray-600 text-center">{t("tablePayment")}</th>
+              <th className="py-4 px-4 font-semibold text-gray-600 text-center rounded-tr-xl">{t("tableStatusAction")}</th>
             </tr>
           </thead>
 
@@ -113,7 +114,7 @@ export default function OrdersManagementPage() {
                   colSpan="5"
                   className="text-center py-12 text-gray-500 font-medium"
                 >
-                  No orders found on the platform yet.
+                  {t("noOrdersFoundPlatform")}
                 </td>
               </tr>
             )}
