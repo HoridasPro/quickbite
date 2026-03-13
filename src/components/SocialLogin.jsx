@@ -3,8 +3,11 @@
 import { signIn } from "next-auth/react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const SocialLogin = () => {
+  const { t } = useTranslation();
+
   const handleSocialLogin = (provider) => {
     signIn(provider, { callbackUrl: "/" });
   };
@@ -16,7 +19,7 @@ const SocialLogin = () => {
         className="w-full flex items-center justify-center gap-2 border py-2 rounded-md hover:bg-gray-100 transition cursor-pointer"
       >
         <FcGoogle size={20} />
-        Continue with Google
+        {t("continueWithGoogle")}
       </button>
 
       <button
@@ -24,7 +27,7 @@ const SocialLogin = () => {
         className="w-full flex items-center justify-center gap-2 border py-2 rounded-md hover:bg-gray-100 transition cursor-pointer"
       >
         <FaGithub size={20} />
-        Continue with GitHub
+        {t("continueWithGithub")}
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CategoryCard = ({ img, name, onClick, active }) => {
   return (
@@ -29,6 +30,13 @@ const CategoryCard = ({ img, name, onClick, active }) => {
 
 const FoodCard = ({ food }) => {
   const router = useRouter();
+  const { t, language } = useTranslation();
+  const isBn = language === "bn";
+
+  const displayTitle = isBn && (food.titleBn || food.foodNameBn) ? (food.titleBn || food.foodNameBn) : (food.title || food.foodName);
+  const displayCategory = isBn && food.categoryBn ? food.categoryBn : (food.category || food.categoryName || (food.tags && food.tags[0]));
+  const displayPrice = isBn && food.priceBn ? food.priceBn : `Tk ${food.price}`;
+
   return (
     <div
       onClick={() => router.push(`/foods/${food.id || food._id}`)}
@@ -37,7 +45,7 @@ const FoodCard = ({ food }) => {
       <div className="overflow-hidden rounded-xl bg-gray-50">
         <img
           src={food.foodImg || food.image || "https://via.placeholder.com/400x160"}
-          alt={food.title || food.foodName || "Food Item"}
+          alt={displayTitle || "Food Item"}
           width={400}
           height={160}
           className="h-[160px] w-full object-cover hover:scale-110 transition duration-500"
@@ -46,15 +54,15 @@ const FoodCard = ({ food }) => {
 
       <div className="mt-3 space-y-1">
         <h3 className="font-semibold text-gray-800 text-lg line-clamp-1">
-          {food.title || food.foodName}
+          {displayTitle}
         </h3>
 
         <p className="text-sm text-gray-600 line-clamp-1">
-          <span className="font-medium">Category:</span>{" "}
-          {food.category || food.categoryName || (food.tags && food.tags[0])}
+          <span className="font-medium">{t("categoryLabel")}</span>{" "}
+          {displayCategory}
         </p>
 
-        <p className="text-orange-500 font-bold text-lg mt-2">Tk {food.price}</p>
+        <p className="text-orange-500 font-bold text-lg mt-2">{displayPrice}</p>
       </div>
     </div>
   );
@@ -65,6 +73,7 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
   const [foods, setFoods] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/categories`)
@@ -119,7 +128,7 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
   return (
     <div className="py-10">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        {categories.length} Food Categories
+        {categories.length} {t("foodCategories")}
       </h2>
 
       <div className="relative flex items-center group">
@@ -134,15 +143,20 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-2 py-4 w-full"
         >
-          {categories.map((cat) => (
-            <CategoryCard
-              key={cat.id || cat._id}
-              img={cat.categoryImg}
-              name={cat.categoryName}
-              active={selectedCategory === cat.categoryName}
-              onClick={() => handleCategoryClick(cat.categoryName)}
-            />
-          ))}
+          {categories.map((cat) => {
+            const catName = cat.categoryName || cat.name;
+            const displayName = language === "bn" && cat.nameBn ? cat.nameBn : catName;
+            
+            return (
+              <CategoryCard
+                key={cat.id || cat._id}
+                img={cat.categoryImg}
+                name={displayName}
+                active={selectedCategory === catName}
+                onClick={() => handleCategoryClick(catName)}
+              />
+            );
+          })}
         </div>
 
         <button
@@ -156,7 +170,7 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
       {!hideFoods && foods.length > 0 && (
         <div className="mt-12">
           <h2 className="text-xl font-bold mb-6">
-            {selectedCategory ? `${selectedCategory} Foods` : "All Foods"}
+            {selectedCategory ? `${selectedCategory} ${t("foodsLabel")}` : t("allFoods")}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">

@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/contexts/CartContext";
 import NextAuthProvider from "@/provider/NextAuthProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,13 +28,15 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextAuthProvider>
-          <CartProvider>
-            <Header />
-            <main className="max-w-[1380px] mx-auto min-h-[calc(100vh-395px)]">
-              {children}
-            </main>
-            <Footer />
-          </CartProvider>
+          <LanguageProvider>
+            <CartProvider>
+              <Header />
+              <main className="max-w-[1380px] mx-auto min-h-[calc(100vh-395px)]">
+                {children}
+              </main>
+              <Footer />
+            </CartProvider>
+          </LanguageProvider>
         </NextAuthProvider>
       </body>
     </html>

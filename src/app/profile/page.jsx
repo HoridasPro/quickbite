@@ -8,10 +8,12 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ProfileSection() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -20,7 +22,7 @@ export default function ProfileSection() {
     }, [status, router]);
 
     if (status === "loading") {
-        return <div className="min-h-screen flex items-center justify-center">Loading profile...</div>;
+        return <div className="min-h-screen flex items-center justify-center">{t("loadingProfile")}</div>;
     }
 
     return (
@@ -28,7 +30,7 @@ export default function ProfileSection() {
             <div className="max-w-[650px] mx-auto px-6">
                 <div className="flex py-5 items-center gap-3">
                     <h1 className="text-[28px] font-semibold text-gray-900">
-                        My profile
+                        {t("myProfile")}
                     </h1>
                     <FiInfo className="text-gray-400 text-lg" />
                 </div>
@@ -36,7 +38,7 @@ export default function ProfileSection() {
 
                     <div className="relative">
                         <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">
-                            First name
+                            {t("firstNameLabel")}
                         </label>
                         <input
                             type="text"
@@ -47,7 +49,7 @@ export default function ProfileSection() {
 
                     <div className="relative">
                         <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">
-                            Last name
+                            {t("lastNameLabel")}
                         </label>
                         <input
                             type="text"
@@ -60,26 +62,26 @@ export default function ProfileSection() {
                         <label className="">
                             <input
                                 type="text"
-                                placeholder="Mobile Number"
+                                placeholder={t("mobileNumber")}
                                 className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-orange-500"
                             />
                         </label>
                     </div>
 
                     <button className="bg-gray-200 text-gray-400 px-6 py-2 rounded-md text-sm font-medium cursor-not-allowed">
-                        Save
+                        {t("saveBtn")}
                     </button>
                 </div>
 
                 <div className="border-t my-12"></div>
 
                 <h2 className="text-[22px] font-semibold text-gray-900 mb-5">
-                    Email
+                    {t("emailLabel")}
                 </h2>
 
                 <div className="relative">
                     <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">
-                        Email
+                        {t("emailLabel")}
                     </label>
                     <input
                         type="text"
@@ -91,31 +93,31 @@ export default function ProfileSection() {
 
                 <div className="mt-3">
                     <span className="bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-full font-medium">
-                        Verified
+                        {t("verified")}
                     </span>
                 </div>
 
                 <div className="border-t my-12"></div>
 
                 <h2 className="text-[22px] font-semibold text-gray-900 mb-5">
-                    Password
+                    {t("passwordLabel")}
                 </h2>
 
                 <div className="space-y-5">
                     <input
                         type="password"
-                        placeholder="Current password"
+                        placeholder={t("currentPassword")}
                         className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500"
                     />
 
                     <input
                         type="password"
-                        placeholder="New password"
+                        placeholder={t("newPassword")}
                         className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500"
                     />
 
                     <button className="bg-gray-200 text-gray-500 px-6 py-2 rounded-md text-sm font-medium">
-                        Save
+                        {t("saveBtn")}
                     </button>
                 </div>
 
@@ -123,10 +125,10 @@ export default function ProfileSection() {
 
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-[22px] font-semibold text-gray-900">
-                        Delivery Addresses
+                        {t("deliveryAddressesHeader")}
                     </h2>
                     <Link href="/profile/addresses" className="text-orange-500 font-medium text-sm hover:underline">
-                        Manage
+                        {t("manage")}
                     </Link>
                 </div>
                 
@@ -136,8 +138,8 @@ export default function ProfileSection() {
                             <MapPin className="w-5 h-5 text-orange-600" />
                         </div>
                         <div>
-                            <p className="font-medium text-gray-900">View and edit saved addresses</p>
-                            <p className="text-sm text-gray-500">Make checkout faster</p>
+                            <p className="font-medium text-gray-900">{t("viewEditAddresses")}</p>
+                            <p className="text-sm text-gray-500">{t("makeCheckoutFaster")}</p>
                         </div>
                     </div>
                 </Link>
@@ -145,17 +147,17 @@ export default function ProfileSection() {
                 <div className="border-t my-12"></div>
 
                 <h2 className="text-[22px] font-semibold text-gray-900 mb-3">
-                    My payments
+                    {t("myPayments")}
                 </h2>
 
                 <p className="text-gray-500 text-[15px]">
-                    You have no saved payment options yet.
+                    {t("noSavedPayments")}
                 </p>
 
                 <div className="border-t my-12"></div>
 
                 <h2 className="text-[22px] font-semibold text-gray-900 mb-6">
-                    Connected accounts
+                    {t("connectedAccounts")}
                 </h2>
 
                 <div className="grid sm:grid-cols-2 gap-6">
@@ -164,7 +166,7 @@ export default function ProfileSection() {
                             <FaFacebookF className="text-blue-600 text-lg" />
                             <span className="font-medium text-gray-800">Facebook</span>
                         </div>
-                        <button className="text-black font-semibold text-sm">Connect</button>
+                        <button className="text-black font-semibold text-sm">{t("connectBtn")}</button>
                     </div>
 
                     <div className="bg-white rounded-xl p-5 flex justify-between items-center shadow-[0px_6px_18px_rgba(0,0,0,0.08)]">
@@ -172,7 +174,7 @@ export default function ProfileSection() {
                             <FcGoogle className="text-lg" />
                             <span className="font-medium text-gray-800">Google</span>
                         </div>
-                        <span className="text-gray-900 font-semibold text-sm">Connected</span>
+                        <span className="text-gray-900 font-semibold text-sm">{t("connectedStatus")}</span>
                     </div>
 
                     <div className="bg-white rounded-xl p-5 flex justify-between items-center shadow-[0px_6px_18px_rgba(0,0,0,0.08)]">
@@ -180,7 +182,7 @@ export default function ProfileSection() {
                             <FaApple className="text-black text-lg" />
                             <span className="font-medium text-gray-800">Apple</span>
                         </div>
-                        <button className="text-black font-semibold text-sm">Connect</button>
+                        <button className="text-black font-semibold text-sm">{t("connectBtn")}</button>
                     </div>
                 </div>
 
@@ -188,13 +190,13 @@ export default function ProfileSection() {
 
                 <div>
                     <h2 className="text-[22px] font-semibold text-gray-900 mb-3">
-                        Account Management
+                        {t("accountManagement")}
                     </h2>
                     <p className="text-gray-600 max-w-md mb-5">
-                        You can delete your account and personal data associated with it
+                        {t("deleteAccountDesc")}
                     </p>
                     <button className="border border-gray-500 text-gray-800 rounded-lg p-2 text-sm font-medium bg-white hover:bg-gray-50 transition cursor-pointer">
-                        Delete my account
+                        {t("deleteAccountBtn")}
                     </button>
                 </div>
             </div>

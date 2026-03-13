@@ -23,6 +23,7 @@ import NavLink from "./NavLink";
 import { useCart } from "@/contexts/CartContext";
 import CartDrawer from "./CartDrawer";
 import InputSearch from "./InputSearch";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Header = () => {
   const { cartCount } = useCart();
@@ -30,7 +31,9 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
-  const [deliveryAddress, setDeliveryAddress] = useState("Add Delivery Address");
+  const [deliveryAddress, setDeliveryAddress] = useState(null);
+  
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchDefaultAddress = () => {
@@ -41,7 +44,7 @@ const Header = () => {
             if (data.success && data.addresses.length > 0) {
               setDeliveryAddress(`${data.addresses[0].address}, ${data.addresses[0].city}`);
             } else {
-              setDeliveryAddress("Add Delivery Address");
+              setDeliveryAddress(null);
             }
           })
           .catch((err) => console.error(err));
@@ -53,7 +56,6 @@ const Header = () => {
     return () => window.removeEventListener("addressUpdated", fetchDefaultAddress);
   }, [session]);
 
-  // Determine if the user has access to any dashboard
   const userRole = session?.user?.role || "user";
   const hasDashboard = ["admin", "restaurant", "rider"].includes(userRole);
 
@@ -77,7 +79,7 @@ const Header = () => {
           <Link href="/profile/addresses" className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] transition">
             <MapPin className="w-4 h-4 shrink-0" />
             <span className="truncate">
-              {status === "authenticated" ? deliveryAddress : "Add Delivery Address"}
+              {status === "authenticated" && deliveryAddress ? deliveryAddress : t("addDeliveryAddress")}
             </span>
           </Link>
 
@@ -105,10 +107,9 @@ const Header = () => {
                       activeClassName="text-orange-600 bg-orange-50 font-medium"
                       inactiveClassName="text-gray-700 hover:bg-gray-50"
                     >
-                      <User className="w-4 h-4" /> Profile
+                      <User className="w-4 h-4" /> {t("profile")}
                     </NavLink>
 
-                    {/* ROLE-AWARE DASHBOARD LINK */}
                     {hasDashboard && (
                       <NavLink
                         href={`/dashboard/${userRole}`}
@@ -117,7 +118,7 @@ const Header = () => {
                         activeClassName="text-orange-600 bg-orange-50 font-medium"
                         inactiveClassName="text-gray-700 hover:bg-gray-50"
                       >
-                        <MdOutlineDashboardCustomize className="w-4 h-4" /> Dashboard
+                        <MdOutlineDashboardCustomize className="w-4 h-4" /> {t("dashboard")}
                       </NavLink>
                     )}
 
@@ -128,7 +129,7 @@ const Header = () => {
                       activeClassName="text-orange-600 bg-orange-50 font-medium"
                       inactiveClassName="text-gray-700 hover:bg-gray-50"
                     >
-                      <Package className="w-4 h-4" /> Orders
+                      <Package className="w-4 h-4" /> {t("orders")}
                     </NavLink>
 
                     <NavLink
@@ -138,7 +139,7 @@ const Header = () => {
                       activeClassName="text-orange-600 bg-orange-50 font-medium"
                       inactiveClassName="text-gray-700 hover:bg-gray-50"
                     >
-                      <Ticket className="w-4 h-4" /> Vouchers
+                      <Ticket className="w-4 h-4" /> {t("vouchers")}
                     </NavLink>
 
                     <div className="border-t border-gray-100 my-1"></div>
@@ -147,7 +148,7 @@ const Header = () => {
                       onClick={() => signOut({ callbackUrl: "/" })}
                       className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                     >
-                      <LogOut className="w-4 h-4" /> Logout
+                      <LogOut className="w-4 h-4" /> {t("logout")}
                     </button>
                   </div>
                 )}
@@ -155,10 +156,10 @@ const Header = () => {
             ) : (
               <>
                 <Link href="/login" className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition">
-                  Log in
+                  {t("login")}
                 </Link>
                 <Link href="/register" className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer">
-                  Sign up for free delivery
+                  {t("signup")}
                 </Link>
               </>
             )}
@@ -188,7 +189,7 @@ const Header = () => {
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
+              <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
             </NavLink>
             <NavLink
               href="/pick-up"
@@ -196,7 +197,7 @@ const Header = () => {
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <Bike className="w-5 h-5" /> Pick-up
+              <Bike className="w-5 h-5" /> {t("pickup")}
             </NavLink>
             <NavLink
               href="/vouchers"
@@ -204,7 +205,7 @@ const Header = () => {
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <Ticket className="w-5 h-5" /> Vouchers
+              <Ticket className="w-5 h-5" /> {t("vouchers")}
             </NavLink>
             <NavLink
               href="/pandamart"
@@ -212,7 +213,7 @@ const Header = () => {
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
+              <MdOutlineShoppingBag className="w-5 h-5" /> {t("pandamart")}
             </NavLink>
             <NavLink
               href="/shops"
@@ -220,7 +221,7 @@ const Header = () => {
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <Store className="w-5 h-5" /> Shops
+              <Store className="w-5 h-5" /> {t("shops")}
             </NavLink>
           </div>
 
@@ -250,7 +251,7 @@ const Header = () => {
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <MdOutlineDeliveryDining className="w-5 h-5" /> Delivery
+                <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
               </NavLink>
               
               <NavLink
@@ -260,7 +261,7 @@ const Header = () => {
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <Bike className="w-5 h-5" /> Pick-up
+                <Bike className="w-5 h-5" /> {t("pickup")}
               </NavLink>
               
               <NavLink
@@ -270,7 +271,7 @@ const Header = () => {
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <Ticket className="w-5 h-5" /> Vouchers
+                <Ticket className="w-5 h-5" /> {t("vouchers")}
               </NavLink>
               
               <NavLink
@@ -280,7 +281,7 @@ const Header = () => {
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <MdOutlineShoppingBag className="w-5 h-5" /> Pandamart
+                <MdOutlineShoppingBag className="w-5 h-5" /> {t("pandamart")}
               </NavLink>
               
               <NavLink
@@ -290,7 +291,7 @@ const Header = () => {
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <Store className="w-5 h-5" /> Shops
+                <Store className="w-5 h-5" /> {t("shops")}
               </NavLink>
 
               <hr className="my-2 border-gray-100" />
@@ -304,10 +305,9 @@ const Header = () => {
                     activeClassName="text-orange-600 bg-orange-50"
                     inactiveClassName="text-gray-700 hover:bg-gray-50"
                   >
-                    <User className="w-5 h-5" /> Profile
+                    <User className="w-5 h-5" /> {t("profile")}
                   </NavLink>
                   
-                  {/* ROLE-AWARE DASHBOARD LINK (MOBILE) */}
                   {hasDashboard && (
                     <NavLink
                       href={`/dashboard/${userRole}`}
@@ -316,7 +316,7 @@ const Header = () => {
                       activeClassName="text-orange-600 bg-orange-50"
                       inactiveClassName="text-gray-700 hover:bg-gray-50"
                     >
-                      <MdOutlineDashboardCustomize className="w-5 h-5" /> Dashboard
+                      <MdOutlineDashboardCustomize className="w-5 h-5" /> {t("dashboard")}
                     </NavLink>
                   )}
                   
@@ -327,7 +327,7 @@ const Header = () => {
                     activeClassName="text-orange-600 bg-orange-50"
                     inactiveClassName="text-gray-700 hover:bg-gray-50"
                   >
-                    <Package className="w-5 h-5" /> Orders
+                    <Package className="w-5 h-5" /> {t("orders")}
                   </NavLink>
                   
                   <button
@@ -337,7 +337,7 @@ const Header = () => {
                     }}
                     className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 text-left w-full cursor-pointer transition"
                   >
-                    <LogOut className="w-5 h-5" /> Logout
+                    <LogOut className="w-5 h-5" /> {t("logout")}
                   </button>
                 </>
               ) : (
@@ -347,14 +347,14 @@ const Header = () => {
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3 p-3 rounded-xl text-gray-700 hover:bg-gray-50 transition"
                   >
-                    Log in
+                    {t("login")}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3 p-3 rounded-xl text-gray-700 hover:bg-gray-50 transition"
                   >
-                    Sign up
+                    {t("signup")}
                   </Link>
                 </>
               )}

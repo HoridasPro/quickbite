@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, MapPin, Check } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AddressDropdown({ savedAddresses, selectedAddressId, onSelect }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -19,7 +21,7 @@ export default function AddressDropdown({ savedAddresses, selectedAddressId, onS
 
   return (
     <div className="mb-6 relative" ref={dropdownRef}>
-      <label className="block text-sm font-semibold text-gray-800 mb-2">Select a Saved Address</label>
+      <label className="block text-sm font-semibold text-gray-800 mb-2">{t("selectSavedAddress")}</label>
       
       <div
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -40,7 +42,7 @@ export default function AddressDropdown({ savedAddresses, selectedAddressId, onS
                     <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
                       {selected.label}
                       {selected.isDefault && (
-                        <span className="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">Default</span>
+                        <span className="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">{t("defaultText")}</span>
                       )}
                     </p>
                     <p className="text-xs text-gray-500 truncate max-w-[200px] sm:max-w-[300px]">
@@ -48,11 +50,11 @@ export default function AddressDropdown({ savedAddresses, selectedAddressId, onS
                     </p>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-500">Choose an address...</p>
+                  <p className="text-sm text-gray-500">{t("chooseAddress")}</p>
                 );
               })()
             ) : (
-              <p className="text-sm text-gray-500">Choose an address...</p>
+              <p className="text-sm text-gray-500">{t("chooseAddress")}</p>
             )}
           </div>
         </div>
@@ -80,7 +82,7 @@ export default function AddressDropdown({ savedAddresses, selectedAddressId, onS
                   <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
                     {addr.label}
                     {addr.isDefault && (
-                      <span className="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">Default</span>
+                      <span className="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">{t("defaultText")}</span>
                     )}
                   </span>
                   <span className="text-xs text-gray-500">{addr.address}, {addr.city}</span>

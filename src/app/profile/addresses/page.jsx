@@ -4,10 +4,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Map from "@/components/Map";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AddressesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +24,19 @@ export default function AddressesPage() {
 
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
+
+  const labelOptions = [
+    { id: "Home", name: t("labelHome") },
+    { id: "Work", name: t("labelWork") },
+    { id: "Other", name: t("labelOther") }
+  ];
+
+  const getDisplayLabel = (dbLabel) => {
+    if (dbLabel === "Home") return t("labelHome");
+    if (dbLabel === "Work") return t("labelWork");
+    if (dbLabel === "Other") return t("labelOther");
+    return dbLabel;
+  };
 
   const fetchAddresses = async () => {
     if (session?.user?.email) {
@@ -63,7 +78,7 @@ export default function AddressesPage() {
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
-    if (!addressText || !city) return alert("Please fill in all fields");
+    if (!addressText || !city) return alert(t("fillAllFieldsAlert"));
 
     setSubmitting(true);
     try {
@@ -82,13 +97,14 @@ export default function AddressesPage() {
         setShowForm(false);
         setAddressText("");
         setCity("");
+        setLabel("Home");
         fetchAddresses();
         window.dispatchEvent(new Event("addressUpdated"));
       } else {
-        alert(data.message || "Failed to add address");
+        alert(data.message || t("failedAddAddressAlert"));
       }
     } catch (error) {
-      alert("An error occurred");
+      alert(t("errorOccurredAlert"));
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +129,7 @@ export default function AddressesPage() {
       });
       const data = await res.json();
       if (!data.success) {
-        alert(data.message || "Failed to set default");
+        alert(data.message || t("failedSetDefaultAlert"));
         fetchAddresses();
       } else {
         window.dispatchEvent(new Event("addressUpdated"));
@@ -125,7 +141,7 @@ export default function AddressesPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    if (!confirm(t("confirmDeleteAddress"))) return;
     
     try {
       const res = await fetch(`/api/users/addresses?id=${id}`, {
@@ -136,7 +152,7 @@ export default function AddressesPage() {
         fetchAddresses();
         window.dispatchEvent(new Event("addressUpdated"));
       } else {
-        alert(data.message || "Failed to delete");
+        alert(data.message || t("failedDeleteAlert"));
       }
     } catch (error) {
       console.error(error);
@@ -184,17 +200,17 @@ export default function AddressesPage() {
   };
 
   if (loading || status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading addresses...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-gray-500">{t("loadingAddresses")}</div>;
   }
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] py-10">
       <div className="max-w-[680px] mx-auto px-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Saved Addresses</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("savedAddressesHeader")}</h1>
         
         <div className="space-y-4">
           {addresses.length === 0 && !showForm ? (
-            <p className="text-gray-500 text-center py-4">No saved addresses yet.</p>
+            <p className="text-gray-500 text-center py-4">{t("noSavedAddresses")}</p>
           ) : (
             addresses.map((addr, index) => (
               <div 
@@ -221,10 +237,10 @@ export default function AddressesPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-gray-900">📍 {addr.label}</h3>
+                      <h3 className="font-semibold text-gray-900">📍 {getDisplayLabel(addr.label)}</h3>
                       {addr.isDefault && (
                         <span className="bg-orange-100 text-orange-700 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md">
-                          Default
+                          {t("defaultText")}
                         </span>
                       )}
                     </div>
@@ -239,7 +255,7 @@ export default function AddressesPage() {
                     }}
                     className="text-red-500 font-medium text-sm hover:underline cursor-pointer"
                   >
-                    Delete
+                    {t("deleteBtn")}
                   </button>
                 </div>
               </div>
@@ -249,26 +265,26 @@ export default function AddressesPage() {
 
         {showForm ? (
           <form onSubmit={handleAddAddress} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6 space-y-4">
-            <h3 className="font-bold text-lg mb-2">Add New Address</h3>
+            <h3 className="font-bold text-lg mb-2">{t("addNewAddressTitle")}</h3>
 
             <div className="w-full h-48 rounded-xl overflow-hidden border border-gray-300 mb-2 relative">
               <Map position={mapPosition} onLocationSelect={handleLocationSelect} />
             </div>
-            <p className="text-xs text-gray-500 text-right -mt-2">Click map to auto-fill</p>
+            <p className="text-xs text-gray-500 text-right -mt-2">{t("clickMapAutoFill")}</p>
             
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Label</label>
+              <label className="block text-sm text-gray-600 mb-2">{t("labelTitle")}</label>
               <div className="flex gap-2">
-                {["Home", "Work", "Other"].map((lbl) => (
+                {labelOptions.map((lbl) => (
                   <button
                     type="button"
-                    key={lbl}
-                    onClick={() => setLabel(lbl)}
+                    key={lbl.id}
+                    onClick={() => setLabel(lbl.id)}
                     className={`px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
-                      label === lbl ? "border-orange-500 bg-orange-50 text-orange-600 font-medium" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                      label === lbl.id ? "border-orange-500 bg-orange-50 text-orange-600 font-medium" : "border-gray-300 text-gray-600 hover:bg-gray-50"
                     }`}
                   >
-                    {lbl}
+                    {lbl.name}
                   </button>
                 ))}
               </div>
@@ -277,7 +293,7 @@ export default function AddressesPage() {
             <div>
               <input
                 type="text"
-                placeholder="Street / House Number / Apartment"
+                placeholder={t("streetApartmentPlaceholder")}
                 value={addressText}
                 onChange={(e) => setAddressText(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
@@ -287,7 +303,7 @@ export default function AddressesPage() {
             <div>
               <input
                 type="text"
-                placeholder="City / Area"
+                placeholder={t("cityPlaceholder")}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
@@ -301,14 +317,14 @@ export default function AddressesPage() {
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition cursor-pointer"
               >
-                Cancel
+                {t("cancelBtn")}
               </button>
               <button 
                 type="submit"
                 disabled={submitting}
                 className="flex-1 bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition disabled:bg-gray-400 cursor-pointer"
               >
-                {submitting ? "Saving..." : "Save Address"}
+                {submitting ? t("savingBtn") : t("saveAddressBtn")}
               </button>
             </div>
           </form>
@@ -317,7 +333,7 @@ export default function AddressesPage() {
             onClick={() => setShowForm(true)}
             className="mt-6 w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition cursor-pointer"
           >
-            + Add New Address
+            {t("addNewAddressBtn")}
           </button>
         )}
       </div>

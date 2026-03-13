@@ -33,9 +33,13 @@ export default async function ItemPage({ params }) {
     id: food.id?.toString() || food._id.toString(),
     image: food.foodImg || "https://via.placeholder.com/800x450",
     title: food.title || "Untitled Dish",
+    titleBn: food.titleBn || null,
     price: food.price || 0,
+    priceBn: food.priceBn || null,
     description: food.description || "No description available.",
+    descriptionBn: food.descriptionBn || null,
     category: food.category || "General",
+    categoryBn: food.categoryBn || null,
     variations: food.variations || [],
     restaurant_name: food.restaurant_name || "QuickBite"
   };

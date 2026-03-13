@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantHero from "@/components/restaurant/RestaurantHero";
 import { useParams } from "next/navigation";
-import Image from "next/image";
-import SidebarCart from "@/components/SidebarCart";
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "@/hooks/useTranslation";
+import CartSideBar from "@/components/CartSideBar";
 
 const getFoodById = async (id) => {
   const res = await fetch(`/api/foods/${id}`);
@@ -25,52 +25,69 @@ const getCategories = async () => {
   return data || [];
 };
 
-const CategoryCard = ({ name, count, onClick, active }) => (
-  <div
-    onClick={onClick}
-    className={`flex-shrink-0 w-36 sm:w-40 h-20 flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-4 cursor-pointer transition hover:shadow-xl ${
-      active ? "border-2 border-orange-500 ring-2 ring-orange-100" : "border border-gray-100"
-    }`}
-  >
-    <span className="text-sm font-medium text-gray-800 text-center truncate">
-      {name} ({count})
-    </span>
-  </div>
-);
-
-const FoodCard = ({ food, onClick }) => (
-  <div
-    className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
-    onClick={onClick}
-  >
-    <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
-      <img
-        src={food.foodImg || food.image || "https://via.placeholder.com/150"}
-        alt={food.title || food.foodName || "Food Item"}
-        width={150} 
-        height={150} 
-        className="w-full h-full object-cover hover:scale-110 transition duration-500"
-      />
+const CategoryCard = ({ name, count, onClick, active }) => {
+  return (
+    <div
+      onClick={onClick}
+      className={`flex-shrink-0 w-36 sm:w-40 h-20 flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-4 cursor-pointer transition hover:shadow-xl ${
+        active ? "border-2 border-orange-500 ring-2 ring-orange-100" : "border border-gray-100"
+      }`}
+    >
+      <span className="text-sm font-medium text-gray-800 text-center truncate">
+        {name} ({count})
+      </span>
     </div>
-    <div className="flex-1 p-4 flex flex-col justify-between">
-      <div>
-        <p className="text-gray-900 text-base font-bold line-clamp-2">
-          {food.title || food.foodName}
-        </p>
-        <p className="mt-2 text-orange-500 font-bold text-lg">
-          Tk {food.price}
-        </p>
-        <p className="text-gray-500 text-xs mt-2 line-clamp-2">
-          {food.description || "Delicious, freshly prepared food made with premium ingredients."}
-        </p>
+  );
+};
+
+const FoodCard = ({ food, onClick }) => {
+  const { t, language } = useTranslation();
+  const isBn = language === "bn";
+  
+  const displayTitle = isBn && (food.titleBn || food.foodNameBn) ? (food.titleBn || food.foodNameBn) : (food.title || food.foodName);
+  const displayDesc = isBn && food.descriptionBn ? food.descriptionBn : (food.description || t("defaultDescription"));
+  const displayPrice = isBn && food.priceBn ? food.priceBn : `Tk ${food.price}`;
+
+  return (
+    <div
+      className="flex bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden border border-gray-100 cursor-pointer transition duration-300 flex-col md:flex-row-reverse"
+      onClick={onClick}
+    >
+      <div className="w-32 h-32 md:w-36 md:h-36 flex-shrink-0 overflow-hidden rounded-r-lg">
+        <img
+          src={food.foodImg || food.image || "https://via.placeholder.com/150"}
+          alt={displayTitle || "Food Item"}
+          width={150} 
+          height={150} 
+          className="w-full h-full object-cover hover:scale-110 transition duration-500"
+        />
+      </div>
+      <div className="flex-1 p-4 flex flex-col justify-between">
+        <div>
+          <p className="text-gray-900 text-base font-bold line-clamp-2">
+            {displayTitle}
+          </p>
+          <p className="mt-2 text-orange-500 font-bold text-lg">
+            {displayPrice}
+          </p>
+          <p className="text-gray-500 text-xs mt-2 line-clamp-2">
+            {displayDesc}
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
-  const price = food?.price || 0;
+  const { t, language } = useTranslation();
   const { addToCart } = useCart();
+  const price = food?.price || 0;
+  
+  const isBn = language === "bn";
+  const displayTitle = isBn && (food.titleBn || food.foodNameBn) ? (food.titleBn || food.foodNameBn) : (food.title || food.foodName);
+  const displayDesc = isBn && food.descriptionBn ? food.descriptionBn : (food.description || t("defaultDescription"));
+  const displayPrice = isBn && food.priceBn ? food.priceBn : `Tk ${price}`;
   
   const increaseQty = () => setQuantity((prev) => prev + 1);
   const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -80,10 +97,11 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
       cartItemId: Date.now(),
       itemId: food._id || food.id,
       title: food.title || food.foodName,
+      titleBn: food.titleBn || food.foodNameBn,
       image: food.foodImg || food.image,
-      price: food.price,
+      price: price,
       quantity,
-      totalPrice: food.price * quantity,
+      totalPrice: price * quantity,
     });
     onClose();
   };
@@ -101,25 +119,25 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
         <div className="relative shrink-0">
           <img
             src={food?.foodImg || food?.image || "https://images.unsplash.com/photo-1604908554165-2e0c15e36d1a"}
-            alt={food?.title || food?.foodName || "Food Item"}
+            alt={displayTitle || "Food Item"}
             className="object-cover w-full h-48 md:h-64"
           />
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto flex-1">
-          <h2 className="text-2xl font-extrabold text-gray-900">{food?.title || food?.foodName || "Food Item"}</h2>
-          <p className="text-xl font-bold text-orange-500">Tk {price}</p>
+          <h2 className="text-2xl font-extrabold text-gray-900">{displayTitle}</h2>
+          <p className="text-xl font-bold text-orange-500">{displayPrice}</p>
           <p className="text-gray-600 text-sm leading-relaxed">
-            {food?.description || "Delicious, freshly prepared food made with premium ingredients."}
+            {displayDesc}
           </p>
           <hr className="border-gray-100 my-4" />
           <div>
-            <h3 className="font-semibold text-lg text-gray-900">Special instructions</h3>
+            <h3 className="font-semibold text-lg text-gray-900">{t("specialInstructions")}</h3>
             <p className="text-xs text-gray-500 mb-3">
-              Special requests are subject to the restaurant's approval.
+              {t("specialRequestsText")}
             </p>
             <textarea
-              placeholder="e.g. No mayo, extra spicy..."
+              placeholder={t("specialInstructionsPlaceholder")}
               className="w-full border border-gray-300 rounded-xl p-4 outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm text-gray-800"
               rows={3}
             ></textarea>
@@ -140,7 +158,7 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
             onClick={handleAddToCart}
             className="flex-1 bg-orange-600 text-white font-bold py-4 rounded-xl hover:bg-orange-700 transition cursor-pointer shadow-lg shadow-orange-200"
           >
-            Add to cart • Tk {price * quantity}
+            {t("addToCart")} • Tk {price * quantity}
           </button>
         </div>
       </div>
@@ -151,6 +169,7 @@ const FoodModal = ({ food, quantity, setQuantity, onClose }) => {
 const ProductPage = () => {
   const params = useParams();
   const { id } = params || {};
+  const { t, language } = useTranslation();
 
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
@@ -202,18 +221,18 @@ const ProductPage = () => {
   const scrollRight = () => scrollRef.current?.scrollBy({ left: 900, behavior: "smooth" });
   const scrollLeft = () => scrollRef.current?.scrollBy({ left: -900, behavior: "smooth" });
 
-  if (loading) return <div className="p-10 text-center text-gray-500 min-h-screen flex items-center justify-center">Loading details...</div>;
-  if (!mainFood) return <div className="p-10 text-center text-red-500 min-h-screen flex items-center justify-center">Restaurant not found.</div>;
+  if (loading) return <div className="p-10 text-center text-gray-500 min-h-screen flex items-center justify-center">{t("loadingDetails")}</div>;
+  if (!mainFood) return <div className="p-10 text-center text-red-500 min-h-screen flex items-center justify-center">{t("restaurantNotFound")}</div>;
 
   return (
     <div className="pb-20 px-2 sm:px-4">
       <div className="bg-[#FCFCFC] pt-4">
-        <RestaurantHero foodImg={mainFood.foodImg || mainFood.image} title={mainFood.title || mainFood.foodName} id={mainFood.id || mainFood._id} />
+        <RestaurantHero foodImg={mainFood.foodImg || mainFood.image} title={language === 'bn' && (mainFood.titleBn || mainFood.foodNameBn) ? (mainFood.titleBn || mainFood.foodNameBn) : (mainFood.title || mainFood.foodName)} id={mainFood.id || mainFood._id} />
       </div>
 
       <div className="py-5 relative max-w-[1380px] mx-auto">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          {categories.length} Food Categories
+          {categories.length} {t("foodCategories")}
         </h2>
 
         <button
@@ -229,10 +248,12 @@ const ProductPage = () => {
         >
           {categories.map((cat, index) => {
             const name = cat.categoryName || cat.name;
+            const displayName = language === 'bn' && cat.nameBn ? cat.nameBn : name; 
+            
             return (
               <CategoryCard
                 key={cat.id || index}
-                name={name}
+                name={displayName}
                 count={categoryCounts[name] || 0}
                 active={selectedCategory === name}
                 onClick={() => setSelectedCategory(name === selectedCategory ? null : name)}
@@ -264,7 +285,7 @@ const ProductPage = () => {
             </div>
           </div>
           <div className="md:col-span-4 lg:col-span-3">
-            <SidebarCart />
+            <CartSideBar />
           </div>
         </div>
       </div>

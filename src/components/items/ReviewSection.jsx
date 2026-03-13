@@ -3,18 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Swal from 'sweetalert2';
+import { useTranslation } from "@/hooks/useTranslation";
 
 const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
     const { data: session } = useSession();
+    const { t } = useTranslation();
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
     
-    // Eligibility States
     const [isEligible, setIsEligible] = useState(false);
     const [checkingEligibility, setCheckingEligibility] = useState(true);
 
-    // Verify if the user has actually purchased and received this item
     useEffect(() => {
         const verifyPurchase = async () => {
             if (!session?.user?.email) {
@@ -47,12 +47,12 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
         e.preventDefault();
         
         if (!session?.user) {
-            Swal.fire("Wait!", "Please login to submit a review", "warning");
+            Swal.fire(t("wait"), t("swalLoginWarning"), "warning");
             return;
         }
 
         if (!isEligible) {
-            Swal.fire("Not Eligible", "You can only review items you have received.", "error");
+            Swal.fire(t("notEligible"), t("swalEligibilityError"), "error");
             return;
         }
 
@@ -77,16 +77,16 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Review Posted',
+                    title: t("reviewPosted"),
                     showConfirmButton: false,
                     timer: 1500
                 });
             } else {
-                Swal.fire("Error", data.message || "Failed to submit review", "error");
+                Swal.fire(t("error"), data.message || t("failedSubmitReview"), "error");
             }
         } catch (error) {
             console.error("Review submit error:", error);
-            Swal.fire("Error", "An unexpected error occurred", "error");
+            Swal.fire(t("error"), t("unexpectedError"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -95,27 +95,26 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
     return (
         <div className="mt-12 border-t border-gray-100 pt-8">
             <h3 className="text-xl font-bold text-gray-900 mb-6">
-                Ratings & Reviews <span className="text-gray-400 text-sm font-normal">({reviews.length})</span>
+                {t("ratingsAndReviews")} <span className="text-gray-400 text-sm font-normal">({reviews.length})</span>
             </h3>
 
-            {/* Review Form Area */}
             <div className="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-100">
-                <h4 className="font-semibold text-gray-900 mb-3">Leave a Review</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">{t("leaveAReview")}</h4>
                 
                 {checkingEligibility ? (
-                    <p className="text-sm text-gray-500 italic animate-pulse">Verifying purchase history...</p>
+                    <p className="text-sm text-gray-500 italic animate-pulse">{t("verifyingPurchase")}</p>
                 ) : !session ? (
-                    <p className="text-sm text-gray-500 italic">Please log in to leave a review.</p>
+                    <p className="text-sm text-gray-500 italic">{t("loginToReview")}</p>
                 ) : !isEligible ? (
                     <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg">
                         <p className="text-sm text-orange-800 font-medium">
-                            Only customers who have purchased and received this item can leave a review.
+                            {t("onlyCustomersReview")}
                         </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Rating:</span>
+                            <span className="text-sm text-gray-600">{t("ratingLabel")}</span>
                             <div className="flex gap-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <button
@@ -134,7 +133,7 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                         <textarea
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder="Share your experience with this item..."
+                            placeholder={t("shareExperiencePlaceholder")}
                             className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none h-24 text-gray-800"
                             required
                         />
@@ -143,15 +142,14 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                             disabled={submitting}
                             className="bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition disabled:bg-gray-300 cursor-pointer shadow-sm"
                         >
-                            {submitting ? "Submitting..." : "Submit Review"}
+                            {submitting ? t("submitting") : t("submitReview")}
                         </button>
                     </form>
                 )}
             </div>
             
-            {/* Reviews List */}
             {reviews.length === 0 ? (
-                <p className="text-gray-500 italic">No reviews yet. Be the first to try it!</p>
+                <p className="text-gray-500 italic">{t("noReviewsYet")}</p>
             ) : (
                 <div className="space-y-6">
                     {reviews.map((review, index) => (
@@ -159,7 +157,7 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                             <div className="flex items-center justify-between mb-2">
                                 <span className="font-bold text-gray-900">{review.user}</span>
                                 <span className="text-xs text-gray-400">
-                                    {review.date ? new Date(review.date).toLocaleDateString() : 'Recent'}
+                                    {review.date ? new Date(review.date).toLocaleDateString() : t("recent")}
                                 </span>
                             </div>
                             <div className="flex items-center mb-2">

@@ -5,10 +5,12 @@ import FoodCards from "@/components/FoodCards";
 import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const FoodsPageContent = () => {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const { t } = useTranslation();
 
   const [foods, setFoods] = useState([]);
   const [selectedSort, setSelectedSort] = useState("");
@@ -17,7 +19,6 @@ const FoodsPageContent = () => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
@@ -63,18 +64,22 @@ const FoodsPageContent = () => {
   }, [currentPage, selectedSort, selectedOffer, selectedCategory, searchQuery]);
 
   const sortOptions = [
-    "Relevance",
-    "Delivery Time",
-    "Rating",
-    "Price: Low to High",
-    "Price: High to Low",
+    { id: "Relevance", label: t("sortRelevance") },
+    { id: "Delivery Time", label: t("sortDeliveryTime") },
+    { id: "Rating", label: t("sortRating") },
+    { id: "Price: Low to High", label: t("sortPriceLowHigh") },
+    { id: "Price: High to Low", label: t("sortPriceHighLow") },
   ];
 
-  const offerOptions = ["Discount", "Free Delivery", "Buy 1 Get 1", "Cashback"];
+  const offerOptions = [
+    { id: "Discount", label: t("offerDiscount") },
+    { id: "Free Delivery", label: t("offerFreeDelivery") },
+    { id: "Buy 1 Get 1", label: t("offerBogo") },
+    { id: "Cashback", label: t("offerCashback") },
+  ];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 mb-20 items-start">
-      {/* Sidebar Filter - Hidden on mobile, shown on large screens */}
       <div 
         className="hidden lg:block lg:col-span-3 bg-white shadow-lg rounded-2xl p-6 sticky self-start overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{
@@ -83,7 +88,7 @@ const FoodsPageContent = () => {
         }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="font-bold text-2xl">Filters</h2>
+          <h2 className="font-bold text-2xl">{t("filters")}</h2>
           <button
             onClick={() => {
               setSelectedSort("");
@@ -92,49 +97,49 @@ const FoodsPageContent = () => {
             }}
             className="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
           >
-            Clear All
+            {t("clearAll")}
           </button>
         </div>
 
         <div className="mb-6">
-          <h4 className="font-semibold mb-3 text-gray-700">Sort By</h4>
+          <h4 className="font-semibold mb-3 text-gray-700">{t("sortBy")}</h4>
           <div className="space-y-3">
             {sortOptions.map((option) => (
               <div
-                key={option}
-                onClick={() => setSelectedSort(option === selectedSort ? "" : option)}
+                key={option.id}
+                onClick={() => setSelectedSort(option.id === selectedSort ? "" : option.id)}
                 className="flex items-center gap-3 cursor-pointer group hover:bg-gray-100 p-1 rounded-xl"
               >
                 <div
                   className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition ${
-                    selectedSort === option ? "bg-black border-black" : "border-gray-400"
+                    selectedSort === option.id ? "bg-black border-black" : "border-gray-400"
                   }`}
                 >
-                  {selectedSort === option && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                  {selectedSort === option.id && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
-                <span>{option}</span>
+                <span>{option.label}</span>
               </div>
             ))}
           </div>
         </div>
 
         <div>
-          <h4 className="font-semibold mb-3 text-gray-700">Offers</h4>
+          <h4 className="font-semibold mb-3 text-gray-700">{t("offers")}</h4>
           <div className="space-y-3">
             {offerOptions.map((option) => (
               <div
-                key={option}
-                onClick={() => setSelectedOffer(option === selectedOffer ? "" : option)}
+                key={option.id}
+                onClick={() => setSelectedOffer(option.id === selectedOffer ? "" : option.id)}
                 className="flex items-center gap-3 cursor-pointer group hover:bg-gray-100 p-1 rounded-xl"
               >
                 <div
                   className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition ${
-                    selectedOffer === option ? "bg-black border-black" : "border-gray-400"
+                    selectedOffer === option.id ? "bg-black border-black" : "border-gray-400"
                   }`}
                 >
-                  {selectedOffer === option && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                  {selectedOffer === option.id && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
-                <span>{option}</span>
+                <span>{option.label}</span>
               </div>
             ))}
           </div>
@@ -150,7 +155,7 @@ const FoodsPageContent = () => {
         />
         
         <h2 className="font-bold text-2xl mt-10 mb-5">
-          {foods.length} Restaurants Found {selectedCategory && `for "${selectedCategory}"`} {searchQuery && `matching "${searchQuery}"`}
+          {foods.length} {t("restaurantsFound")} {selectedCategory && `${t("forText")} "${selectedCategory}"`} {searchQuery && `${t("matchingText")} "${searchQuery}"`}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -165,17 +170,17 @@ const FoodsPageContent = () => {
             disabled={currentPage === 1}
             className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-40 hover:bg-gray-300 font-semibold transition cursor-pointer disabled:cursor-not-allowed"
           >
-            Previous
+            {t("previous")}
           </button>
           <span className="font-bold text-gray-900 bg-orange-100 px-4 py-2 rounded-lg">
-            Page {currentPage} of {totalPages}
+            {t("pageText")} {currentPage} {t("ofText")} {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
             className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-40 hover:bg-gray-300 font-semibold transition cursor-pointer disabled:cursor-not-allowed"
           >
-            Next
+            {t("next")}
           </button>
         </div>
       </div>
@@ -184,8 +189,9 @@ const FoodsPageContent = () => {
 };
 
 export default function FoodsPage() {
+  const { t } = useTranslation();
   return (
-    <Suspense fallback={<div className="flex justify-center mt-10 text-gray-500">Loading...</div>}>
+    <Suspense fallback={<div className="flex justify-center mt-10 text-gray-500">{t("loading")}</div>}>
       <FoodsPageContent />
     </Suspense>
   );

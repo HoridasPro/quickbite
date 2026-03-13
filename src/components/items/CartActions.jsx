@@ -1,8 +1,11 @@
 "use client";
 
 import React from 'react';
+import { useTranslation } from "@/hooks/useTranslation";
 
 const CartActions = ({ quantity, setQuantity, onAdd }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="flex gap-3 h-12">
             <div className="flex items-center border border-gray-300 rounded-lg w-28 md:w-32 justify-between px-1">
@@ -25,7 +28,7 @@ const CartActions = ({ quantity, setQuantity, onAdd }) => {
                 onClick={onAdd}
                 className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-100 flex items-center justify-center gap-2"
             >
-                Add to Cart
+                {t("addToCart")}
             </button>
         </div>
     );

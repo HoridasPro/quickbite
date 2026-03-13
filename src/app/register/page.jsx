@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  
   const [errors, setErrors] = useState({
     name: "",
     email: "",
@@ -30,38 +33,34 @@ export default function RegisterPage() {
     let hasError = false;
     const newErrors = { name: "", email: "", image: "", password: "" };
 
-    // Name validation
     if (!name) {
-      newErrors.name = "Name is required";
+      newErrors.name = t("nameRequired");
       hasError = true;
     }
 
-    // Email validation
     if (!email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("emailRequired");
       hasError = true;
     } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = t("invalidEmailFormat");
       hasError = true;
     }
 
-    // Photo URL validation
     if (!image) {
-      newErrors.image = "Photo URL is required";
+      newErrors.image = t("photoUrlRequired");
       hasError = true;
     } else if (
       !/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(image)
     ) {
-      newErrors.image = "Invalid photo URL";
+      newErrors.image = t("invalidPhotoUrl");
       hasError = true;
     }
 
-    // Password validation
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("passwordRequired");
       hasError = true;
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = t("passwordMinLength");
       hasError = true;
     }
 
@@ -72,14 +71,13 @@ export default function RegisterPage() {
       return;
     }
 
-    // Call server
     const result = await postUser({ name, email, image, password });
 
     if (result?.success) {
       Swal.fire({
         icon: "success",
-        title: "Registration Successful",
-        text: "Please login",
+        title: t("registrationSuccessful"),
+        text: t("pleaseLogin"),
         confirmButtonColor: "#f97316",
       }).then(() => {
         router.push("/login");
@@ -87,8 +85,8 @@ export default function RegisterPage() {
     } else {
       Swal.fire({
         icon: "error",
-        title: "Registration Failed",
-        text: result?.message || "Something went wrong",
+        title: t("registrationFailed"),
+        text: result?.message || t("somethingWentWrong"),
         confirmButtonColor: "#f97316",
       });
     }
@@ -98,16 +96,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">{t("registerTitle")}</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
-          {/* Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
+            <label className="block text-sm font-medium mb-1">{t("nameLabel")}</label>
             <input
               name="name"
               type="text"
-              placeholder="Enter your name"
+              placeholder={t("enterNamePlaceholder")}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                 errors.name ? "border-red-500" : ""
               }`}
@@ -117,13 +114,12 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1">{t("emailLabel")}</label>
             <input
               name="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder={t("enterEmailPlaceholder")}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                 errors.email ? "border-red-500" : ""
               }`}
@@ -133,13 +129,12 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Photo URL */}
           <div>
-            <label className="block text-sm font-medium mb-1">Photo URL</label>
+            <label className="block text-sm font-medium mb-1">{t("photoUrlLabel")}</label>
             <input
               name="image"
               type="url"
-              placeholder="Enter your photo URL"
+              placeholder={t("enterPhotoUrlPlaceholder")}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                 errors.image ? "border-red-500" : ""
               }`}
@@ -149,13 +144,12 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className="block text-sm font-medium mb-1">{t("passwordLabel")}</label>
             <input
               name="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t("enterPasswordPlaceholder")}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                 errors.password ? "border-red-500" : ""
               }`}
@@ -170,23 +164,22 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md cursor-pointer disabled:bg-gray-400 transition"
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? t("registering") : t("registerTitle")}
           </button>
         </form>
 
-        {/* Divider */}
         <div className="my-6 flex items-center">
           <div className="flex-grow border-t"></div>
-          <span className="mx-3 text-sm text-gray-500">OR</span>
+          <span className="mx-3 text-sm text-gray-500">{t("orDivider")}</span>
           <div className="flex-grow border-t"></div>
         </div>
 
         <SocialLogin />
 
         <p className="text-sm text-gray-500 mt-6 text-center">
-          Already have an account?{" "}
+          {t("alreadyHaveAccount")}
           <Link href="/login" className="text-blue-500 hover:underline">
-            Login
+            {t("loginTitle")}
           </Link>
         </p>
       </div>
