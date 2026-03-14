@@ -313,7 +313,17 @@ export const dictionaries = {
     retryVerificationBtn: "Retry Verification",
     returnToHomeBtn: "Return to Home",
     // Swal keys
-    okBtn: "OK"
+    okBtn: "OK",
+    // Hero keys
+    heroTitle: "Free delivery on your first order",
+    heroSubtitle: "Fast, reliable, and smart food delivery platform connecting you with your favorite local restaurants.",
+    heroExploreBtn: "Explore Delivery",
+    forgotPasswordTitle: "Forgot Password",
+    sendResetLink: "Send Reset Link",
+    setNewPassword: "Set New Password",
+    updatePasswordBtn: "Update Password",
+    updatingBtn: "Updating...",
+    newPasswordPlaceholder: "New password"
   },
   bn: {
     delivery: "ডেলিভারি",
@@ -629,6 +639,16 @@ export const dictionaries = {
     retryVerificationBtn: "আবার যাচাই করুন",
     returnToHomeBtn: "হোমে ফিরে যান",
     // Swal keys
-    okBtn: "ঠিক আছে"
+    okBtn: "ঠিক আছে",
+    // Hero keys
+    heroTitle: "আপনার প্রথম অর্ডারে ফ্রি ডেলিভারি",
+    heroSubtitle: "আপনার প্রিয় স্থানীয় রেস্তোরাঁগুলোর সাথে আপনাকে সংযুক্ত করছে দ্রুত, নির্ভরযোগ্য এবং স্মার্ট ফুড ডেলিভারি প্ল্যাটফর্ম।",
+    heroExploreBtn: "ডেলিভারি এক্সপ্লোর করুন",
+    forgotPasswordTitle: "পাসওয়ার্ড ভুলে গেছেন",
+    sendResetLink: "রিসেট লিঙ্ক পাঠান",
+    setNewPassword: "নতুন পাসওয়ার্ড সেট করুন",
+    updatePasswordBtn: "পাসওয়ার্ড আপডেট করুন",
+    updatingBtn: "আপডেট করা হচ্ছে...",
+    newPasswordPlaceholder: "নতুন পাসওয়ার্ড"
   }
 };
