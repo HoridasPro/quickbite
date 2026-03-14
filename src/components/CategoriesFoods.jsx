@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const CategoryCard = ({ img, name, onClick, active }) => {
@@ -79,7 +78,6 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
     fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
-        // Handle array or object structure safely
         const catArray = Array.isArray(data) ? data : data.categories || [];
         setCategories(catArray);
       })
@@ -109,19 +107,8 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
     }
   };
 
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({
-      left: 600,
-      behavior: "smooth",
-    });
-  };
-
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({
-      left: -600,
-      behavior: "smooth",
-    });
-  };
+  const scrollRight = () => scrollRef.current?.scrollBy({ left: 600, behavior: "smooth" });
+  const scrollLeft = () => scrollRef.current?.scrollBy({ left: -600, behavior: "smooth" });
 
   if (categories.length === 0) return null;
 
@@ -145,7 +132,8 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
         >
           {categories.map((cat) => {
             const catName = cat.categoryName || cat.name;
-            const displayName = language === "bn" && cat.nameBn ? cat.nameBn : catName;
+            // FIX: Using categoryBn exactly as it is in the DB
+            const displayName = language === "bn" && cat.categoryBn ? cat.categoryBn : catName;
             
             return (
               <CategoryCard

@@ -13,11 +13,9 @@ export async function GET() {
       return NextResponse.json(allCategories);
     }
 
-    // 2. FALLBACK: If 'categories' collection is empty, use your dynamic generation!
-    // We point to 'allFoods' since that is what the team uses for foods.
+    // 2. FALLBACK: If 'categories' collection is empty, use dynamic generation
     const foodsCollection = await dbConnect("allFoods");
     
-    // Check for 'category' field first, fallback to 'tags' array
     let uniqueTags = await foodsCollection.distinct("category");
     if (!uniqueTags || uniqueTags.length === 0) {
       uniqueTags = await foodsCollection.distinct("tags");
@@ -36,6 +34,7 @@ export async function GET() {
         return {
           _id: (index + 1).toString(),
           categoryName: tag,
+          categoryBn: sampleItem?.categoryBn || null, // FIX: Grabbing the Bangla name
           categoryImg: sampleItem?.image || sampleItem?.foodImg || "https://via.placeholder.com/150",
         };
       })

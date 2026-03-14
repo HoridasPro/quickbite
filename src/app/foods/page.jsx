@@ -10,9 +10,11 @@ import { useTranslation } from "@/hooks/useTranslation";
 const FoodsPageContent = () => {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isBn = language === "bn";
 
   const [foods, setFoods] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedSort, setSelectedSort] = useState("");
   const [selectedOffer, setSelectedOffer] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -33,6 +35,20 @@ const FoodsPageContent = () => {
     window.addEventListener('resize', calculateHeaderHeight);
     
     return () => window.removeEventListener('resize', calculateHeaderHeight);
+  }, []);
+
+  // Fetch categories to match Bangla names later
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`/api/categories`);
+        const data = await res.json();
+        setCategories(Array.isArray(data) ? data : data.categories || []);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -77,6 +93,13 @@ const FoodsPageContent = () => {
     { id: "Buy 1 Get 1", label: t("offerBogo") },
     { id: "Cashback", label: t("offerCashback") },
   ];
+
+  // Helper to safely translate the category name for the header
+  const getDisplayCategoryName = (engName) => {
+    if (!engName) return "";
+    const match = categories.find(c => c.categoryName === engName || c.name === engName);
+    return isBn ? (match?.categoryBn || engName) : engName;
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 mb-20 items-start">
@@ -155,7 +178,9 @@ const FoodsPageContent = () => {
         />
         
         <h2 className="font-bold text-2xl mt-10 mb-5">
-          {foods.length} {t("restaurantsFound")} {selectedCategory && `${t("forText")} "${selectedCategory}"`} {searchQuery && `${t("matchingText")} "${searchQuery}"`}
+          {foods.length} {t("restaurantsFound")} {selectedCategory && (
+            <> {t("forText")} "{getDisplayCategoryName(selectedCategory)}"</>
+          )} {searchQuery && ` ${t("matchingText")} "${searchQuery}"`}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
