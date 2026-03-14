@@ -3,27 +3,29 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import fdpImg from "../../public/fdp.jpg";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="bg-orange-100 py-5 px-6 rounded-xl">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center gap-10">
         {/* Text Section */}
         <div className="md:w-1/2 text-center md:text-left">
           <h1 className="text-3xl md:text-3xl font-bold mb-6 text-gray-900">
-            Free delivery on your first order
+            {t("heroTitle")}
           </h1>
 
           <p className="text-gray-700 mb-8 text-lg">
-            Fast, reliable, and smart food delivery platform connecting you with
-            your favorite local restaurants.
+            {t("heroSubtitle")}
           </p>
 
           <Link
             href="/"
             className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition cursor-pointer"
           >
-            Explore Delivery
+            {t("heroExploreBtn")}
           </Link>
         </div>
 
