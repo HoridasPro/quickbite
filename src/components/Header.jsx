@@ -21,7 +21,7 @@ import Language from "./Language";
 import Link from "next/link";
 import NavLink from "./NavLink";
 import { useCart } from "@/contexts/CartContext";
-import CartDrawer from "./CartDrawer";
+import CartDrawer from "./cart/CartDrawer";
 import InputSearch from "./InputSearch";
 import { useTranslation } from "@/hooks/useTranslation";
 

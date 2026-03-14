@@ -5,7 +5,7 @@ import RestaurantHero from "@/components/restaurant/RestaurantHero";
 import { useParams } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { useTranslation } from "@/hooks/useTranslation";
-import CartSideBar from "@/components/CartSideBar";
+import CartSideBar from "@/components/cart/CartSideBar";
 
 const getFoodById = async (id) => {
   const res = await fetch(`/api/foods/${id}`);

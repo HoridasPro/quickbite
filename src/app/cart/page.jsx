@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import CartContent from "@/components/CartContent";
+import CartContent from "@/components/cart/CartContent";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const CartPage = () => {

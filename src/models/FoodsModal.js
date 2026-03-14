@@ -1,4 +1,4 @@
-import CartButton from "@/components/CartButton";
+import CartButton from "@/components/cart/CartButton";
 import React from "react";
 
 const FoodsModal = ({ food, quantity, onClose, addToCart }) => {
