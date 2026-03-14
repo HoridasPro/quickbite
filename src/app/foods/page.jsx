@@ -21,6 +21,7 @@ const FoodsPageContent = () => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ const FoodsPageContent = () => {
         const data = await res.json();
         setFoods(data.foods || []);
         setTotalPages(data.totalPages || 1);
+        setTotalItems(data.totalItems || 0);
       } catch (error) {
         console.error(error);
       }
@@ -178,7 +180,7 @@ const FoodsPageContent = () => {
         />
         
         <h2 className="font-bold text-2xl mt-10 mb-5">
-          {foods.length} {t("restaurantsFound")} {selectedCategory && (
+         {totalItems} {t("foodsFound")} {selectedCategory && (
             <> {t("forText")} "{getDisplayCategoryName(selectedCategory)}"</>
           )} {searchQuery && ` ${t("matchingText")} "${searchQuery}"`}
         </h2>
