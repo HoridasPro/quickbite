@@ -2,6 +2,7 @@
 
 import { postUser } from "@/actions/server/auth";
 import SocialLogin from "@/components/SocialLogin";
+import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
@@ -12,6 +13,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { t } = useTranslation();
   
+  const [imageUrl, setImageUrl] = useState("");
   const [errors, setErrors] = useState({
     name: "",
     email: "",
@@ -27,7 +29,7 @@ export default function RegisterPage() {
     const form = e.target;
     const name = form.name.value.trim();
     const email = form.email.value.trim();
-    const image = form.image.value.trim();
+    const image = imageUrl.trim();
     const password = form.password.value.trim();
 
     let hasError = false;
@@ -95,7 +97,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mt-10 mb-10">
         <h2 className="text-2xl font-bold mb-6 text-center">{t("registerTitle")}</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
@@ -130,14 +132,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t("photoUrlLabel")}</label>
-            <input
-              name="image"
-              type="url"
-              placeholder={t("enterPhotoUrlPlaceholder")}
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-                errors.image ? "border-red-500" : ""
-              }`}
+            <ImageUpload 
+              label={t("photoUrlLabel")}
+              value={imageUrl}
+              onChange={setImageUrl}
             />
             {errors.image && (
               <p className="text-red-500 text-sm mt-1">{errors.image}</p>

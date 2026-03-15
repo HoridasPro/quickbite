@@ -5,6 +5,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Save, Loader2, Layers } from "lucide-react";
 import VariationsBuilder from "./VariationsBuilder";
 import CustomDropdown from "./CustomDropdown";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function FoodForm({ initialData = null, onSubmit, isLoading = false }) {
   const { t, language } = useTranslation();
@@ -78,7 +79,6 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
     });
   };
 
-  // Convert restaurants to standard options format
   const restaurantOptions = restaurants.map(res => ({
     id: res.id,
     label: isBn && res.nameBn ? res.nameBn : res.name
@@ -113,8 +113,11 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">{t("foodImage")} URL *</label>
-            <input type="url" name="foodImg" required value={formData.foodImg} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
+            <ImageUpload 
+              label={`${t("foodImage")} *`}
+              value={formData.foodImg}
+              onChange={(url) => setFormData(prev => ({ ...prev, foodImg: url }))}
+            />
           </div>
 
           <div className="space-y-2">

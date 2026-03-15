@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Save, Loader2, Store, Image as ImageIcon, MapPin, Phone } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function RestaurantForm({ initialData = null, onSubmit, isLoading = false }) {
   const { t } = useTranslation();
@@ -47,7 +48,6 @@ export default function RestaurantForm({ initialData = null, onSubmit, isLoading
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 pb-10">
-      {/* basic info */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
           <Store className="w-5 h-5 text-orange-500" />
@@ -131,7 +131,6 @@ export default function RestaurantForm({ initialData = null, onSubmit, isLoading
         </div>
       </div>
 
-      {/* media section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
           <ImageIcon className="w-5 h-5 text-orange-500" />
@@ -140,37 +139,22 @@ export default function RestaurantForm({ initialData = null, onSubmit, isLoading
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">{t("restaurantLogo")} URL *</label>
-            <input 
-              type="url" 
-              name="logo" 
-              required 
-              value={formData.logo} 
-              onChange={handleChange} 
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" 
+            <ImageUpload 
+              label={`${t("restaurantLogo")} *`}
+              value={formData.logo}
+              onChange={(url) => setFormData(prev => ({ ...prev, logo: url }))}
             />
-            {formData.logo && (
-              <img src={formData.logo} alt="Logo Preview" className="mt-2 w-20 h-20 object-cover rounded-full border border-gray-100 shadow-sm" />
-            )}
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">{t("restaurantCover")} URL *</label>
-            <input 
-              type="url" 
-              name="cover" 
-              required 
-              value={formData.cover} 
-              onChange={handleChange} 
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" 
+             <ImageUpload 
+              label={`${t("restaurantCover")} *`}
+              value={formData.cover}
+              onChange={(url) => setFormData(prev => ({ ...prev, cover: url }))}
             />
-            {formData.cover && (
-              <img src={formData.cover} alt="Cover Preview" className="mt-2 w-full h-32 object-cover rounded-xl border border-gray-100 shadow-sm" />
-            )}
           </div>
         </div>
       </div>
 
-      {/* action bar */}
       <div className="flex justify-end pt-4">
         <button 
           type="submit" 

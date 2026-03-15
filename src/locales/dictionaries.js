@@ -400,6 +400,11 @@ export const dictionaries = {
     updatePasswordBtn: "Update Password",
     updatingBtn: "Updating...",
     newPasswordPlaceholder: "New password",
+    // Image upload keys
+    invalidFileType: "Please upload an image file.",
+    uploadFailed: "Image upload failed.",
+    uploading: "Uploading...",
+    clickToUpload: "Click or drag to upload",
     // 404 Page
     pageNotFoundTitle: "404",
     pageNotFoundHeading: "Page Not Found",
@@ -816,6 +821,11 @@ export const dictionaries = {
     updatePasswordBtn: "পাসওয়ার্ড আপডেট করুন",
     updatingBtn: "আপডেট করা হচ্ছে...",
     newPasswordPlaceholder: "নতুন পাসওয়ার্ড",
+    // Image upload keys
+    invalidFileType: "অনুগ্রহ করে একটি ছবি আপলোড করুন।",
+    uploadFailed: "ছবি আপলোড ব্যর্থ হয়েছে।",
+    uploading: "আপলোড করা হচ্ছে...",
+    clickToUpload: "আপলোড করতে ক্লিক করুন বা টেনে আনুন",
     // 404 Page
     pageNotFoundTitle: "৪০৪",
     pageNotFoundHeading: "পৃষ্ঠা পাওয়া যায়নি",
