@@ -375,6 +375,11 @@ export const dictionaries = {
     availableForPickup: "Available for Pickup",
     noOrdersReadyPickup: "No orders are currently ready for pickup. Check back soon.",
     acceptDeliveryBtn: "Accept Delivery",
+    // Payment management keys
+    paymentsManagement: "Payments Management",
+    tableTransactionId: "Transaction / Order ID",
+    tableDate: "Date",
+    noPaymentsFound: "No successful payments found.",
     // Payment keys
     paymentSuccessfulTitle: "Payment Successful!",
     orderConfirmedPart1: "Your order",
@@ -796,6 +801,11 @@ export const dictionaries = {
     availableForPickup: "পিকআপের জন্য প্রস্তুত",
     noOrdersReadyPickup: "বর্তমানে পিকআপের জন্য কোনো অর্ডার নেই। পরে আবার দেখুন।",
     acceptDeliveryBtn: "ডেলিভারি গ্রহণ করুন",
+    // Payment management keys
+    paymentsManagement: "পেমেন্ট ব্যবস্থাপনা",
+    tableTransactionId: "ট্রানজিশন / অর্ডার আইডি",
+    tableDate: "তারিখ",
+    noPaymentsFound: "কোনো সফল পেমেন্ট পাওয়া যায়নি।",
     // Payment keys
     paymentSuccessfulTitle: "পেমেন্ট সফল হয়েছে!",
     orderConfirmedPart1: "আপনার",
