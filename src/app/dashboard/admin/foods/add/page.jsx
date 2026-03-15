@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import FoodForm from "@/components/admin/FoodForm";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function AddFoodPage() {
   const { t } = useTranslation();
@@ -44,8 +46,16 @@ export default function AddFoodPage() {
 
   return (
     <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("addNewFood")}</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link 
+          href="/dashboard/admin/foods" 
+          className="p-2 bg-white rounded-xl border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors text-gray-600"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{t("addNewFood")}</h1>
+        </div>
       </div>
       <FoodForm onSubmit={handleSubmit} isLoading={isSubmitting} />
     </div>

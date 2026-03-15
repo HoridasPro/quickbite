@@ -1,4 +1,3 @@
-// src/app/dashboard/admin/foods/[id]/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,19 +5,20 @@ import { useRouter, useParams } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import FoodForm from "@/components/admin/FoodForm";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function EditFoodPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
-  const id = params?.id; // Safely extract id
+  const id = params?.id; 
 
   const [initialData, setInitialData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // We declare the fetch function inside useEffect or outside, but we only depend on id
     const fetchFood = async () => {
       try {
         const res = await fetch(`/api/foods/${id}`);
@@ -40,8 +40,7 @@ export default function EditFoodPage() {
     if (id) {
       fetchFood();
     }
-    // Only id is needed here. If React complains during dev, just hit refresh in the browser.
-  }, [id]);
+  }, [id, router]);
 
   const handleSubmit = async (formData) => {
     setIsSubmitting(true);
@@ -84,8 +83,16 @@ export default function EditFoodPage() {
 
   return (
     <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("editFood")}</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link 
+          href="/dashboard/admin/foods" 
+          className="p-2 bg-white rounded-xl border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors text-gray-600"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{t("editFood")}</h1>
+        </div>
       </div>
       <FoodForm initialData={initialData} onSubmit={handleSubmit} isLoading={isSubmitting} />
     </div>
