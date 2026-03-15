@@ -135,7 +135,7 @@ export default function RestaurantForm({ initialData = null, onSubmit, isLoading
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
           <ImageIcon className="w-5 h-5 text-orange-500" />
-          Media & Branding
+          {t("mediaAndBranding")}
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

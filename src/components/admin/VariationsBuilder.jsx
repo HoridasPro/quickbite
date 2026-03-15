@@ -129,7 +129,7 @@ export default function VariationsBuilder({ variations = [], onChange }) {
                     <input type="text" value={option.nameBn} onChange={(e) => updateOption(vIndex, oIndex, "nameBn", e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm" placeholder={t("optionNameBn")} />
                   </div>
                   <div className="md:col-span-3">
-                    <input type="number" value={option.price} onChange={(e) => updateOption(vIndex, oIndex, "price", e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium" placeholder="Price (Tk)" />
+                    <input type="number" value={option.price} onChange={(e) => updateOption(vIndex, oIndex, "price", e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium" placeholder={t("priceTkPlaceholder")} />
                   </div>
                   <div className="md:col-span-1 flex justify-end">
                     <button type="button" onClick={(e) => removeOption(e, vIndex, oIndex)} className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg">

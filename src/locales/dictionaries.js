@@ -405,7 +405,15 @@ export const dictionaries = {
     pageNotFoundHeading: "Page Not Found",
     pageNotFoundDesc: "Oops! The page you are looking for doesn't exist or has been moved.",
     goBackBtn: "Go Back",
-    goHomeBtn: "Go to Home"
+    goHomeBtn: "Go to Home",
+    // Other keys
+    basicDetails: "Basic Details",
+    mediaAndBranding: "Media & Branding",
+    priceTkPlaceholder: "Price (Tk)",
+    enterEmail: "Enter your email",
+    sendResetLinkBtn: "Send Reset Link",
+    setNewPasswordHeader: "Set New Password",
+    loadingInteractiveMap: "Loading Interactive Map..."
   },
   bn: {
     delivery: "ডেলিভারি",
@@ -813,6 +821,14 @@ export const dictionaries = {
     pageNotFoundHeading: "পৃষ্ঠা পাওয়া যায়নি",
     pageNotFoundDesc: "উফ! আপনি যে পৃষ্ঠাটি খুঁজছেন তা নেই বা সরানো হয়েছে।",
     goBackBtn: "ফিরে যান",
-    goHomeBtn: "হোমে যান"
+    goHomeBtn: "হোমে যান",
+    // Other keys
+    basicDetails: "প্রাথমিক বিবরণ",
+    mediaAndBranding: "মিডিয়া এবং ব্র্যান্ডিং",
+    priceTkPlaceholder: "দাম (টাকা)",
+    enterEmail: "আপনার ইমেইল দিন",
+    sendResetLinkBtn: "রিসেট লিঙ্ক পাঠান",
+    setNewPasswordHeader: "নতুন পাসওয়ার্ড সেট করুন",
+    loadingInteractiveMap: "ইন্টারেক্টিভ ম্যাপ লোড হচ্ছে..."
   }
 };
