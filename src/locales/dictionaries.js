@@ -262,6 +262,27 @@ export const dictionaries = {
     confirmDeleteUser: "Are you sure you want to delete this user?",
     noUsersFound: "No users found.",
     roleUser: "User",
+    adminDashboardSubtitle: "Here is what's happening on QuickBite today.",
+    manageUserDescription: "Manage user roles and account access.",
+    searchUsersPlaceholder: "Search users...",
+    usersCountLabel: "Users",
+    tableUserDetails: "User Details",
+    tableAccountStatus: "Account Status",
+    reasonPrefix: "Reason:",
+    noUsersFoundSearch: "No users found matching your search.",
+    // Status & Modals
+    statusActive: "Active",
+    statusSuspended: "Suspended",
+    statusBanned: "Banned",
+    setStatusTitle: "Set status to",
+    reasonForAction: "Reason for action",
+    violationPlaceholder: "Violation of terms...",
+    provideReasonWarning: "You need to provide a reason!",
+    areYouSure: "Are you sure?",
+    cannotRevert: "You won't be able to revert this!",
+    confirmDeleteBtn: "Yes, delete it!",
+    deletedSuccessTitle: "Deleted!",
+    userDeletedSuccessMessage: "User has been deleted.",
     // Admin dashboard order, restaurant and rider management keys
     orderManagement: "Order Management",
     tableOrderId: "Order ID",
@@ -324,7 +345,13 @@ export const dictionaries = {
     setNewPassword: "Set New Password",
     updatePasswordBtn: "Update Password",
     updatingBtn: "Updating...",
-    newPasswordPlaceholder: "New password"
+    newPasswordPlaceholder: "New password",
+    // 404 Page
+    pageNotFoundTitle: "404",
+    pageNotFoundHeading: "Page Not Found",
+    pageNotFoundDesc: "Oops! The page you are looking for doesn't exist or has been moved.",
+    goBackBtn: "Go Back",
+    goHomeBtn: "Go to Home"
   },
   bn: {
     delivery: "ডেলিভারি",
@@ -589,6 +616,27 @@ export const dictionaries = {
     confirmDeleteUser: "আপনি কি নিশ্চিত যে আপনি এই ব্যবহারকারীকে মুছে ফেলতে চান?",
     noUsersFound: "কোনো ব্যবহারকারী পাওয়া যায়নি।",
     roleUser: "ব্যবহারকারী",
+    adminDashboardSubtitle: "আজ কুইকবাইটে কী ঘটছে তা এখানে দেখুন।",
+    manageUserDescription: "ব্যবহারকারীর ভূমিকা এবং অ্যাকাউন্ট অ্যাক্সেস পরিচালনা করুন।",
+    searchUsersPlaceholder: "ব্যবহারকারী খুঁজুন...",
+    usersCountLabel: "জন ব্যবহারকারী",
+    tableUserDetails: "ব্যবহারকারীর বিবরণ",
+    tableAccountStatus: "অ্যাকাউন্ট স্ট্যাটাস",
+    reasonPrefix: "কারণ:",
+    noUsersFoundSearch: "আপনার অনুসন্ধানের সাথে মেলে এমন কোনো ব্যবহারকারী পাওয়া যায়নি।",
+    // Status & Modals
+    statusActive: "সক্রিয়",
+    statusSuspended: "স্থগিত",
+    statusBanned: "নিষিদ্ধ",
+    setStatusTitle: "স্ট্যাটাস পরিবর্তন করুন",
+    reasonForAction: "পদক্ষেপের কারণ",
+    violationPlaceholder: "শর্তাবলী লঙ্ঘন...",
+    provideReasonWarning: "আপনাকে অবশ্যই একটি কারণ প্রদান করতে হবে!",
+    areYouSure: "আপনি কি নিশ্চিত?",
+    cannotRevert: "আপনি এটি ফিরিয়ে আনতে পারবেন না!",
+    confirmDeleteBtn: "হ্যাঁ, মুছে ফেলুন!",
+    deletedSuccessTitle: "মুছে ফেলা হয়েছে!",
+    userDeletedSuccessMessage: "ব্যবহারকারী মুছে ফেলা হয়েছে।",
     // Admin dashboard order, restaurant and rider management keys
     orderManagement: "অর্ডার ব্যবস্থাপনা",
     tableOrderId: "অর্ডার আইডি",
@@ -651,6 +699,12 @@ export const dictionaries = {
     setNewPassword: "নতুন পাসওয়ার্ড সেট করুন",
     updatePasswordBtn: "পাসওয়ার্ড আপডেট করুন",
     updatingBtn: "আপডেট করা হচ্ছে...",
-    newPasswordPlaceholder: "নতুন পাসওয়ার্ড"
+    newPasswordPlaceholder: "নতুন পাসওয়ার্ড",
+    // 404 Page
+    pageNotFoundTitle: "৪০৪",
+    pageNotFoundHeading: "পৃষ্ঠা পাওয়া যায়নি",
+    pageNotFoundDesc: "উফ! আপনি যে পৃষ্ঠাটি খুঁজছেন তা নেই বা সরানো হয়েছে।",
+    goBackBtn: "ফিরে যান",
+    goHomeBtn: "হোমে যান"
   }
 };

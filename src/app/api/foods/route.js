@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
+import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
@@ -69,7 +72,73 @@ export async function GET(request) {
       totalItems: totalItems
     });
   } catch (error) {
-    console.error("Foods list fetch error:", error);
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "admin") {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const collection = await dbConnect("allFoods");
+    const result = await collection.insertOne(body);
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "admin") {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { _id, id, ...updateData } = body;
+    
+    if (!_id && !id) {
+        return NextResponse.json({ success: false, message: "ID required" }, { status: 400 });
+    }
+
+    const collection = await dbConnect("allFoods");
+    const queryId = _id ? new ObjectId(_id) : (isNaN(id) ? id : parseInt(id));
+    
+    const result = await collection.updateOne(
+      { $or: [{ _id: queryId }, { id: queryId }] },
+      { $set: updateData }
+    );
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "admin") {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await request.json();
+    if (!id) {
+         return NextResponse.json({ success: false, message: "ID required" }, { status: 400 });
+    }
+
+    const collection = await dbConnect("allFoods");
+    const queryId = typeof id === 'string' && id.length === 24 ? new ObjectId(id) : (isNaN(id) ? id : parseInt(id));
+
+    const result = await collection.deleteOne({ 
+       $or: [{ _id: queryId }, { id: queryId }] 
+    });
+    return NextResponse.json({ success: true, result });
+  } catch (error) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }

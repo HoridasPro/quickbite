@@ -9,6 +9,15 @@ export async function proxy(req) {
 
   const { pathname } = req.nextUrl;
 
+  // 1. ENFORCEMENT: The Ban Hammer
+  // If the user is marked as Banned in their token, lock them out of all secure areas.
+  if (token && token.accountStatus === "Banned") {
+    if (pathname.startsWith("/dashboard")) {
+      // Redirect to a dedicated "Account Terminated" page (we will build this later)
+      return NextResponse.redirect(new URL("/banned", req.url));
+    }
+  }
+
   // Protect Admin Dashboard
   if (pathname.startsWith("/dashboard/admin")) {
     if (!token || token.role !== "admin") {
@@ -21,11 +30,19 @@ export async function proxy(req) {
     if (!token || (token.role !== "rider" && token.role !== "admin")) {
       return NextResponse.redirect(new URL("/", req.url));
     }
+    // Riders who are "Suspended" shouldn't be able to access the delivery pool
+    if (token && token.accountStatus === "Suspended" && token.role !== "admin") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
   }
 
   // Protect Restaurant Dashboard (Admins also get access)
   if (pathname.startsWith("/dashboard/restaurant")) {
     if (!token || (token.role !== "restaurant" && token.role !== "admin")) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    // Suspended restaurants shouldn't access the Kitchen KDS
+    if (token && token.accountStatus === "Suspended" && token.role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
     }
   }
@@ -35,8 +52,7 @@ export async function proxy(req) {
 
 export const config = {
   matcher: [
-    "/dashboard/admin/:path*", 
-    "/dashboard/rider/:path*", 
-    "/dashboard/restaurant/:path*"
+    // Catch everything under dashboard
+    "/dashboard/:path*"
   ],
 };

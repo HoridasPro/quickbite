@@ -12,7 +12,8 @@ export async function GET() {
   const client = await clientPromise;
   const db = client.db(process.env.DB_NAME);
 
-  const users = await db.collection("users").find().toArray();
+  // Fetch users, but exclude their passwords for security
+  const users = await db.collection("users").find({}, { projection: { password: 0 } }).toArray();
 
   return Response.json(users);
 }
@@ -23,17 +24,50 @@ export async function PATCH(req) {
     return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await req.json();
+  try {
+    const body = await req.json();
+    const { id, role, accountStatus, statusReason } = body;
 
-  const client = await clientPromise;
-  const db = client.db(process.env.DB_NAME);
+    if (!id) {
+      return Response.json({ success: false, message: "User ID is required" }, { status: 400 });
+    }
 
-  const result = await db.collection("users").updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { role: "admin" } }
-  );
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
 
-  return Response.json(result);
+    // Build a dynamic update object based on what the Admin sent
+    const updateFields = {};
+    
+    // Role management
+    if (role) {
+      const allowedRoles = ["user", "admin", "restaurant", "rider"];
+      if (allowedRoles.includes(role)) updateFields.role = role;
+    }
+
+    // Regulatory Status management
+    if (accountStatus) {
+      const allowedStatuses = ["Active", "Suspended", "Banned"];
+      if (allowedStatuses.includes(accountStatus)) {
+        updateFields.accountStatus = accountStatus;
+        updateFields.statusReason = statusReason || "Action taken by Administrator.";
+        updateFields.statusUpdatedAt = new Date().toISOString();
+      }
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return Response.json({ success: false, message: "No valid fields to update" }, { status: 400 });
+    }
+
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
+    );
+
+    return Response.json({ success: true, result });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return Response.json({ success: false, message: "Server Error" }, { status: 500 });
+  }
 }
 
 export async function DELETE(req) {
@@ -42,14 +76,18 @@ export async function DELETE(req) {
     return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await req.json();
+  try {
+    const { id } = await req.json();
 
-  const client = await clientPromise;
-  const db = client.db(process.env.DB_NAME);
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
 
-  const result = await db.collection("users").deleteOne({
-    _id: new ObjectId(id),
-  });
+    const result = await db.collection("users").deleteOne({
+      _id: new ObjectId(id),
+    });
 
-  return Response.json(result);
+    return Response.json({ success: true, result });
+  } catch (error) {
+    return Response.json({ success: false, message: "Server Error" }, { status: 500 });
+  }
 }
