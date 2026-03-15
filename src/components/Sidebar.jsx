@@ -71,7 +71,7 @@ export default function Sidebar({ closeSidebar }) {
               </NavLink>
             </li>
             <li>
-              <NavLink href="/dashboard/admin/products" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+              <NavLink href="/dashboard/admin/foods" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
                 <ShoppingBag size={20} /> {t("foodsLabel")}
               </NavLink>
             </li>
