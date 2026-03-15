@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Save, Loader2, Layers } from "lucide-react";
 import VariationsBuilder from "./VariationsBuilder";
+import CustomDropdown from "./CustomDropdown";
 
 export default function FoodForm({ initialData = null, onSubmit, isLoading = false }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isBn = language === "bn";
 
+  const [restaurants, setRestaurants] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     titleBn: "",
@@ -18,9 +21,24 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
     description: "",
     descriptionBn: "",
     foodImg: "",
-    restaurant_name: "",
+    restaurantId: "",
     variations: []
   });
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const res = await fetch("/api/restaurants?limit=100");
+        const data = await res.json();
+        if (data.success) {
+          setRestaurants(data.restaurants);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchRestaurants();
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -34,7 +52,7 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
         description: initialData.description || "",
         descriptionBn: initialData.descriptionBn || "",
         foodImg: initialData.foodImg || "",
-        restaurant_name: initialData.restaurant_name || "",
+        restaurantId: initialData.restaurantId || "",
         variations: initialData.variations || []
       });
     }
@@ -51,11 +69,20 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const selectedRes = restaurants.find(r => r.id === formData.restaurantId);
+    
     onSubmit({
       ...formData,
       price: Number(formData.price),
+      restaurant_name: selectedRes ? selectedRes.name : ""
     });
   };
+
+  // Convert restaurants to standard options format
+  const restaurantOptions = restaurants.map(res => ({
+    id: res.id,
+    label: isBn && res.nameBn ? res.nameBn : res.name
+  }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 pb-10">
@@ -73,6 +100,23 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
             <label className="text-sm font-semibold text-gray-700">{t("foodNameBnInput")} *</label>
             <input type="text" name="titleBn" required value={formData.titleBn} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
           </div>
+
+          <div className="space-y-2 relative">
+            <label className="text-sm font-semibold text-gray-700">{t("restaurantNameInput")} *</label>
+            <CustomDropdown 
+              value={formData.restaurantId} 
+              onChange={(val) => setFormData(prev => ({ ...prev, restaurantId: val }))} 
+              options={restaurantOptions}
+              placeholder={t("selectRestaurant") || "Select a Restaurant"}
+              allowClear={true}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700">{t("foodImage")} URL *</label>
+            <input type="url" name="foodImg" required value={formData.foodImg} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">{t("categoryLabel")} *</label>
             <input type="text" name="category" required value={formData.category} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
@@ -89,14 +133,6 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
             <label className="text-sm font-semibold text-gray-700">{t("foodPriceBn")} *</label>
             <input type="text" name="priceBn" required placeholder="যেমন: ৬০০ টাকা" value={formData.priceBn} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">{t("restaurantNameInput")} *</label>
-            <input type="text" name="restaurant_name" required value={formData.restaurant_name} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">{t("foodImage")} URL *</label>
-            <input type="url" name="foodImg" required value={formData.foodImg} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" />
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -110,10 +146,7 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
         </div>
       </div>
 
-      <VariationsBuilder 
-        variations={formData.variations} 
-        onChange={handleVariationsChange} 
-      />
+      <VariationsBuilder variations={formData.variations} onChange={handleVariationsChange} />
 
       <div className="flex justify-end pt-4">
         <button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-3 rounded-2xl font-black shadow-xl shadow-orange-100 flex items-center gap-3 transition-all active:scale-95 disabled:opacity-70">
