@@ -6,6 +6,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
+    const session = await getServerSession(authOptions);
+    // Check if the requester is an ACTIVE admin
+    const isAdmin = session?.user?.role === "admin" && session?.user?.accountStatus === "Active";
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "9");
@@ -34,6 +38,38 @@ export async function GET(request) {
       ];
     }
 
+    let finalQuery = { ...query };
+
+    // ENFORCEMENT: The "Ghost Store" Fix
+    // If the user is NOT an active admin, filter out foods from Suspended/Banned restaurants
+    if (!isAdmin) {
+      const restCollection = await dbConnect("restaurants");
+      // Fetch restaurants that are explicitly Active (or legacy ones with no status)
+      const activeRestaurants = await restCollection.find({
+        $or: [{ status: "Active" }, { status: { $exists: false } }]
+      }).toArray();
+      
+      const activeNames = activeRestaurants.map(r => r.name).filter(Boolean);
+
+      const activeRestaurantFilter = {
+        $or: [
+          { restaurant_name: { $in: activeNames } },
+          { restaurant_name: null },
+          { restaurant_name: "" },
+          { restaurant_name: { $exists: false } }
+        ]
+      };
+
+      // Safely merge the visibility filter with existing search filters
+      if (Object.keys(query).length > 0) {
+        finalQuery = {
+          $and: [query, activeRestaurantFilter]
+        };
+      } else {
+        finalQuery = activeRestaurantFilter;
+      }
+    }
+
     let sortOption = {};
     switch (sort) {
       case "Price: Low to High":
@@ -56,8 +92,8 @@ export async function GET(request) {
     
     const collection = await dbConnect("allFoods");
     
-    const foods = await collection.find(query).sort(sortOption).skip(skip).limit(limit).toArray();
-    const totalItems = await collection.countDocuments(query);
+    const foods = await collection.find(finalQuery).sort(sortOption).skip(skip).limit(limit).toArray();
+    const totalItems = await collection.countDocuments(finalQuery);
     const totalPages = Math.ceil(totalItems / limit);
 
     const mappedFoods = foods.map((item) => ({
@@ -82,8 +118,14 @@ export async function GET(request) {
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json({ success: false, message: "Account restricted" }, { status: 403 });
   }
 
   try {
@@ -98,8 +140,14 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json({ success: false, message: "Account restricted" }, { status: 403 });
   }
 
   try {
@@ -129,8 +177,14 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json({ success: false, message: "Account restricted" }, { status: 403 });
   }
 
   try {

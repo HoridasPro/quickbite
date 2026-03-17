@@ -14,6 +14,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // ENFORCEMENT: Completely block restricted users from initiating payments
+    if (sessionUser.user.accountStatus !== "Active") {
+      return NextResponse.json(
+        { error: `Account ${sessionUser.user.accountStatus}. Payments are disabled.` }, 
+        { status: 403 }
+      );
+    }
+
     const { order } = await request.json();
 
     if (!order || !order.items || order.items.length === 0) {

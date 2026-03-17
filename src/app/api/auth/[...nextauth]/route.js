@@ -9,7 +9,6 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
-
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -42,6 +41,7 @@ export const authOptions = {
           email: user.email,
           image: user.image || null,
           role: user.role || "user",
+          accountStatus: user.accountStatus || "Active",
         };
       },
     }),
@@ -54,7 +54,6 @@ export const authOptions = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
   ],
-
   callbacks: {
     async signIn({ user, account }) {
       if (account.provider === "google" || account.provider === "github") {
@@ -69,6 +68,7 @@ export const authOptions = {
               email,
               image,
               role: "user",
+              accountStatus: "Active",
               createdAt: new Date(),
             });
           } else {
@@ -88,33 +88,41 @@ export const authOptions = {
       }
       return true;
     },
-
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      // 1. Initial Sign In: Populate the token when the user first logs in
       if (account || user) {
         token.id = user?.id || token.id;
         token.name = user?.name || token.name;
         token.email = user?.email || token.email;
         token.image = user?.image || token.image;
         token.role = user?.role || "user";
+        token.accountStatus = user?.accountStatus || "Active";
+      }
 
-        if (account?.provider === "google" || account?.provider === "github") {
-          try {
-            const collection = await dbConnect("users");
-            const dbUser = await collection.findOne({ email: token.email });
-            if (dbUser) {
-              token.role = dbUser.role || "user";
-              token.id = dbUser._id.toString();
-              token.name = dbUser.name || token.name;
-              token.image = dbUser.image || token.image;
-            }
-          } catch (error) {
-            console.error(error);
+      // 2. Real-Time Database Sync: Runs on every subsequent request
+      if (token?.email) {
+        try {
+          const collection = await dbConnect("users");
+          const dbUser = await collection.findOne({ email: token.email });
+          if (dbUser) {
+            token.role = dbUser.role || "user";
+            token.accountStatus = dbUser.accountStatus || "Active";
+            token.name = dbUser.name || token.name;
+            token.image = dbUser.image || token.image;
           }
+        } catch (error) {
+          console.error("JWT Sync Error:", error);
         }
       }
+
+      // 3. Handle manual client-side updates (SessionGuard)
+      if (trigger === "update" && session) {
+        token.accountStatus = session.accountStatus ?? token.accountStatus;
+        token.role = session.role ?? token.role;
+      }
+
       return token;
     },
-
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -122,11 +130,11 @@ export const authOptions = {
         session.user.email = token.email;
         session.user.image = token.image;
         session.user.role = token.role;
+        session.user.accountStatus = token.accountStatus;
       }
       return session;
     },
   },
-
   secret: process.env.NEXTAUTH_SECRET,
 };
 

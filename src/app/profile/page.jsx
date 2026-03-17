@@ -3,7 +3,7 @@
 import { FaFacebookF, FaApple } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { FiInfo } from "react-icons/fi";
-import { MapPin } from "lucide-react";
+import { MapPin, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
@@ -14,6 +14,9 @@ export default function ProfileSection() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const { t } = useTranslation();
+
+    // ENFORCEMENT: Check if the user is suspended
+    const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -28,22 +31,39 @@ export default function ProfileSection() {
     return (
         <div className="bg-white pt-12 pb-20">
             <div className="max-w-[650px] mx-auto px-6">
+                
+                {/* ENFORCEMENT UI: Warning Banner */}
+                {isRestricted && (
+                    <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-xl flex items-start gap-3 shadow-sm">
+                        <AlertTriangle className="text-yellow-600 shrink-0 mt-0.5" size={18} />
+                        <div>
+                            <p className="text-sm text-yellow-800 font-bold mb-1">
+                                {t("accountRestricted")}
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                                {t("profileReadOnlyDesc")}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex py-5 items-center gap-3">
                     <h1 className="text-[28px] font-semibold text-gray-900">
                         {t("myProfile")}
                     </h1>
                     <FiInfo className="text-gray-400 text-lg" />
                 </div>
+                
                 <div className="space-y-6">
-
                     <div className="relative">
                         <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">
                             {t("firstNameLabel")}
                         </label>
                         <input
                             type="text"
+                            disabled={isRestricted}
                             defaultValue={session?.user?.name?.split(" ")[0] || ""}
-                            className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-pink-500"
+                            className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-pink-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
                         />
                     </div>
 
@@ -53,8 +73,9 @@ export default function ProfileSection() {
                         </label>
                         <input
                             type="text"
+                            disabled={isRestricted}
                             defaultValue={session?.user?.name?.split(" ").slice(1).join(" ") || ""}
-                            className="w-full h-[56px] font-thin border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-orange-500"
+                            className="w-full h-[56px] font-thin border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-orange-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
                         />
                     </div>
 
@@ -62,13 +83,14 @@ export default function ProfileSection() {
                         <label className="">
                             <input
                                 type="text"
+                                disabled={isRestricted}
                                 placeholder={t("mobileNumber")}
-                                className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-orange-500"
+                                className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-900 focus:outline-none focus:border-orange-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
                             />
                         </label>
                     </div>
 
-                    <button className="bg-gray-200 text-gray-400 px-6 py-2 rounded-md text-sm font-medium cursor-not-allowed">
+                    <button disabled={isRestricted} className={`px-6 py-2 rounded-md text-sm font-medium ${isRestricted ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>
                         {t("saveBtn")}
                     </button>
                 </div>
@@ -87,7 +109,7 @@ export default function ProfileSection() {
                         type="text"
                         defaultValue={session?.user?.email || ""}
                         readOnly
-                        className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-500 bg-gray-50 focus:outline-none"
+                        className="w-full h-[56px] border border-gray-300 rounded-xl px-4 text-gray-500 bg-gray-50 focus:outline-none cursor-not-allowed"
                     />
                 </div>
 
@@ -106,17 +128,19 @@ export default function ProfileSection() {
                 <div className="space-y-5">
                     <input
                         type="password"
+                        disabled={isRestricted}
                         placeholder={t("currentPassword")}
-                        className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500"
+                        className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                     />
 
                     <input
                         type="password"
+                        disabled={isRestricted}
                         placeholder={t("newPassword")}
-                        className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500"
+                        className="w-full h-[52px] border text-gray-900 border-gray-300 rounded-lg px-4 focus:outline-none focus:border-orange-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                     />
 
-                    <button className="bg-gray-200 text-gray-500 px-6 py-2 rounded-md text-sm font-medium">
+                    <button disabled={isRestricted} className={`px-6 py-2 rounded-md text-sm font-medium ${isRestricted ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-200 text-gray-500"}`}>
                         {t("saveBtn")}
                     </button>
                 </div>
@@ -161,12 +185,13 @@ export default function ProfileSection() {
                 </h2>
 
                 <div className="grid sm:grid-cols-2 gap-6">
+                    {/* ... Existing connected accounts UI (No changes needed here) ... */}
                     <div className="bg-white rounded-xl p-5 flex justify-between items-center shadow-[0px_6px_18px_rgba(0,0,0,0.08)]">
                         <div className="flex items-center gap-3">
                             <FaFacebookF className="text-blue-600 text-lg" />
                             <span className="font-medium text-gray-800">Facebook</span>
                         </div>
-                        <button className="text-black font-semibold text-sm">{t("connectBtn")}</button>
+                        <button disabled={isRestricted} className="text-black font-semibold text-sm disabled:text-gray-400">{t("connectBtn")}</button>
                     </div>
 
                     <div className="bg-white rounded-xl p-5 flex justify-between items-center shadow-[0px_6px_18px_rgba(0,0,0,0.08)]">
@@ -182,7 +207,7 @@ export default function ProfileSection() {
                             <FaApple className="text-black text-lg" />
                             <span className="font-medium text-gray-800">Apple</span>
                         </div>
-                        <button className="text-black font-semibold text-sm">{t("connectBtn")}</button>
+                        <button disabled={isRestricted} className="text-black font-semibold text-sm disabled:text-gray-400">{t("connectBtn")}</button>
                     </div>
                 </div>
 
@@ -195,7 +220,14 @@ export default function ProfileSection() {
                     <p className="text-gray-600 max-w-md mb-5">
                         {t("deleteAccountDesc")}
                     </p>
-                    <button className="border border-gray-500 text-gray-800 rounded-lg p-2 text-sm font-medium bg-white hover:bg-gray-50 transition cursor-pointer">
+                    <button 
+                        disabled={isRestricted}
+                        className={`border rounded-lg p-2 text-sm font-medium transition ${
+                            isRestricted 
+                                ? "border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed" 
+                                : "border-gray-500 text-gray-800 bg-white hover:bg-gray-50 cursor-pointer"
+                        }`}
+                    >
                         {t("deleteAccountBtn")}
                     </button>
                 </div>

@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { ChefHat, CheckCircle, Clock } from "lucide-react";
+import { ChefHat, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useSession } from "next-auth/react";
 
 export default function KitchenDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t, language } = useTranslation();
+  const { data: session } = useSession();
   const isBn = language === "bn";
+
+  // ENFORCEMENT: Check if the restaurant is suspended
+  const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
   const fetchOrders = async () => {
     try {
@@ -50,6 +55,8 @@ export default function KitchenDashboard() {
           showConfirmButton: false,
         });
         fetchOrders();
+      } else {
+        Swal.fire(t("error"), data.message || t("failedUpdateStatus"), "error");
       }
     } catch (error) {
       Swal.fire(t("error"), t("failedUpdateStatus"), "error");
@@ -132,21 +139,42 @@ export default function KitchenDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-start">
-        <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 min-h-[500px]">
-          <h3 className="font-bold text-gray-700 mb-4 flex items-center justify-between">
-            <span>{t("newOrders")}</span>
-            <span className="bg-blue-100 text-blue-700 py-0.5 px-2.5 rounded-full text-xs">{newOrders.length}</span>
-          </h3>
-          <div className="space-y-4">
-            {newOrders.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 text-sm">{t("noNewOrders")}</div>
-            ) : (
-              newOrders.map(order => <OrderTicket key={order.orderId} order={order} type="new" />)
-            )}
+      {/* ENFORCEMENT UI: Warning Banner for Suspended Restaurants */}
+      {isRestricted && (
+        <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-xl flex items-start gap-4 shadow-sm">
+          <div className="bg-yellow-100 p-2 rounded-full text-yellow-600 shrink-0">
+            <AlertTriangle size={20} />
+          </div>
+          <div>
+            <h3 className="text-yellow-800 font-bold mb-1">{t("storeSuspendedBannerTitle")}</h3>
+            <p className="text-yellow-700 text-sm leading-relaxed">
+              {t("storeSuspendedBannerDesc")}
+            </p>
           </div>
         </div>
+      )}
 
+      {/* Dynamic Grid: Adjusts to 1 column if "New Orders" is hidden */}
+      <div className={`grid grid-cols-1 ${!isRestricted ? "md:grid-cols-2" : ""} gap-6 flex-1 items-start`}>
+        
+        {/* Hide New Orders completely if restricted */}
+        {!isRestricted && (
+          <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 min-h-[500px]">
+            <h3 className="font-bold text-gray-700 mb-4 flex items-center justify-between">
+              <span>{t("newOrders")}</span>
+              <span className="bg-blue-100 text-blue-700 py-0.5 px-2.5 rounded-full text-xs">{newOrders.length}</span>
+            </h3>
+            <div className="space-y-4">
+              {newOrders.length === 0 ? (
+                <div className="text-center py-10 text-gray-400 text-sm">{t("noNewOrders")}</div>
+              ) : (
+                newOrders.map(order => <OrderTicket key={order.orderId} order={order} type="new" />)
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Cooking Now remains accessible so they can finish their active orders */}
         <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 min-h-[500px]">
           <h3 className="font-bold text-gray-700 mb-4 flex items-center justify-between">
             <span>{t("cookingNow")}</span>

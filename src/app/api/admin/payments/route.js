@@ -10,6 +10,14 @@ export async function GET() {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole for sensitive financial data
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json(
+      { success: false, message: "Account restricted. Data access disabled." }, 
+      { status: 403 }
+    );
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db(process.env.DB_NAME || "quickbite");

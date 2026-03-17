@@ -6,6 +6,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+    // Identify if the requester is an active administrator
+    const isAdmin = session?.user?.role === "admin" && session?.user?.accountStatus === "Active";
+
     const { id } = await params;
     const collection = await dbConnect("restaurants");
 
@@ -20,6 +24,15 @@ export async function GET(request, { params }) {
 
     if (!restaurant) {
       return NextResponse.json({ success: false, message: "Restaurant not found" }, { status: 404 });
+    }
+
+    // ENFORCEMENT: The "Ghost Store" Fix for direct links
+    // If the restaurant is Suspended or Banned, only an Active Admin can view its details directly.
+    if (!isAdmin) {
+      const isActive = restaurant.status === "Active" || !restaurant.status;
+      if (!isActive) {
+        return NextResponse.json({ success: false, message: "Restaurant is currently unavailable" }, { status: 403 });
+      }
     }
 
     const mappedRestaurant = {
@@ -38,6 +51,11 @@ export async function PATCH(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json({ success: false, message: "Account restricted. Modifications disabled." }, { status: 403 });
   }
 
   try {
@@ -70,6 +88,11 @@ export async function DELETE(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy the Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return NextResponse.json({ success: false, message: "Account restricted. Deletions disabled." }, { status: 403 });
   }
 
   try {

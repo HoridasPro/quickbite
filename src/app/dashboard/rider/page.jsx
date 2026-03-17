@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
-import { MapPin, Bike, CheckCircle, Package, Phone, Navigation, Store } from "lucide-react";
+import { MapPin, Bike, CheckCircle, Package, Phone, Navigation, Store, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RiderDashboard() {
@@ -11,6 +11,9 @@ export default function RiderDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+
+  // ENFORCEMENT: Check if the rider is suspended
+  const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
   const fetchOrders = async () => {
     try {
@@ -33,6 +36,12 @@ export default function RiderDashboard() {
   }, []);
 
   const handleUpdateOrder = async (orderId, newStatus) => {
+    // ENFORCEMENT: Frontend block to prevent suspended riders from accepting new deliveries
+    if (newStatus === "On the way" && isRestricted) {
+      Swal.fire(t("accountRestricted"), t("cannotAcceptNewOrders"), "error");
+      return;
+    }
+
     const payload = {
       orderId,
       status: newStatus,
@@ -54,137 +63,146 @@ export default function RiderDashboard() {
       if (data.success) {
         Swal.fire({
           icon: "success",
-          title: newStatus === "On the way" ? t("deliveryAcceptedToast") : t("orderDeliveredToast"),
+          title: newStatus === "Delivered" ? t("deliveryCompletedToast") : t("deliveryAcceptedToast"),
           toast: true,
           position: "top-end",
           timer: 2000,
           showConfirmButton: false,
         });
         fetchOrders();
+      } else {
+        Swal.fire(t("error"), data.message || t("failedUpdateStatus"), "error");
       }
     } catch (error) {
-      Swal.fire(t("error"), t("failedUpdateOrder"), "error");
+      Swal.fire(t("error"), t("failedUpdateStatus"), "error");
     }
   };
 
-  const availableOrders = orders.filter(
-    (o) => o.status === "Ready for Pickup" && !o.riderEmail
-  );
+  const availableOrders = orders.filter(o => o.status === "Ready for Pickup" && !o.riderEmail);
+  const myActiveOrders = orders.filter(o => o.riderEmail === session?.user?.email && o.status === "On the way");
 
-  const myActiveOrders = orders.filter(
-    (o) => o.status === "On the way" && o.riderEmail === session?.user?.email
-  );
-
-  if (loading) return <div className="p-10 text-center text-gray-500">{t("loadingDeliveryPool")}</div>;
+  if (loading) return <div className="p-10 text-center text-gray-500">{t("loadingRiderDashboard")}</div>;
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-8 pb-10">
-      
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Bike className="text-orange-500" /> {t("myActiveDelivery")}
-        </h2>
-        
-        {myActiveOrders.length === 0 ? (
-          <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-6 text-center text-orange-600 font-medium">
-            {t("noActiveDeliveries")}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {myActiveOrders.map((order) => (
-              <div key={order.orderId} className="bg-white border-2 border-orange-400 shadow-md rounded-2xl overflow-hidden">
-                <div className="bg-orange-500 text-white px-4 py-2 flex justify-between items-center font-bold text-sm">
-                  <span>{t("orderPrefix")}: {order.orderId}</span>
-                  <span className="bg-white/20 px-2 py-0.5 rounded">Tk {order.totalAmount}</span>
-                </div>
-                
-                <div className="p-5 space-y-4">
-                  <div className="flex gap-3">
-                    <Store className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{t("pickupFrom")}</p>
-                      <p className="font-semibold text-gray-900">{order.items[0]?.restaurant || t("quickBite")}</p>
-                      <p className="text-sm text-gray-600">{order.items.length} {t("itemsToCollect")}</p>
-                    </div>
-                  </div>
-
-                  <div className="border-l-2 border-dashed border-gray-200 ml-2.5 h-6 my-1"></div>
-
-                  <div className="flex gap-3">
-                    <MapPin className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-orange-500 font-bold uppercase tracking-wider">{t("deliverTo")}</p>
-                      <p className="font-semibold text-gray-900">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</p>
-                      <p className="text-sm text-gray-600">{order.customerInfo?.street}, {order.customerInfo?.city}</p>
-                      {order.customerInfo?.apartment && <p className="text-sm text-gray-600">{t("aptPrefix")} {order.customerInfo.apartment}</p>}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
-                    <a 
-                      href={`tel:${order.customerInfo?.mobile}`}
-                      className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold transition"
-                    >
-                      <Phone size={18} /> {t("callBtn")}
-                    </a>
-                    <button 
-                      onClick={() => handleUpdateOrder(order.orderId, "Delivered")}
-                      className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-sm shadow-green-200"
-                    >
-                      <CheckCircle size={18} /> {t("deliveredBtn")}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+    <div className="w-full max-w-5xl mx-auto h-full flex flex-col min-h-[70vh]">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">{t("riderDashboard")}</h2>
+          <p className="text-gray-500 text-sm">{t("manageDeliveries")}</p>
+        </div>
+        <div className="bg-gray-100 px-4 py-2 rounded-lg flex items-center gap-2">
+          <Bike size={18} className="text-orange-500" />
+          <span className="font-bold text-gray-800">{myActiveOrders.length} {t("activeDeliveries")}</span>
+        </div>
       </div>
 
-      <hr className="border-gray-200" />
-
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Package className="text-gray-500" /> {t("availableForPickup")}
-          <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">{availableOrders.length}</span>
-        </h2>
-
-        {availableOrders.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-10 text-center text-gray-500">
-            {t("noOrdersReadyPickup")}
+      {/* ENFORCEMENT UI: Warning Banner for Suspended Riders */}
+      {isRestricted && (
+        <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-xl flex items-start gap-4 shadow-sm">
+          <div className="bg-yellow-100 p-2 rounded-full text-yellow-600 shrink-0">
+            <AlertTriangle size={20} />
           </div>
-        ) : (
+          <div>
+            <h3 className="text-yellow-800 font-bold mb-1">{t("accountSuspendedBannerTitle")}</h3>
+            <p className="text-yellow-700 text-sm leading-relaxed">
+              {t("riderSuspendedBannerDesc")}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {myActiveOrders.length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+            <Package size={20} /> {t("myActiveDelivery")}
+          </h2>
           <div className="space-y-4">
-            {availableOrders.map((order) => (
-              <div key={order.orderId} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-900 text-lg">Tk {order.totalAmount}</span>
-                    <span className="text-xs font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{order.orderId}</span>
+            {myActiveOrders.map((order) => (
+              <div key={order.orderId} className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-5 md:p-6 shadow-sm">
+                <div className="flex justify-between items-start mb-4 border-b border-orange-100 pb-4">
+                  <div>
+                    <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">{order.orderId}</span>
+                    <h3 className="font-bold text-gray-900 text-lg">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</h3>
                   </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Store size={14} /> {order.items[0]?.restaurant || t("quickBite")}
+                  <span className="font-extrabold text-orange-600 text-xl">Tk {order.totalAmount}</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-500 uppercase">{t("pickupFrom")}</p>
+                    <div className="flex gap-2 text-gray-800 font-medium">
+                      <Store size={18} className="text-gray-400 shrink-0" />
+                      {order.items[0]?.restaurant || t("quickBite")}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Navigation size={14} /> {order.customerInfo?.city}
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-500 uppercase">{t("deliverTo")}</p>
+                    <div className="flex gap-2 text-gray-800 font-medium">
+                      <MapPin size={18} className="text-red-400 shrink-0" />
+                      {order.customerInfo?.street}, {order.customerInfo?.city}
+                    </div>
+                    <div className="flex gap-2 text-gray-800 font-medium">
+                      <Phone size={18} className="text-green-500 shrink-0" />
+                      {order.customerInfo?.mobile}
+                    </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => handleUpdateOrder(order.orderId, "On the way")}
-                  className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition cursor-pointer whitespace-nowrap"
+                  onClick={() => handleUpdateOrder(order.orderId, "Delivered")}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-orange-200 flex justify-center items-center gap-2 cursor-pointer"
                 >
-                  {t("acceptDeliveryBtn")}
+                  <CheckCircle size={22} /> {t("markAsDelivered")}
                 </button>
-
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* ENFORCEMENT UI: Hide the available pool if the rider is restricted */}
+      {!isRestricted && (
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Navigation size={20} className="text-blue-500" /> {t("availableDeliveries")}
+          </h2>
+          
+          {availableOrders.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-10 text-center flex flex-col items-center justify-center">
+              <Bike size={48} className="text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">{t("noOrdersWaiting")}</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {availableOrders.map((order) => (
+                <div key={order.orderId} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900 text-lg">Tk {order.totalAmount}</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{order.orderId}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Store size={14} /> {order.items[0]?.restaurant || t("quickBite")}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Navigation size={14} /> {order.customerInfo?.city}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleUpdateOrder(order.orderId, "On the way")}
+                    className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition cursor-pointer whitespace-nowrap"
+                  >
+                    {t("acceptDeliveryBtn")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

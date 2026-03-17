@@ -5,8 +5,14 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Destroy Admin God-Mode Loophole
+  if (session.user.accountStatus !== "Active") {
+    return Response.json({ success: false, message: "Account restricted. Access denied." }, { status: 403 });
   }
 
   const client = await clientPromise;
@@ -20,8 +26,14 @@ export async function GET() {
 
 export async function PATCH(req) {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Prevent Suspended/Banned admins from modifying users (or unbanning themselves)
+  if (session.user.accountStatus !== "Active") {
+    return Response.json({ success: false, message: "Account restricted. Modifications disabled." }, { status: 403 });
   }
 
   try {
@@ -72,8 +84,14 @@ export async function PATCH(req) {
 
 export async function DELETE(req) {
   const session = await getServerSession(authOptions);
+  
   if (!session || session.user.role !== "admin") {
     return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+
+  // ENFORCEMENT: Prevent Suspended/Banned admins from deleting users
+  if (session.user.accountStatus !== "Active") {
+    return Response.json({ success: false, message: "Account restricted. Deletions disabled." }, { status: 403 });
   }
 
   try {

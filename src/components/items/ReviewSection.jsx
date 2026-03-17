@@ -15,6 +15,9 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
     const [isEligible, setIsEligible] = useState(false);
     const [checkingEligibility, setCheckingEligibility] = useState(true);
 
+    // ENFORCEMENT: Check if the user is suspended/restricted
+    const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
+
     useEffect(() => {
         const verifyPurchase = async () => {
             if (!session?.user?.email) {
@@ -48,6 +51,12 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
         
         if (!session?.user) {
             Swal.fire(t("wait"), t("swalLoginWarning"), "warning");
+            return;
+        }
+
+        // ENFORCEMENT: Backend request blocker
+        if (isRestricted) {
+            Swal.fire(t("accountRestricted"), t("accountRestrictedReviewDesc"), "error");
             return;
         }
 
@@ -105,6 +114,13 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                     <p className="text-sm text-gray-500 italic animate-pulse">{t("verifyingPurchase")}</p>
                 ) : !session ? (
                     <p className="text-sm text-gray-500 italic">{t("loginToReview")}</p>
+                ) : isRestricted ? (
+                    /* ENFORCEMENT UI: The Read-Only View for Restricted Users */
+                    <div className="bg-red-50 border border-red-100 p-4 rounded-lg">
+                        <p className="text-sm text-red-800 font-medium">
+                            {t("accountRestrictedReview")}
+                        </p>
+                    </div>
                 ) : !isEligible ? (
                     <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg">
                         <p className="text-sm text-orange-800 font-medium">
