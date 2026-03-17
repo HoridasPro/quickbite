@@ -410,6 +410,13 @@ export const dictionaries = {
     uploadFailed: "Image upload failed.",
     uploading: "Uploading...",
     clickToUpload: "Click or drag to upload",
+    // Banned suspended page
+    accountBannedTitle: "Account Banned",
+    accountBannedDesc: "Your account has been permanently restricted due to a violation of our terms of service. If you believe this is a mistake, please contact support.",
+    accountSuspendedTitle: "Account Suspended",
+    accountSuspendedDesc: "Your account is temporarily suspended while under review. You currently do not have access to the dashboard.",
+    contactSupportBtn: "Contact Support",
+    backToHomeBtn: "Back to Home",
     // 404 Page
     pageNotFoundTitle: "404",
     pageNotFoundHeading: "Page Not Found",
@@ -423,7 +430,19 @@ export const dictionaries = {
     enterEmail: "Enter your email",
     sendResetLinkBtn: "Send Reset Link",
     setNewPasswordHeader: "Set New Password",
-    loadingInteractiveMap: "Loading Interactive Map..."
+    loadingInteractiveMap: "Loading Interactive Map...",
+
+    // UI Restriction Keys
+    accountRestricted: "Account Restricted",
+    accountRestrictedReview: "Your account is currently restricted. You cannot leave reviews.",
+    accountRestrictedReviewDesc: "Restricted accounts cannot submit reviews.",
+    storeSuspendedBannerTitle: "Store Suspended",
+    storeSuspendedBannerDesc: "Your store is suspended. You may fulfill your active orders, but your store is offline to new customers.",
+    cannotAcceptNewOrders: "Suspended accounts cannot accept new orders.",
+    accountSuspendedBannerTitle: "Account Suspended",
+    riderSuspendedBannerDesc: "Your account is suspended. Please complete your current deliveries. You cannot accept new orders at this time.",
+    addressModificationDisabled: "Modifications to addresses are temporarily disabled.",
+    profileReadOnlyDesc: "Your profile is in read-only mode. You cannot modify your details or delete your account while under investigation."
   },
   bn: {
     delivery: "ডেলিভারি",
@@ -724,7 +743,7 @@ export const dictionaries = {
     violationPlaceholder: "শর্তাবলী লঙ্ঘন...",
     provideReasonWarning: "আপনাকে অবশ্যই একটি কারণ প্রদান করতে হবে!",
     areYouSure: "আপনি কি নিশ্চিত?",
-    cannotRevert: "আপনি এটি ফিরিয়ে আনতে পারবেন না!",
+    cannotRevert: "আপনি এটি ফিরিয়ে আনতে পারবেন চিহ্নিত পারবেন না!",
     confirmDeleteBtn: "হ্যাঁ, মুছে ফেলুন!",
     deletedSuccessTitle: "মুছে ফেলা হয়েছে!",
     userDeletedSuccessMessage: "ব্যবহারকারী মুছে ফেলা হয়েছে।",
@@ -836,6 +855,13 @@ export const dictionaries = {
     uploadFailed: "ছবি আপলোড ব্যর্থ হয়েছে।",
     uploading: "আপলোড করা হচ্ছে...",
     clickToUpload: "আপলোড করতে ক্লিক করুন বা টেনে আনুন",
+    // Banned and suspended page
+    accountBannedTitle: "অ্যাকাউন্ট নিষিদ্ধ করা হয়েছে",
+    accountBannedDesc: "আমাদের পরিষেবার শর্তাবলী লঙ্ঘনের কারণে আপনার অ্যাকাউন্ট স্থায়ীভাবে সীমাবদ্ধ করা হয়েছে। যদি আপনি মনে করেন এটি একটি ভুল, অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।",
+    accountSuspendedTitle: "অ্যাকাউন্ট স্থগিত করা হয়েছে",
+    accountSuspendedDesc: "পর্যালোচনার অধীনে থাকার কারণে আপনার অ্যাকাউন্ট সাময়িকভাবে স্থগিত করা হয়েছে। বর্তমানে আপনার ড্যাশবোর্ডে অ্যাক্সেস নেই।",
+    contactSupportBtn: "সাপোর্টে যোগাযোগ করুন",
+    backToHomeBtn: "হোমে ফিরে যান",
     // 404 Page
     pageNotFoundTitle: "৪০৪",
     pageNotFoundHeading: "পৃষ্ঠা পাওয়া যায়নি",
@@ -849,6 +875,18 @@ export const dictionaries = {
     enterEmail: "আপনার ইমেইল দিন",
     sendResetLinkBtn: "রিসেট লিঙ্ক পাঠান",
     setNewPasswordHeader: "নতুন পাসওয়ার্ড সেট করুন",
-    loadingInteractiveMap: "ইন্টারেক্টিভ ম্যাপ লোড হচ্ছে..."
+    loadingInteractiveMap: "ইন্টারেক্টিভ ম্যাপ লোড হচ্ছে...",
+
+    // UI Restriction Keys
+    accountRestricted: "অ্যাকাউন্ট সীমাবদ্ধ",
+    accountRestrictedReview: "আপনার অ্যাকাউন্ট বর্তমানে সীমাবদ্ধ। আপনি রিভিউ দিতে পারবেন না।",
+    accountRestrictedReviewDesc: "সীমাবদ্ধ অ্যাকাউন্টগুলি রিভিউ জমা দিতে পারে না।",
+    storeSuspendedBannerTitle: "দোকান স্থগিত করা হয়েছে",
+    storeSuspendedBannerDesc: "আপনার দোকান স্থগিত করা হয়েছে। আপনি আপনার সক্রিয় অর্ডারগুলো পূরণ করতে পারেন, কিন্তু নতুন গ্রাহকদের জন্য আপনার দোকান অফলাইনে আছে।",
+    cannotAcceptNewOrders: "স্থগিত অ্যাকাউন্টগুলি নতুন অর্ডার গ্রহণ করতে পারে না।",
+    accountSuspendedBannerTitle: "অ্যাকাউন্ট স্থগিত করা হয়েছে",
+    riderSuspendedBannerDesc: "আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। অনুগ্রহ করে আপনার বর্তমান ডেলিভারিগুলো শেষ করুন। এই মুহূর্তে আপনি নতুন অর্ডার গ্রহণ করতে পারবেন না।",
+    addressModificationDisabled: "ঠিকানা পরিবর্তন সাময়িকভাবে নিষ্ক্রিয় করা হয়েছে।",
+    profileReadOnlyDesc: "আপনার প্রোফাইল রিড-ওনলি মোডে আছে। তদন্ত চলাকালীন আপনি আপনার তথ্য পরিবর্তন বা অ্যাকাউন্ট মুছে ফেলতে পারবেন না।"
   }
 };

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
@@ -10,10 +12,8 @@ export async function GET(request) {
       return NextResponse.json({ success: false, message: "Item ID is required" }, { status: 400 });
     }
 
-    // Convert to number if possible to match the team's numeric IDs
     const queryId = isNaN(itemId) ? itemId : parseInt(itemId);
 
-    // FIX: Must await the dbConnect call
     const collection = await dbConnect("reviews");
     const reviews = await collection
       .find({ itemId: queryId })
@@ -29,25 +29,37 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { itemId, user, rating, comment } = body;
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!itemId || !user || !rating) {
+    // ENFORCEMENT: Universally block restricted users (Suspended or Banned) from leaving reviews
+    // The role !== "admin" exception has been permanently removed.
+    if (session.user.accountStatus !== "Active") {
+      return NextResponse.json(
+        { success: false, message: `Account ${session.user.accountStatus}. Reviews disabled.` }, 
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { itemId, rating, comment } = body;
+
+    if (!itemId || !rating) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
-    // Convert to number if possible to match the team's numeric IDs
     const storedId = isNaN(itemId) ? itemId : parseInt(itemId);
 
     const newReview = {
       itemId: storedId,
-      user,
+      user: session.user.name || "Anonymous",
       rating: parseInt(rating),
       comment: comment || "",
       date: new Date().toISOString()
     };
 
-    // FIX: Must await the dbConnect call
     const collection = await dbConnect("reviews");
     const result = await collection.insertOne(newReview);
     

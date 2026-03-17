@@ -5,12 +5,18 @@ import { Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useSession } from "next-auth/react";
 
 export default function CartContent({ onClose, isDrawer = false }) {
   const { cartItems, removeFromCart } = useCart();
   const { t, language } = useTranslation();
+  const { data: session } = useSession();
+  
   const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
   const isBn = language === "bn";
+
+  // ENFORCEMENT: Check if the user is suspended/restricted
+  const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
   // EMPTY STATE
   if (cartItems.length === 0) {
@@ -88,13 +94,23 @@ export default function CartContent({ onClose, isDrawer = false }) {
           <span>{t("total")}</span>
           <span className="text-orange-600">Tk {totalAmount}</span>
         </div>
-        <Link 
-          href="/checkout" 
-          onClick={onClose} 
-          className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold flex justify-center items-center hover:bg-orange-700 transition shadow-lg shadow-orange-200 cursor-pointer text-center"
-        >
-          {t("reviewPaymentCheckout")}
-        </Link>
+        
+        {isRestricted ? (
+          <button 
+            disabled
+            className="w-full bg-gray-300 text-gray-500 py-3 rounded-xl font-bold flex justify-center items-center cursor-not-allowed text-center"
+          >
+            {t("accountRestricted") || "Account Restricted"}
+          </button>
+        ) : (
+          <Link 
+            href="/checkout" 
+            onClick={onClose} 
+            className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold flex justify-center items-center hover:bg-orange-700 transition shadow-lg shadow-orange-200 cursor-pointer text-center"
+          >
+            {t("reviewPaymentCheckout")}
+          </Link>
+        )}
       </div>
     </div>
   );

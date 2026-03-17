@@ -6,6 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
+import { getDisplayCategoryName } from "@/utils/translateCategoryName";
 
 const FoodsPageContent = () => {
   const searchParams = useSearchParams();
@@ -38,7 +39,6 @@ const FoodsPageContent = () => {
     return () => window.removeEventListener('resize', calculateHeaderHeight);
   }, []);
 
-  // Fetch categories to match Bangla names later
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -95,13 +95,6 @@ const FoodsPageContent = () => {
     { id: "Buy 1 Get 1", label: t("offerBogo") },
     { id: "Cashback", label: t("offerCashback") },
   ];
-
-  // Helper to safely translate the category name for the header
-  const getDisplayCategoryName = (engName) => {
-    if (!engName) return "";
-    const match = categories.find(c => c.categoryName === engName || c.name === engName);
-    return isBn ? (match?.categoryBn || engName) : engName;
-  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 mb-20 items-start">
@@ -181,7 +174,7 @@ const FoodsPageContent = () => {
         
         <h2 className="font-bold text-2xl mt-10 mb-5">
          {totalItems} {t("foodsFound")} {selectedCategory && (
-            <> {t("forText")} "{getDisplayCategoryName(selectedCategory)}"</>
+            <> {t("forText")} "{getDisplayCategoryName(selectedCategory, categories, language)}"</>
           )} {searchQuery && ` ${t("matchingText")} "${searchQuery}"`}
         </h2>
 

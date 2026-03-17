@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
+import { getDisplayCategoryName } from "@/utils/translateCategoryName";
 
 const CategoryCard = ({ img, name, onClick, active }) => {
   return (
@@ -27,7 +28,7 @@ const CategoryCard = ({ img, name, onClick, active }) => {
   );
 };
 
-const FoodCard = ({ food }) => {
+const FoodCard = ({ food, onClick }) => {
   const router = useRouter();
   const { t, language } = useTranslation();
   const isBn = language === "bn";
@@ -38,7 +39,7 @@ const FoodCard = ({ food }) => {
 
   return (
     <div
-      onClick={() => router.push(`/foods/${food.id || food._id}`)}
+      onClick={() => onClick ? onClick(food) : router.push(`/foods/${food.id || food._id}`)}
       className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 p-3 cursor-pointer"
     >
       <div className="overflow-hidden rounded-xl bg-gray-50">
@@ -67,7 +68,7 @@ const FoodCard = ({ food }) => {
   );
 };
 
-const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
+const CategoriesFoods = ({ onCategorySelect, hideFoods = false, onFoodClick }) => {
   const [categories, setCategories] = useState([]);
   const [foods, setFoods] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -132,7 +133,6 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
         >
           {categories.map((cat) => {
             const catName = cat.categoryName || cat.name;
-            // FIX: Using categoryBn exactly as it is in the DB
             const displayName = language === "bn" && cat.categoryBn ? cat.categoryBn : catName;
             
             return (
@@ -158,12 +158,16 @@ const CategoriesFoods = ({ onCategorySelect, hideFoods = false }) => {
       {!hideFoods && foods.length > 0 && (
         <div className="mt-12">
           <h2 className="text-xl font-bold mb-6">
-            {selectedCategory ? `${selectedCategory} ${t("foodsLabel")}` : t("allFoods")}
+            {selectedCategory ? `${getDisplayCategoryName(selectedCategory, categories, language)} ${t("foodsLabel")}` : t("allFoods")}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {foods.map((food) => (
-              <FoodCard key={food.id || food._id} food={food} />
+              <FoodCard 
+                key={food.id || food._id} 
+                food={food} 
+                onClick={onFoodClick} 
+              />
             ))}
           </div>
         </div>

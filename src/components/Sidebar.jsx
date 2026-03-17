@@ -10,7 +10,8 @@ import {
   Truck, 
   X,
   ChefHat,
-  Bike
+  Bike,
+  AlertTriangle
 } from "lucide-react";
 import NavLink from "./NavLink";
 import { useSession } from "next-auth/react";
@@ -19,7 +20,10 @@ import { useTranslation } from "@/hooks/useTranslation";
 export default function Sidebar({ closeSidebar }) {
   const { data: session } = useSession();
   const { t } = useTranslation();
+  
   const role = session?.user?.role || "user";
+  const accountStatus = session?.user?.accountStatus || "Active";
+  const isRestricted = accountStatus !== "Active";
 
   const baseClass = "flex items-center gap-3 p-3 rounded-xl transition-all font-medium";
   const activeClass = "text-orange-500 bg-orange-50";
@@ -38,6 +42,13 @@ export default function Sidebar({ closeSidebar }) {
     rider: t("roleRider")
   };
 
+  // Badge Styling based on restriction severity
+  const badgeColor = accountStatus === "Suspended" 
+    ? "bg-yellow-100 text-yellow-800 border-yellow-300" 
+    : "bg-red-100 text-red-800 border-red-300";
+    
+  const statusKey = accountStatus === "Suspended" ? "statusSuspended" : "statusBanned";
+
   return (
     <div className="h-full text-gray-800 p-6 relative">
       <button
@@ -51,9 +62,19 @@ export default function Sidebar({ closeSidebar }) {
         <h2 className="text-3xl font-extrabold text-orange-500">
           {roleTitles[role]}
         </h2>
-        <p className="text-sm text-gray-400 mt-1 font-medium capitalize">
-          {t("quickBite")} {roleNames[role]}
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-sm text-gray-400 font-medium capitalize">
+            {t("quickBite")} {roleNames[role]}
+          </p>
+          
+          {/* ENFORCEMENT UI: Persistent Visual Status Badge */}
+          {isRestricted && (
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 uppercase tracking-wider ${badgeColor}`}>
+              <AlertTriangle size={10} />
+              {t(statusKey) || accountStatus}
+            </span>
+          )}
+        </div>
       </div>
 
       <ul className="space-y-2">

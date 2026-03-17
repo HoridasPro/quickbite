@@ -15,6 +15,17 @@ export async function POST(request) {
       );
     }
 
+    const { accountStatus } = session.user;
+
+    // ENFORCEMENT 1: Block restricted users (Suspended or Banned) from placing new orders.
+    // Removed the 'role !== "admin"' loophole. All suspended accounts are blocked.
+    if (accountStatus !== "Active") {
+      return NextResponse.json(
+        { success: false, message: `Account ${accountStatus}. Purchasing is disabled.` },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const foodsCollection = await dbConnect("allFoods");
 
@@ -167,22 +178,33 @@ export async function GET(request) {
     if (!session || !session.user?.email) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
+
+    const { accountStatus, role, email: sessionEmail } = session.user;
+
+    // ENFORCEMENT 2: Total Read Block for Banned users. 
+    // Suspended users ARE allowed to GET so they can view past order history/read-only dashboards.
+    if (accountStatus === "Banned") {
+      return NextResponse.json({ success: false, message: "Account Banned" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
     const orderId = searchParams.get("orderId");
     let query = {};
+    
     if (orderId) {
       query.orderId = orderId;
-      if (!["admin", "restaurant", "rider"].includes(session.user.role)) {
-        query.email = session.user.email;
+      if (!["admin", "restaurant", "rider"].includes(role)) {
+        query.email = sessionEmail;
       }
     } else {
-      if (["admin", "restaurant", "rider"].includes(session.user.role)) {
+      if (["admin", "restaurant", "rider"].includes(role)) {
         if (email) query.email = email;
       } else {
-        query.email = session.user.email;
+        query.email = sessionEmail;
       }
     }
+    
     const collection = await dbConnect("orders");
     const orders = await collection.find(query).sort({ timestamp: -1 }).toArray();
     return NextResponse.json({ success: true, orders }, { status: 200 });
@@ -197,26 +219,63 @@ export async function PATCH(request) {
     if (!session || !["admin", "restaurant", "rider"].includes(session.user.role)) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
+
+    const { accountStatus, role, email: sessionEmail } = session.user;
+
+    // ENFORCEMENT 3: Banned users cannot interact at all.
+    if (accountStatus === "Banned") {
+      return NextResponse.json({ success: false, message: "Account Banned" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { orderId, status, riderEmail, riderName } = body;
+    
     if (!orderId || !status) {
       return NextResponse.json({ success: false, message: "Order ID and status required" }, { status: 400 });
     }
+
+    // ENFORCEMENT 4: The Fulfillment Paradox Logic for Suspended Users
+    if (accountStatus === "Suspended") {
+      // Suspended Admins cannot modify anything
+      if (role === "admin") {
+        return NextResponse.json({ success: false, message: "Admin privileges suspended." }, { status: 403 });
+      }
+
+      // Suspended Riders cannot ACCEPT new orders (transitioning to "On the way")
+      if (role === "rider" && status === "On the way") {
+        return NextResponse.json({ success: false, message: "Suspended riders cannot accept new deliveries." }, { status: 403 });
+      }
+    }
+    
     const collection = await dbConnect("orders");
     const existingOrder = await collection.findOne({ orderId: orderId });
+    
     if (!existingOrder) {
        return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
     }
+
+    // ENFORCEMENT 5: Suspended Rider validation layer
+    if (accountStatus === "Suspended" && role === "rider") {
+      // If a suspended rider tries to modify an order they are NOT assigned to, block it.
+      // This allows them to mark their currently active deliveries as "Delivered", but nothing else.
+      if (existingOrder.riderEmail !== sessionEmail) {
+        return NextResponse.json({ success: false, message: "Cannot modify unassigned orders while suspended." }, { status: 403 });
+      }
+    }
+    
     if (existingOrder.paymentStatus !== "Paid") {
       const allowedUnpaidStatuses = ["Pending", "Cancelled"];
       if (!allowedUnpaidStatuses.includes(status)) {
         return NextResponse.json({ success: false, message: "Unpaid orders can only be set to Pending or Cancelled." }, { status: 400 });
       }
     }
+    
     let updateFields = { status };
     if (riderEmail) updateFields.riderEmail = riderEmail;
     if (riderName) updateFields.riderName = riderName;
+    
     await collection.updateOne({ orderId: orderId }, { $set: updateFields });
+    
     return NextResponse.json({ success: true, message: "Order updated successfully" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, message: "Failed to update order" }, { status: 500 });

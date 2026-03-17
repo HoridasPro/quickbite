@@ -8,43 +8,44 @@ export async function proxy(req) {
   });
 
   const { pathname } = req.nextUrl;
+  const isApiRoute = pathname.startsWith("/api");
 
-  // 1. ENFORCEMENT: The Ban Hammer
-  // If the user is marked as Banned in their token, lock them out of all secure areas.
-  if (token && token.accountStatus === "Banned") {
-    if (pathname.startsWith("/dashboard")) {
-      // Redirect to a dedicated "Account Terminated" page (we will build this later)
+  if (token) {
+    // 1. Total lockout for Banned users
+    if (token.accountStatus === "Banned" && !pathname.startsWith("/banned")) {
+      if (isApiRoute) {
+        return NextResponse.json({ success: false, message: "Account Banned." }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/banned", req.url));
     }
+
+    // 2. Strategic lockout for Suspended users
+    if (token.accountStatus === "Suspended" && !pathname.startsWith("/suspended")) {
+      if (token.role === "admin" && pathname.startsWith("/dashboard/admin")) {
+        if (isApiRoute) {
+          return NextResponse.json({ success: false, message: "Admin privileges suspended." }, { status: 403 });
+        }
+        return NextResponse.redirect(new URL("/suspended", req.url));
+      }
+
+      if (pathname.startsWith("/checkout")) {
+        if (isApiRoute) {
+          return NextResponse.json({ success: false, message: "Purchasing disabled." }, { status: 403 });
+        }
+        return NextResponse.redirect(new URL("/suspended", req.url));
+      }
+    }
   }
 
-  // Protect Admin Dashboard
+  // Protect Dashboards
   if (pathname.startsWith("/dashboard/admin")) {
-    if (!token || token.role !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+    if (!token || token.role !== "admin") return NextResponse.redirect(new URL("/", req.url));
   }
-
-  // Protect Rider Dashboard (Admins also get access)
   if (pathname.startsWith("/dashboard/rider")) {
-    if (!token || (token.role !== "rider" && token.role !== "admin")) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    // Riders who are "Suspended" shouldn't be able to access the delivery pool
-    if (token && token.accountStatus === "Suspended" && token.role !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+    if (!token || (token.role !== "rider" && token.role !== "admin")) return NextResponse.redirect(new URL("/", req.url));
   }
-
-  // Protect Restaurant Dashboard (Admins also get access)
   if (pathname.startsWith("/dashboard/restaurant")) {
-    if (!token || (token.role !== "restaurant" && token.role !== "admin")) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    // Suspended restaurants shouldn't access the Kitchen KDS
-    if (token && token.accountStatus === "Suspended" && token.role !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+    if (!token || (token.role !== "restaurant" && token.role !== "admin")) return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
@@ -52,7 +53,6 @@ export async function proxy(req) {
 
 export const config = {
   matcher: [
-    // Catch everything under dashboard
-    "/dashboard/:path*"
+    "/((?!_next/static|_next/image|favicon.ico).*)"
   ],
 };

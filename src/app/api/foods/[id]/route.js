@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === "admin" && session?.user?.accountStatus === "Active";
+
     const { id } = await params;
-    
-    // FIX: Point to the actual team collection 'allFoods'
     const collection = await dbConnect("allFoods");
 
     let query = {};
     
-    // Support both the team's numeric 'id' and MongoDB '_id'
     if (!isNaN(id)) {
       query = { id: parseInt(id) };
     } else {
@@ -34,7 +36,18 @@ export async function GET(request, { params }) {
       );
     }
 
-    // FIX: Mapping values based on team schema examples
+    if (!isAdmin && food.restaurant_name) {
+      const restCollection = await dbConnect("restaurants");
+      const restaurant = await restCollection.findOne({ name: food.restaurant_name });
+      
+      if (!restaurant || restaurant.status !== "Active") {
+        return NextResponse.json(
+          { success: false, message: "Item unavailable" }, 
+          { status: 403 }
+        );
+      }
+    }
+
     const mappedFood = {
       ...food,
       id: food.id || food._id.toString(),
@@ -50,7 +63,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({ success: true, food: mappedFood });
   } catch (error) {
-    console.error("Single food fetch error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" }, 
       { status: 500 }

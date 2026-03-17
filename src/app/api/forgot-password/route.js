@@ -8,15 +8,22 @@ export async function POST(req) {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ message: "Email is required" });
+      return NextResponse.json({ message: "Email is required" }, { status: 400 });
     }
 
     const users = await dbConnect("users");
-
     const user = await users.findOne({ email });
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" });
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    // ENFORCEMENT: Block Banned users from utilizing SMTP resources
+    if (user.accountStatus === "Banned") {
+      return NextResponse.json(
+        { message: "Account is banned. Password reset disabled." }, 
+        { status: 403 }
+      );
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
@@ -27,7 +34,6 @@ export async function POST(req) {
       { $set: { resetToken, resetTokenExpiry } },
     );
 
-    // 🔥 Check ENV values
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error("Email credentials missing in .env");
     }
@@ -45,10 +51,10 @@ export async function POST(req) {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Reset Password",
+      subject: "Reset Password - QuickBite",
       html: `
         <h2>Password Reset</h2>
-        <p>Click below to reset:</p>
+        <p>Click below to reset your password:</p>
         <a href="${resetUrl}">${resetUrl}</a>
       `,
     });
@@ -61,6 +67,6 @@ export async function POST(req) {
     return NextResponse.json({
       message: "Server error",
       error: error.message,
-    });
+    }, { status: 500 });
   }
 }

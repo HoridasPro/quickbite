@@ -1,15 +1,38 @@
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
   try {
-    // Keeping this returning allFoods because the team's UI currently fetches foods from here
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === "admin" && session?.user?.accountStatus === "Active";
+    
+    let finalQuery = {};
+
+    if (!isAdmin) {
+      const restCollection = await dbConnect("restaurants");
+      const activeRestaurants = await restCollection.find({
+        $or: [{ status: "Active" }, { status: { $exists: false } }]
+      }).toArray();
+      
+      const activeNames = activeRestaurants.map(r => r.name).filter(Boolean);
+
+      finalQuery = {
+        $or: [
+          { restaurant_name: { $in: activeNames } },
+          { restaurant_name: null },
+          { restaurant_name: "" },
+          { restaurant_name: { $exists: false } }
+        ]
+      };
+    }
+
     const collection = await dbConnect("allFoods");
-    const allFoods = await collection.find({}).toArray();
+    const allFoods = await collection.find(finalQuery).toArray();
 
     return NextResponse.json(allFoods, { status: 200 });
   } catch (err) {
-    console.error("GET FOODS ERROR:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
@@ -19,7 +42,6 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    // FIX: Save actual feedback to a 'feedback' collection, NOT 'allFoods'
     const collection = await dbConnect("feedback");
     const { message } = await req.json();
     
@@ -35,7 +57,6 @@ export async function POST(req) {
     
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
-    console.error("POST FEEDBACK ERROR:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }

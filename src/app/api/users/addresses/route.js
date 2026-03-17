@@ -1,17 +1,25 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
-      return NextResponse.json({ success: false, message: "Email is required" }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    // FIX: Await the async dbConnect helper
+    // ENFORCEMENT: Banned users cannot view addresses. Suspended users retain Read-Only access.
+    if (session.user.accountStatus === "Banned") {
+      return NextResponse.json({ success: false, message: "Account Banned" }, { status: 403 });
+    }
+
+    // IDOR FIX: Hardcode the email to the securely verified session email.
+    // Completely ignore any email passed in the URL searchParams.
+    const email = session.user.email;
+
     const collection = await dbConnect("addresses");
     const addresses = await collection.find({ email }).toArray();
     
@@ -30,14 +38,26 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { email, label, address, city } = body;
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!email || !label || !address) {
+    // ENFORCEMENT: Only Active users can create new addresses.
+    if (session.user.accountStatus !== "Active") {
+      return NextResponse.json({ success: false, message: "Account restricted. Modifications disabled." }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { label, address, city } = body; 
+    
+    // IDOR FIX: Extract email directly from the secure session, never the request body.
+    const email = session.user.email;
+
+    if (!label || !address) {
        return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
-    // FIX: Await the async dbConnect helper
     const collection = await dbConnect("addresses");
 
     const existingAddressesCount = await collection.countDocuments({ email });
@@ -63,27 +83,41 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const body = await request.json();
-    const { id, email } = body;
-
-    if (!id || !email) {
-      return NextResponse.json({ success: false, message: "ID and email are required" }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    // FIX: Await the async dbConnect helper
+    // ENFORCEMENT: Only Active users can update default addresses.
+    if (session.user.accountStatus !== "Active") {
+      return NextResponse.json({ success: false, message: "Account restricted. Modifications disabled." }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { id } = body;
+    
+    // IDOR FIX: Force email from session
+    const email = session.user.email;
+
+    if (!id) {
+      return NextResponse.json({ success: false, message: "ID is required" }, { status: 400 });
+    }
+
     const collection = await dbConnect("addresses");
 
+    // Scope updates strictly to this user's email
     await collection.updateMany({ email }, { $set: { isDefault: false } });
 
+    // IDOR FIX: Append 'email' to the query to ensure users cannot update an address ID that belongs to someone else
     const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
+      { _id: new ObjectId(id), email: email },
       { $set: { isDefault: true } }
     );
 
     if (result.modifiedCount === 1 || result.matchedCount === 1) {
       return NextResponse.json({ success: true, message: "Default address updated" }, { status: 200 });
     } else {
-      return NextResponse.json({ success: false, message: "Address not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "Address not found or unauthorized" }, { status: 404 });
     }
   } catch (error) {
     console.error("Update default address error:", error);
@@ -93,17 +127,30 @@ export async function PUT(request) {
 
 export async function PATCH(request) {
   try {
-    const body = await request.json();
-    const { updates, email } = body;
-
-    if (!updates || !email) {
-       return NextResponse.json({ success: false, message: "Updates and email are required" }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    // FIX: Await the async dbConnect helper
+    // ENFORCEMENT: Only Active users can reorder addresses.
+    if (session.user.accountStatus !== "Active") {
+      return NextResponse.json({ success: false, message: "Account restricted. Modifications disabled." }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { updates } = body;
+    
+    // IDOR FIX: Force email from session
+    const email = session.user.email;
+
+    if (!updates) {
+       return NextResponse.json({ success: false, message: "Updates are required" }, { status: 400 });
+    }
+
     const collection = await dbConnect("addresses");
     
     for (const item of updates) {
+      // IDOR FIX: Append 'email' to the query ensuring cross-account pollution is impossible
       await collection.updateOne(
         { _id: new ObjectId(item.id), email },
         { $set: { order: item.order } }
@@ -119,22 +166,35 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    // ENFORCEMENT: Only Active users can delete addresses.
+    if (session.user.accountStatus !== "Active") {
+      return NextResponse.json({ success: false, message: "Account restricted. Deletions disabled." }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    
+    // IDOR FIX: Force email from session
+    const email = session.user.email;
 
     if (!id) {
        return NextResponse.json({ success: false, message: "ID is required" }, { status: 400 });
     }
 
-    // FIX: Await the async dbConnect helper
     const collection = await dbConnect("addresses");
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    // IDOR FIX: Append 'email' to the deletion query to prevent malicious deletion of other users' addresses via ID guessing
+    const result = await collection.deleteOne({ _id: new ObjectId(id), email: email });
     
     if (result.deletedCount === 1) {
        return NextResponse.json({ success: true, message: "Address deleted" }, { status: 200 });
     } else {
-       return NextResponse.json({ success: false, message: "Address not found" }, { status: 404 });
+       return NextResponse.json({ success: false, message: "Address not found or unauthorized" }, { status: 404 });
     }
   } catch (error) {
     console.error("Delete address error:", error);

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Map from "@/components/Map";
 import { useTranslation } from "@/hooks/useTranslation";
+import { AlertTriangle } from "lucide-react";
 
 export default function AddressesPage() {
   const { data: session, status } = useSession();
@@ -24,6 +25,9 @@ export default function AddressesPage() {
 
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
+
+  // ENFORCEMENT: Check if the user is suspended
+  const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
   const labelOptions = [
     { id: "Home", name: t("labelHome") },
@@ -78,6 +82,7 @@ export default function AddressesPage() {
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
+    if (isRestricted) return; // Failsafe
     if (!addressText || !city) return alert(t("fillAllFieldsAlert"));
 
     setSubmitting(true);
@@ -111,6 +116,8 @@ export default function AddressesPage() {
   };
 
   const handleSetDefault = async (id) => {
+    if (isRestricted) return; // Failsafe
+
     setAddresses((prevAddresses) =>
       prevAddresses.map((addr) => ({
         ...addr,
@@ -141,6 +148,7 @@ export default function AddressesPage() {
   };
 
   const handleDelete = async (id) => {
+    if (isRestricted) return; // Failsafe
     if (!confirm(t("confirmDeleteAddress"))) return;
     
     try {
@@ -168,7 +176,7 @@ export default function AddressesPage() {
   };
 
   const handleDragEnd = async () => {
-    if (dragItem.current === null || dragOverItem.current === null) return;
+    if (isRestricted || dragItem.current === null || dragOverItem.current === null) return;
     
     const copyAddresses = [...addresses];
     const draggedItemContent = copyAddresses[dragItem.current];
@@ -208,6 +216,16 @@ export default function AddressesPage() {
       <div className="max-w-[680px] mx-auto px-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("savedAddressesHeader")}</h1>
         
+        {/* ENFORCEMENT UI: Warning Banner */}
+        {isRestricted && (
+          <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-xl flex items-start gap-3 shadow-sm">
+            <AlertTriangle className="text-yellow-600 shrink-0 mt-0.5" size={18} />
+            <p className="text-sm text-yellow-800 font-medium">
+              {t("accountRestricted")}: {t("addressModificationDisabled")}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
           {addresses.length === 0 && !showForm ? (
             <p className="text-gray-500 text-center py-4">{t("noSavedAddresses")}</p>
@@ -215,15 +233,15 @@ export default function AddressesPage() {
             addresses.map((addr, index) => (
               <div 
                 key={addr._id} 
-                draggable
+                draggable={!isRestricted} // Disable dragging if restricted
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragEnter={(e) => handleDragEnter(e, index)}
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => e.preventDefault()}
-                onClick={() => handleSetDefault(addr._id)}
-                className={`bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4 cursor-pointer transition-all ${
-                  addr.isDefault ? "border-2 border-orange-500" : "border border-gray-100 hover:border-orange-300"
-                }`}
+                onClick={() => !isRestricted && handleSetDefault(addr._id)} // Disable click if restricted
+                className={`bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all ${
+                  addr.isDefault ? "border-2 border-orange-500" : "border border-gray-100"
+                } ${isRestricted ? "opacity-80 cursor-not-allowed" : "hover:border-orange-300 cursor-pointer"}`}
               >
                 <div className="flex items-start gap-4">
                   <div className="pt-1">
@@ -232,7 +250,8 @@ export default function AddressesPage() {
                       name="defaultAddress"
                       checked={addr.isDefault || false}
                       readOnly
-                      className="w-5 h-5 text-orange-600 cursor-pointer accent-orange-600 pointer-events-none"
+                      disabled={isRestricted}
+                      className="w-5 h-5 text-orange-600 accent-orange-600 pointer-events-none disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -247,94 +266,101 @@ export default function AddressesPage() {
                     <p className="text-sm text-gray-600 mt-1">{addr.address}, {addr.city}</p>
                   </div>
                 </div>
-                <div className="flex gap-4 items-center pl-9 sm:pl-0">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(addr._id);
-                    }}
-                    className="text-red-500 font-medium text-sm hover:underline cursor-pointer"
-                  >
-                    {t("deleteBtn")}
-                  </button>
-                </div>
+                
+                {/* ENFORCEMENT UI: Hide Delete button if restricted */}
+                {!isRestricted && (
+                  <div className="flex gap-4 items-center pl-9 sm:pl-0">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(addr._id);
+                      }}
+                      className="text-red-500 font-medium text-sm hover:underline cursor-pointer"
+                    >
+                      {t("deleteBtn")}
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
         </div>
 
-        {showForm ? (
-          <form onSubmit={handleAddAddress} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6 space-y-4">
-            <h3 className="font-bold text-lg mb-2">{t("addNewAddressTitle")}</h3>
+        {/* ENFORCEMENT UI: Hide Add Address button/form entirely if restricted */}
+        {!isRestricted && (
+          showForm ? (
+            <form onSubmit={handleAddAddress} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6 space-y-4">
+              <h3 className="font-bold text-lg mb-2">{t("addNewAddressTitle")}</h3>
 
-            <div className="w-full h-48 rounded-xl overflow-hidden border border-gray-300 mb-2 relative">
-              <Map position={mapPosition} onLocationSelect={handleLocationSelect} />
-            </div>
-            <p className="text-xs text-gray-500 text-right -mt-2">{t("clickMapAutoFill")}</p>
-            
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">{t("labelTitle")}</label>
-              <div className="flex gap-2">
-                {labelOptions.map((lbl) => (
-                  <button
-                    type="button"
-                    key={lbl.id}
-                    onClick={() => setLabel(lbl.id)}
-                    className={`px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
-                      label === lbl.id ? "border-orange-500 bg-orange-50 text-orange-600 font-medium" : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {lbl.name}
-                  </button>
-                ))}
+              <div className="w-full h-48 rounded-xl overflow-hidden border border-gray-300 mb-2 relative">
+                <Map position={mapPosition} onLocationSelect={handleLocationSelect} />
               </div>
-            </div>
+              <p className="text-xs text-gray-500 text-right -mt-2">{t("clickMapAutoFill")}</p>
+              
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">{t("labelTitle")}</label>
+                <div className="flex gap-2">
+                  {labelOptions.map((lbl) => (
+                    <button
+                      type="button"
+                      key={lbl.id}
+                      onClick={() => setLabel(lbl.id)}
+                      className={`px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
+                        label === lbl.id ? "border-orange-500 bg-orange-50 text-orange-600 font-medium" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {lbl.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            <div>
-              <input
-                type="text"
-                placeholder={t("streetApartmentPlaceholder")}
-                value={addressText}
-                onChange={(e) => setAddressText(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
-                required
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder={t("cityPlaceholder")}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
-                required
-              />
-            </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder={t("streetApartmentPlaceholder")}
+                  value={addressText}
+                  onChange={(e) => setAddressText(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder={t("cityPlaceholder")}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
 
-            <div className="flex gap-3 pt-2">
-              <button 
-                type="button" 
-                onClick={() => setShowForm(false)}
-                className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition cursor-pointer"
-              >
-                {t("cancelBtn")}
-              </button>
-              <button 
-                type="submit"
-                disabled={submitting}
-                className="flex-1 bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition disabled:bg-gray-400 cursor-pointer"
-              >
-                {submitting ? t("savingBtn") : t("saveAddressBtn")}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <button 
-            onClick={() => setShowForm(true)}
-            className="mt-6 w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition cursor-pointer"
-          >
-            {t("addNewAddressBtn")}
-          </button>
+              <div className="flex gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition cursor-pointer"
+                >
+                  {t("cancelBtn")}
+                </button>
+                <button 
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition disabled:bg-gray-400 cursor-pointer"
+                >
+                  {submitting ? t("savingBtn") : t("saveAddressBtn")}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button 
+              onClick={() => setShowForm(true)}
+              className="mt-6 w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition cursor-pointer"
+            >
+              {t("addNewAddressBtn")}
+            </button>
+          )
         )}
       </div>
     </div>
