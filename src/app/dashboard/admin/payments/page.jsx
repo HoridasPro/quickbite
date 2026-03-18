@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { CreditCard, Calendar, Mail, Hash } from "lucide-react";
+import { Calendar, Mail, Hash } from "lucide-react";
 
 export default function AdminPaymentsPage() {
   const { t } = useTranslation();
@@ -23,7 +23,6 @@ export default function AdminPaymentsPage() {
     <div className="animate-in fade-in duration-500">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <CreditCard className="text-orange-500" />
           {t("paymentsManagement")}
         </h2>
         <span className="text-sm text-gray-500 font-medium bg-gray-100 px-4 py-1.5 rounded-full">
