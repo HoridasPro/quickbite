@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -21,7 +21,7 @@ export default function SessionGuard({ children }) {
         // Force fresh fetch bypassing browser cache
         const res = await fetch("/api/users/status", { cache: "no-store" });
         const data = await res.json();
-        
+
         if (data.success) {
           const currentStatus = session.user.accountStatus;
           const dbStatus = data.accountStatus;
@@ -36,12 +36,12 @@ export default function SessionGuard({ children }) {
           if (dbStatus === "Banned" && !pathname.startsWith("/banned")) {
             router.replace("/banned");
           } else if (dbStatus === "Suspended" && !pathname.startsWith("/suspended")) {
-            
+
             // Admins lose dashboard access entirely during investigation
             if (dbRole === "admin" && pathname.startsWith("/dashboard/admin")) {
               router.replace("/suspended");
             }
-            
+
             // Customers are blocked from checkout
             if (pathname.startsWith("/checkout")) {
               router.replace("/suspended");
@@ -53,6 +53,9 @@ export default function SessionGuard({ children }) {
           } else if (dbStatus === "Active" && (pathname.startsWith("/banned") || pathname.startsWith("/suspended"))) {
             router.replace("/");
           }
+        } else if (res.status === 404) {
+          // IF USER NOT FOUND IN DB -> KICK IMMEDIATELY
+          signOut({ callbackUrl: "/login" });
         }
       } catch (error) {
         console.error("Status check failed", error);
@@ -62,11 +65,11 @@ export default function SessionGuard({ children }) {
     };
 
     checkStatus(); // Run immediately on route change
-    
+
     // Poll every 5 seconds for rapid kicking while idle
     const interval = setInterval(checkStatus, 5000);
     return () => clearInterval(interval);
-    
+
   }, [status, pathname, session?.user?.email, router, update]);
 
   return <>{children}</>;

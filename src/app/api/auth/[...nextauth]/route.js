@@ -104,11 +104,15 @@ export const authOptions = {
         try {
           const collection = await dbConnect("users");
           const dbUser = await collection.findOne({ email: token.email });
+          
           if (dbUser) {
             token.role = dbUser.role || "user";
             token.accountStatus = dbUser.accountStatus || "Active";
             token.name = dbUser.name || token.name;
             token.image = dbUser.image || token.image;
+          } else {
+            // THE KICK: User was deleted from DB. Tag the token for destruction.
+            token.accountStatus = "Deleted";
           }
         } catch (error) {
           console.error("JWT Sync Error:", error);
