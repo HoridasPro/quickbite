@@ -11,12 +11,10 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    
     const [isEligible, setIsEligible] = useState(false);
     const [checkingEligibility, setCheckingEligibility] = useState(true);
-
-    // ENFORCEMENT: Check if the user is suspended/restricted
     const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
+    const hasAlreadyReviewed = session?.user?.email && reviews.some(r => r.userEmail === session.user.email);
 
     useEffect(() => {
         const verifyPurchase = async () => {
@@ -24,14 +22,12 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                 setCheckingEligibility(false);
                 return;
             }
-
             try {
                 const res = await fetch(`/api/orders?email=${session.user.email}`);
                 const data = await res.json();
-                
                 if (data.success) {
-                    const hasPurchasedAndReceived = data.orders.some(order => 
-                        order.status === "Delivered" && 
+                    const hasPurchasedAndReceived = data.orders.some(order =>
+                        order.status === "Delivered" &&
                         order.items.some(item => String(item.itemId) === String(itemId))
                     );
                     setIsEligible(hasPurchasedAndReceived);
@@ -42,29 +38,23 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                 setCheckingEligibility(false);
             }
         };
-
         verifyPurchase();
     }, [session, itemId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!session?.user) {
             Swal.fire(t("wait"), t("swalLoginWarning"), "warning");
             return;
         }
-
-        // ENFORCEMENT: Backend request blocker
         if (isRestricted) {
             Swal.fire(t("accountRestricted"), t("accountRestrictedReviewDesc"), "error");
             return;
         }
-
         if (!isEligible) {
             Swal.fire(t("notEligible"), t("swalEligibilityError"), "error");
             return;
         }
-
         setSubmitting(true);
         try {
             const res = await fetch('/api/reviews', {
@@ -77,13 +67,11 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                     comment
                 })
             });
-
             const data = await res.json();
             if (data.success) {
                 setComment("");
                 setRating(5);
                 if (onReviewAdded) onReviewAdded();
-                
                 Swal.fire({
                     icon: 'success',
                     title: t("reviewPosted"),
@@ -106,19 +94,22 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
             <h3 className="text-xl font-bold text-gray-900 mb-6">
                 {t("ratingsAndReviews")} <span className="text-gray-400 text-sm font-normal">({reviews.length})</span>
             </h3>
-
             <div className="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-100">
                 <h4 className="font-semibold text-gray-900 mb-3">{t("leaveAReview")}</h4>
-                
                 {checkingEligibility ? (
                     <p className="text-sm text-gray-500 italic animate-pulse">{t("verifyingPurchase")}</p>
                 ) : !session ? (
                     <p className="text-sm text-gray-500 italic">{t("loginToReview")}</p>
                 ) : isRestricted ? (
-                    /* ENFORCEMENT UI: The Read-Only View for Restricted Users */
                     <div className="bg-red-50 border border-red-100 p-4 rounded-lg">
                         <p className="text-sm text-red-800 font-medium">
                             {t("accountRestrictedReview")}
+                        </p>
+                    </div>
+                ) : hasAlreadyReviewed ? (
+                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                        <p className="text-sm text-blue-800 font-medium">
+                            {t("alreadyReviewed") || "You have already reviewed this item."}
                         </p>
                     </div>
                 ) : !isEligible ? (
@@ -146,13 +137,21 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                                 ))}
                             </div>
                         </div>
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder={t("shareExperiencePlaceholder")}
-                            className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none h-24 text-gray-800"
-                            required
-                        />
+                        <div>
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder={t("shareExperiencePlaceholder")}
+                                maxLength={1000}
+                                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none h-24 text-gray-800"
+                                required
+                            />
+                            <div className="flex justify-end mt-1">
+                                <span className={`text-xs font-medium ${comment.length >= 1000 ? 'text-red-500' : 'text-gray-400'}`}>
+                                    {comment.length} / 1000
+                                </span>
+                            </div>
+                        </div>
                         <button
                             type="submit"
                             disabled={submitting}
@@ -163,7 +162,6 @@ const ReviewSection = ({ itemId, reviews = [], onReviewAdded }) => {
                     </form>
                 )}
             </div>
-            
             {reviews.length === 0 ? (
                 <p className="text-gray-500 italic">{t("noReviewsYet")}</p>
             ) : (

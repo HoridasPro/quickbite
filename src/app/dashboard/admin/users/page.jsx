@@ -13,9 +13,22 @@ export default function UsersPage() {
   const { t } = useTranslation();
 
   const fetchUsers = async () => {
-    const res = await fetch("/api/users");
-    const data = await res.json();
-    setUsers(data);
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+
+      // Safety check: only set users if data is actually an array
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        // If it's an error object, set users to an empty array so .filter() doesn't crash
+        console.error("Failed to fetch users:", data.message);
+        setUsers([]);
+      }
+    } catch (error) {
+      console.error("Network or parsing error:", error);
+      setUsers([]);
+    }
   };
 
   useEffect(() => {
@@ -82,8 +95,8 @@ export default function UsersPage() {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(user =>
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -91,16 +104,16 @@ export default function UsersPage() {
     <div className="w-full animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-            <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-gray-800">
             {t("usersManagement")}
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">{t("manageUserDescription")}</p>
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">{t("manageUserDescription")}</p>
         </div>
-        
+
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input 
+            <input
               type="text"
               placeholder={t("searchUsersPlaceholder")}
               value={searchTerm}
@@ -137,23 +150,23 @@ export default function UsersPage() {
                 </td>
 
                 <td className="py-4 px-5 align-middle">
-                  <RoleDropdown 
-                    currentRole={user.role} 
-                    userId={user._id} 
-                    onRoleChange={handleRoleChange} 
+                  <RoleDropdown
+                    currentRole={user.role}
+                    userId={user._id}
+                    onRoleChange={handleRoleChange}
                   />
                 </td>
 
                 <td className="py-4 px-5 align-middle">
-                  <AccountStatusDropdown 
-                    currentStatus={user.accountStatus} 
-                    userId={user._id} 
-                    onStatusChange={handleStatusChange} 
+                  <AccountStatusDropdown
+                    currentStatus={user.accountStatus}
+                    userId={user._id}
+                    onStatusChange={handleStatusChange}
                   />
                   {user.statusReason && user.accountStatus !== "Active" && (
-                      <p className="text-[10px] text-gray-500 mt-1.5 max-w-[150px] truncate" title={user.statusReason}>
-                          {t("reasonPrefix")} {user.statusReason}
-                      </p>
+                    <p className="text-[10px] text-gray-500 mt-1.5 max-w-[150px] truncate" title={user.statusReason}>
+                      {t("reasonPrefix")} {user.statusReason}
+                    </p>
                   )}
                 </td>
 
