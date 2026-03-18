@@ -11,6 +11,18 @@ export async function proxy(req) {
   const isApiRoute = pathname.startsWith("/api");
 
   if (token) {
+    // 0. THE FORCE KICK: Instantly destroy session for deleted users
+    if (token.accountStatus === "Deleted") {
+      if (isApiRoute) {
+        return NextResponse.json({ success: false, message: "Account no longer exists." }, { status: 401 });
+      }
+      const response = NextResponse.redirect(new URL("/login", req.url));
+      // Wipe the cookies (handles both localhost and Vercel secure cookies)
+      response.cookies.delete("next-auth.session-token");
+      response.cookies.delete("__Secure-next-auth.session-token");
+      return response;
+    }
+
     // 1. Total lockout for Banned users
     if (token.accountStatus === "Banned" && !pathname.startsWith("/banned")) {
       if (isApiRoute) {
