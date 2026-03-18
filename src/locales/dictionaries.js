@@ -375,6 +375,8 @@ export const dictionaries = {
     availableForPickup: "Available for Pickup",
     noOrdersReadyPickup: "No orders are currently ready for pickup. Check back soon.",
     acceptDeliveryBtn: "Accept Delivery",
+    markAsDelivered: "Mark as Delivered",
+    noOrdersWaiting: "No orders are currently waiting.",
     // Payment management keys
     paymentsManagement: "Payments Management",
     tableTransactionId: "Transaction / Order ID",
@@ -393,6 +395,17 @@ export const dictionaries = {
     verificationIncompleteDesc: "We could not confirm your transaction. If you were charged, please retry.",
     retryVerificationBtn: "Retry Verification",
     returnToHomeBtn: "Return to Home",
+    // Admin dashboard delivery management keys
+    deliveryManagement: "Delivery Management",
+    manageDeliveriesDesc: "Monitor and assign active deliveries to riders.",
+    noActiveDeliveriesPool: "No active deliveries found in the pool.",
+    tableRider: "Assigned Rider",
+    unassignedRider: "Unassigned",
+    assignRiderBtn: "Assign Rider",
+    selectRiderPlaceholder: "Select a rider...",
+    riderAssignedSuccess: "Rider assigned successfully!",
+    failedAssignRider: "Failed to assign rider",
+    statusFilterAll: "All Statuses",
     // Swal keys
     okBtn: "OK",
     // Hero keys
@@ -820,6 +833,8 @@ export const dictionaries = {
     availableForPickup: "পিকআপের জন্য প্রস্তুত",
     noOrdersReadyPickup: "বর্তমানে পিকআপের জন্য কোনো অর্ডার নেই। পরে আবার দেখুন।",
     acceptDeliveryBtn: "ডেলিভারি গ্রহণ করুন",
+    markAsDelivered: "ডেলিভারি সম্পন্ন হিসেবে মার্ক করুন",
+    noOrdersWaiting: "বর্তমানে কোনো অর্ডার অপেক্ষমাণ নেই।",
     // Payment management keys
     paymentsManagement: "পেমেন্ট ব্যবস্থাপনা",
     tableTransactionId: "ট্রানজিশন / অর্ডার আইডি",
@@ -838,6 +853,17 @@ export const dictionaries = {
     verificationIncompleteDesc: "আমরা আপনার লেনদেন নিশ্চিত করতে পারিনি। যদি আপনার অ্যাকাউন্ট থেকে টাকা কাটা হয়ে থাকে, অনুগ্রহ করে আবার চেষ্টা করুন।",
     retryVerificationBtn: "আবার যাচাই করুন",
     returnToHomeBtn: "হোমে ফিরে যান",
+    // Admin dashboard delivery management keys
+    deliveryManagement: "ডেলিভারি ব্যবস্থাপনা",
+    manageDeliveriesDesc: "সক্রিয় ডেলিভারিগুলি পর্যবেক্ষণ করুন এবং রাইডারদের বরাদ্দ করুন।",
+    noActiveDeliveriesPool: "পুলে কোনো সক্রিয় ডেলিভারি পাওয়া যায়নি।",
+    tableRider: "বরাদ্দকৃত রাইডার",
+    unassignedRider: "বরাদ্দ করা হয়নি",
+    assignRiderBtn: "রাইডার বরাদ্দ করুন",
+    selectRiderPlaceholder: "একজন রাইডার নির্বাচন করুন...",
+    riderAssignedSuccess: "রাইডার সফলভাবে বরাদ্দ করা হয়েছে!",
+    failedAssignRider: "রাইডার বরাদ্দ করতে ব্যর্থ হয়েছে",
+    statusFilterAll: "সব স্ট্যাটাস",
     // Swal keys
     okBtn: "ঠিক আছে",
     // Hero keys
