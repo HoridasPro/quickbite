@@ -12,8 +12,8 @@ export default async function AdminLayout({ children }) {
   }
 
   // Not admin
-  if (session.user.role !== "admin") {
-    // redirect("/");
+  if (session.user.role !== "admin"|| session.user.accountStatus !== "Active") {
+    redirect("/");
   }
 
   return (
