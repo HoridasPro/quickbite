@@ -1,23 +1,74 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Calendar, Mail, Hash } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import DataTable from "@/components/admin/DataTable";
 
 export default function AdminPaymentsPage() {
   const { t } = useTranslation();
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/admin/payments")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setPayments(data.payments);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  // 1. Fetch Data with React Query
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ["payments"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/payments");
+      if (!res.ok) throw new Error("Failed to fetch payments");
+      const data = await res.json();
+      return data.success ? data.payments : [];
+    }
+  });
+
+  // 2. Define Table Columns
+  const columns = [
+    {
+      accessorKey: "orderId",
+      header: () => (
+        <div className="flex items-center gap-2">
+          {t("tableTransactionId")}
+        </div>
+      ),
+      cell: ({ row }) => (
+        <span className="font-mono text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">
+          {row.original.orderId}
+        </span>
+      ),
+    },
+    {
+      id: "customer",
+      header: () => (
+        <div className="flex items-center gap-2">
+          {t("tableCustomer")}
+        </div>
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm text-gray-700">
+          {row.original.customerInfo?.email || row.original.email}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "totalAmount",
+      header: t("tableAmount"),
+      cell: ({ row }) => (
+        <span className="font-bold text-green-600">
+          Tk {row.original.totalAmount}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "timestamp",
+      header: () => (
+        <div className="flex items-center gap-2">
+          {t("tableDate")}
+        </div>
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm text-gray-500">
+          {new Date(row.original.timestamp).toLocaleDateString()}
+        </span>
+      ),
+    }
+  ];
 
   return (
     <div className="animate-in fade-in duration-500">
@@ -31,53 +82,12 @@ export default function AdminPaymentsPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
-                <th className="p-4 font-semibold flex items-center gap-2"><Hash size={14}/> {t("tableTransactionId")}</th>
-                <th className="p-4 font-semibold"><Mail size={14} className="inline mr-2"/> {t("tableCustomer")}</th>
-                <th className="p-4 font-semibold">{t("tableAmount")}</th>
-                <th className="p-4 font-semibold"><Calendar size={14} className="inline mr-2"/> {t("tableDate")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="4" className="p-12 text-center text-gray-400">
-                    <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    {t("loading")}
-                  </td>
-                </tr>
-              ) : payments.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="p-12 text-center text-gray-500 font-medium">
-                    {t("noPaymentsFound")}
-                  </td>
-                </tr>
-              ) : (
-                payments.map((payment) => (
-                  <tr key={payment._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4">
-                      <span className="font-mono text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">
-                        {payment.orderId}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-gray-700">
-                      {payment.customerInfo?.email || payment.email}
-                    </td>
-                    <td className="p-4 font-bold text-green-600">
-                      Tk {payment.totalAmount}
-                    </td>
-                    <td className="p-4 text-sm text-gray-500">
-                      {new Date(payment.timestamp).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable 
+          columns={columns} 
+          data={payments} 
+          isLoading={isLoading} 
+          emptyMessage={t("noPaymentsFound")} 
+        />
       </div>
     </div>
   );

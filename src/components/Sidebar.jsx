@@ -17,14 +17,24 @@ import {
 import NavLink from "./NavLink";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePathname } from "next/navigation";
 
 export default function Sidebar({ closeSidebar }) {
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const pathname = usePathname();
   
-  const role = session?.user?.role || "user";
+  const actualRole = session?.user?.role || "user";
   const accountStatus = session?.user?.accountStatus || "Active";
   const isRestricted = accountStatus !== "Active";
+
+  // Dynamically determine the viewed panel based on URL
+  let currentView = actualRole;
+  if (actualRole === "admin") {
+    if (pathname?.startsWith("/dashboard/restaurant")) currentView = "restaurant";
+    else if (pathname?.startsWith("/dashboard/rider")) currentView = "rider";
+    else currentView = "admin";
+  }
 
   const baseClass = "flex items-center gap-3 p-3 rounded-xl transition-all font-medium";
   const activeClass = "text-orange-500 bg-orange-50";
@@ -43,7 +53,6 @@ export default function Sidebar({ closeSidebar }) {
     rider: t("roleRider")
   };
 
-  // Badge Styling based on restriction severity
   const badgeColor = accountStatus === "Suspended" 
     ? "bg-yellow-100 text-yellow-800 border-yellow-300" 
     : "bg-red-100 text-red-800 border-red-300";
@@ -61,14 +70,13 @@ export default function Sidebar({ closeSidebar }) {
 
       <div className="mb-10 mt-8 md:mt-0">
         <h2 className="text-3xl font-extrabold text-orange-500">
-          {roleTitles[role]}
+          {roleTitles[currentView]}
         </h2>
         <div className="flex items-center gap-2 mt-1">
           <p className="text-sm text-gray-400 font-medium capitalize">
-            {t("quickBite")} {roleNames[role]}
+            {t("quickBite")} {roleNames[currentView]}
           </p>
           
-          {/* ENFORCEMENT UI: Persistent Visual Status Badge */}
           {isRestricted && (
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 uppercase tracking-wider ${badgeColor}`}>
               <AlertTriangle size={10} />
@@ -80,7 +88,7 @@ export default function Sidebar({ closeSidebar }) {
 
       <ul className="space-y-2">
         {/* ADMIN LINKS */}
-        {role === "admin" && (
+        {currentView === "admin" && (
           <>
             <li>
               <NavLink href="/dashboard/admin" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
@@ -126,7 +134,7 @@ export default function Sidebar({ closeSidebar }) {
         )}
 
         {/* RESTAURANT LINKS */}
-        {role === "restaurant" && (
+        {currentView === "restaurant" && (
           <li>
             <NavLink href="/dashboard/restaurant" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
               <ChefHat size={20} /> {t("menuKitchenDisplay")}
@@ -135,7 +143,7 @@ export default function Sidebar({ closeSidebar }) {
         )}
 
         {/* RIDER LINKS */}
-        {role === "rider" && (
+        {currentView === "rider" && (
           <li>
             <NavLink href="/dashboard/rider" exact={true} className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
               <Bike size={20} /> {t("menuDeliveryPool")}
