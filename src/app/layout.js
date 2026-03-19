@@ -6,6 +6,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import NextAuthProvider from "@/provider/NextAuthProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import SessionGuard from "@/components/SessionGuard";
+import ReactQueryProvider from "@/provider/ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,17 +30,19 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextAuthProvider>
-          <LanguageProvider>
-            <CartProvider>
-              <SessionGuard>
-                <Header />
-                <main className="max-w-[1380px] mx-auto min-h-[calc(100vh-395px)]">
-                  {children}
-                </main>
-                <Footer />
-              </SessionGuard>
-            </CartProvider>
-          </LanguageProvider>
+          <ReactQueryProvider>
+            <LanguageProvider>
+              <CartProvider>
+                <SessionGuard>
+                  <Header />
+                  <main className="max-w-[1380px] mx-auto min-h-[calc(100vh-395px)]">
+                    {children}
+                  </main>
+                  <Footer />
+                </SessionGuard>
+              </CartProvider>
+            </LanguageProvider>
+          </ReactQueryProvider>
         </NextAuthProvider>
       </body>
     </html>

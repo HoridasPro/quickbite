@@ -1,87 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import { MapPin, Bike, CheckCircle, Package, Phone, Navigation, Store, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function RiderDashboard() {
   const { data: session } = useSession();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const queryClient = useQueryClient();
+  const isBn = language === "bn";
 
   // ENFORCEMENT: Check if the rider is suspended
   const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
-  const fetchOrders = async () => {
-    try {
+  // 1. Fetch Orders with Auto-Polling (Replaces useEffect & setInterval)
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["riderOrders"],
+    queryFn: async () => {
       const res = await fetch("/api/orders");
       const data = await res.json();
-      if (data.success) {
-        setOrders(data.orders);
+      return data.success ? data.orders : [];
+    },
+    refetchInterval: 15000, // Auto-polls every 15 seconds
+  });
+
+  // 2. Status Update Mutation
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ orderId, newStatus }) => {
+      const payload = { orderId, status: newStatus };
+      
+      if (newStatus === "On the way") {
+        payload.riderEmail = session?.user?.email;
+        payload.riderName = session?.user?.name;
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 15000); 
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleUpdateOrder = async (orderId, newStatus) => {
-    // ENFORCEMENT: Frontend block to prevent suspended riders from accepting new deliveries
-    if (newStatus === "On the way" && isRestricted) {
-      Swal.fire(t("accountRestricted"), t("cannotAcceptNewOrders"), "error");
-      return;
-    }
-
-    const payload = {
-      orderId,
-      status: newStatus,
-    };
-
-    if (newStatus === "On the way") {
-      payload.riderEmail = session?.user?.email;
-      payload.riderName = session?.user?.name;
-    }
-
-    try {
       const res = await fetch("/api/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: newStatus === "Delivered" ? t("deliveryCompletedToast") : t("deliveryAcceptedToast"),
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-        fetchOrders();
-      } else {
-        Swal.fire(t("error"), data.message || t("failedUpdateStatus"), "error");
-      }
-    } catch (error) {
-      Swal.fire(t("error"), t("failedUpdateStatus"), "error");
+      if (!data.success) throw new Error(data.message || t("failedUpdateStatus"));
+      return { newStatus };
+    },
+    onSuccess: (data) => {
+      Swal.fire({
+        icon: "success",
+        title: data.newStatus === "Delivered" ? t("deliveryCompletedToast") : t("deliveryAcceptedToast"),
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      queryClient.invalidateQueries(["riderOrders"]); // Instantly refreshes the UI
+    },
+    onError: (error) => {
+      Swal.fire(t("error"), error.message, "error");
     }
+  });
+
+  const handleUpdateOrder = (orderId, newStatus) => {
+    if (newStatus === "On the way" && isRestricted) {
+      Swal.fire(t("accountRestricted"), t("cannotAcceptNewOrders"), "error");
+      return;
+    }
+    updateOrderMutation.mutate({ orderId, newStatus });
   };
 
   const availableOrders = orders.filter(o => o.status === "Ready for Pickup" && !o.riderEmail);
   const myActiveOrders = orders.filter(o => o.riderEmail === session?.user?.email && o.status === "On the way");
 
-  if (loading) return <div className="p-10 text-center text-gray-500">{t("loadingRiderDashboard")}</div>;
+  if (isLoading) return <div className="p-10 text-center text-gray-500">{t("loadingRiderDashboard")}</div>;
 
   return (
     <div className="w-full max-w-5xl mx-auto h-full flex flex-col min-h-[70vh]">
@@ -149,8 +140,9 @@ export default function RiderDashboard() {
                 </div>
 
                 <button
+                  disabled={updateOrderMutation.isPending}
                   onClick={() => handleUpdateOrder(order.orderId, "Delivered")}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-orange-200 flex justify-center items-center gap-2 cursor-pointer"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg shadow-orange-200 flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle size={22} /> {t("markAsDelivered")}
                 </button>
@@ -192,8 +184,9 @@ export default function RiderDashboard() {
                   </div>
 
                   <button
+                    disabled={updateOrderMutation.isPending}
                     onClick={() => handleUpdateOrder(order.orderId, "On the way")}
-                    className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition cursor-pointer whitespace-nowrap"
+                    className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition cursor-pointer whitespace-nowrap disabled:opacity-50"
                   >
                     {t("acceptDeliveryBtn")}
                   </button>

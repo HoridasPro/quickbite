@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Users, Pizza, ShoppingBag, DollarSign } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const StatCard = ({ icon: Icon, label, value, color, prefix = "" }) => {
   const formatNumber = (num) => {
     return new Intl.NumberFormat("en-US", {
       notation: "compact",
       maximumFractionDigits: 1,
-    }).format(num);
+    }).format(num || 0);
   };
 
   const themes = {
@@ -33,7 +33,7 @@ const StatCard = ({ icon: Icon, label, value, color, prefix = "" }) => {
             {prefix}{formatNumber(value)}
           </p>
           <p className={`absolute text-xl font-black ${theme.hover} opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap`}>
-            {prefix}{value.toLocaleString()}
+            {prefix}{(value || 0).toLocaleString()}
           </p>
         </div>
       </div>
@@ -42,16 +42,20 @@ const StatCard = ({ icon: Icon, label, value, color, prefix = "" }) => {
 };
 
 export default function DashboardHome() {
-  const [stats, setStats] = useState(null);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    fetch("/api/admin/stats")
-      .then((res) => res.json())
-      .then((data) => setStats(data));
-  }, []);
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/stats");
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      return res.json();
+    },
+    // Optional: Refresh these stats every 60 seconds automatically if they keep the dashboard open
+    refetchInterval: 60000, 
+  });
 
-  if (!stats) {
+  if (isLoading || !stats) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>

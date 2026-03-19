@@ -1,52 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { Search } from "lucide-react";
 import RoleDropdown from "@/components/admin/RoleDropdown";
 import AccountStatusDropdown from "@/components/admin/AccountStatusDropdown";
+import DataTable from "@/components/admin/DataTable";
 
 export default function UsersPage() {
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchUsers = async () => {
-    try {
+  // 1. Fetch Data via TanStack Query (Handles loading, caching, and background refetching automatically)
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
       const res = await fetch("/api/users");
       const data = await res.json();
-
-      // Safety check: only set users if data is actually an array
-      if (Array.isArray(data)) {
-        setUsers(data);
-      } else {
-        // If it's an error object, set users to an empty array so .filter() doesn't crash
-        console.error("Failed to fetch users:", data.message);
-        setUsers([]);
-      }
-    } catch (error) {
-      console.error("Network or parsing error:", error);
-      setUsers([]);
+      return Array.isArray(data) ? data : [];
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // 2. Mutations (Automatically refresh the table on success)
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ id, role }) => {
+      return fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, role }),
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries(["users"]),
+  });
 
-  const handleRoleChange = async (id, newRole) => {
-    await fetch("/api/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, role: newRole }),
-    });
-    fetchUsers();
-  };
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, accountStatus, statusReason }) => {
+      return fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, accountStatus, statusReason }),
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries(["users"]),
+  });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      return fetch("/api/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
+      Swal.fire(t("deletedSuccessTitle"), t("userDeletedSuccessMessage"), "success");
+    },
+  });
+
+  // 3. Action Handlers
   const handleStatusChange = async (id, newStatus) => {
     let reason = "Action taken by Administrator.";
-
     if (newStatus === "Suspended" || newStatus === "Banned") {
       const { value: formValues } = await Swal.fire({
         title: `${t("setStatusTitle")} ${newStatus}?`,
@@ -54,23 +71,12 @@ export default function UsersPage() {
         inputLabel: t("reasonForAction"),
         inputPlaceholder: t("violationPlaceholder"),
         showCancelButton: true,
-        inputValidator: (value) => {
-          if (!value) {
-            return t("provideReasonWarning");
-          }
-        }
+        inputValidator: (value) => !value ? t("provideReasonWarning") : undefined
       });
-
       if (!formValues) return;
       reason = formValues;
     }
-
-    await fetch("/api/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, accountStatus: newStatus, statusReason: reason }),
-    });
-    fetchUsers();
+    updateStatusMutation.mutate({ id, accountStatus: newStatus, statusReason: reason });
   };
 
   const handleDelete = async (id) => {
@@ -83,18 +89,67 @@ export default function UsersPage() {
       cancelButtonColor: "#3085d6",
       confirmButtonText: t("confirmDeleteBtn")
     });
-
-    if (result.isConfirmed) {
-      await fetch("/api/users", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      fetchUsers();
-      Swal.fire(t("deletedSuccessTitle"), t("userDeletedSuccessMessage"), "success");
-    }
+    if (result.isConfirmed) deleteMutation.mutate(id);
   };
 
+  // 4. Define Table Columns
+  const columns = [
+    {
+      accessorKey: "name",
+      header: t("tableUserDetails"),
+      cell: ({ row }) => (
+        <div>
+          <p className="font-bold text-gray-900">{row.original.name}</p>
+          <p className="text-sm text-gray-500">{row.original.email}</p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "role",
+      header: t("tableRole"),
+      cell: ({ row }) => (
+        <RoleDropdown
+          currentRole={row.original.role}
+          userId={row.original._id}
+          onRoleChange={(id, newRole) => updateRoleMutation.mutate({ id, role: newRole })}
+        />
+      ),
+    },
+    {
+      accessorKey: "accountStatus",
+      header: t("tableAccountStatus"),
+      cell: ({ row }) => (
+        <div>
+          <AccountStatusDropdown
+            currentStatus={row.original.accountStatus}
+            userId={row.original._id}
+            onStatusChange={handleStatusChange}
+          />
+          {row.original.statusReason && row.original.accountStatus !== "Active" && (
+            <p className="text-[10px] text-gray-500 mt-1.5 max-w-[150px] truncate" title={row.original.statusReason}>
+              {t("reasonPrefix")} {row.original.statusReason}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("tableActions")}</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <button
+            onClick={() => handleDelete(row.original._id)}
+            className="bg-white hover:bg-red-50 text-red-500 border border-red-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer shadow-sm"
+          >
+            {t("btnDelete")}
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  // 5. Client-Side Filtering
   const filteredUsers = users.filter(user =>
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -104,9 +159,7 @@ export default function UsersPage() {
     <div className="w-full animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            {t("usersManagement")}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">{t("usersManagement")}</h2>
           <p className="text-gray-500 text-sm mt-1">{t("manageUserDescription")}</p>
         </div>
 
@@ -127,73 +180,12 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto sm:overflow-visible min-h-[400px] bg-white border border-gray-100 rounded-xl shadow-sm">
-        <table className="w-full text-left border-collapse min-w-[800px]">
-          <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
-              <th className="py-4 px-5 font-semibold text-gray-600 text-sm">{t("tableUserDetails")}</th>
-              <th className="py-4 px-5 font-semibold text-gray-600 text-sm w-48">{t("tableRole")}</th>
-              <th className="py-4 px-5 font-semibold text-gray-600 text-sm w-48">{t("tableAccountStatus")}</th>
-              <th className="py-4 px-5 font-semibold text-gray-600 text-sm text-right">{t("tableActions")}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr
-                key={user._id}
-                className="border-b border-gray-50 hover:bg-gray-50/80 transition duration-200"
-              >
-                <td className="py-4 px-5">
-                  <p className="font-bold text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
-                </td>
-
-                <td className="py-4 px-5 align-middle">
-                  <RoleDropdown
-                    currentRole={user.role}
-                    userId={user._id}
-                    onRoleChange={handleRoleChange}
-                  />
-                </td>
-
-                <td className="py-4 px-5 align-middle">
-                  <AccountStatusDropdown
-                    currentStatus={user.accountStatus}
-                    userId={user._id}
-                    onStatusChange={handleStatusChange}
-                  />
-                  {user.statusReason && user.accountStatus !== "Active" && (
-                    <p className="text-[10px] text-gray-500 mt-1.5 max-w-[150px] truncate" title={user.statusReason}>
-                      {t("reasonPrefix")} {user.statusReason}
-                    </p>
-                  )}
-                </td>
-
-                <td className="py-4 px-5 text-right align-middle">
-                  <button
-                    onClick={() => handleDelete(user._id)}
-                    className="bg-white hover:bg-red-50 text-red-500 border border-red-200 font-semibold text-sm px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer shadow-sm"
-                  >
-                    {t("btnDelete")}
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {filteredUsers.length === 0 && (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="text-center py-16 text-gray-500 font-medium"
-                >
-                  {t("noUsersFoundSearch")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable 
+        columns={columns} 
+        data={filteredUsers} 
+        isLoading={isLoading} 
+        emptyMessage={t("noUsersFoundSearch")} 
+      />
     </div>
   );
 }

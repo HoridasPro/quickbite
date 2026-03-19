@@ -1,66 +1,58 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { ChefHat, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function KitchenDashboard() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { t, language } = useTranslation();
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const isBn = language === "bn";
 
-  // ENFORCEMENT: Check if the restaurant is suspended
   const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
-  const fetchOrders = async () => {
-    try {
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["kitchenOrders"],
+    queryFn: async () => {
       const res = await fetch("/api/orders");
       const data = await res.json();
-      if (data.success) {
-        setOrders(data.orders);
-      }
-    } catch (error) {
-      console.error("Error fetching orders for kitchen:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data.success ? data.orders : [];
+    },
+    refetchInterval: 30000,
+  });
 
-  useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, newStatus }) => {
       const res = await fetch("/api/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, status: newStatus }),
       });
-
       const data = await res.json();
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: newStatus === "Cooking" ? t("startedCookingToast") : t("orderReadyToast"),
-          toast: true,
-          position: "top-end",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-        fetchOrders();
-      } else {
-        Swal.fire(t("error"), data.message || t("failedUpdateStatus"), "error");
-      }
-    } catch (error) {
-      Swal.fire(t("error"), t("failedUpdateStatus"), "error");
+      if (!data.success) throw new Error(data.message || t("failedUpdateStatus"));
+      return { newStatus };
+    },
+    onSuccess: (data) => {
+      Swal.fire({
+        icon: "success",
+        title: data.newStatus === "Cooking" ? t("startedCookingToast") : t("orderReadyToast"),
+        toast: true,
+        position: "top-end",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      queryClient.invalidateQueries(["kitchenOrders"]);
+    },
+    onError: (error) => {
+      Swal.fire(t("error"), error.message, "error");
     }
+  });
+
+  const updateOrderStatus = (orderId, newStatus) => {
+    updateStatusMutation.mutate({ orderId, newStatus });
   };
 
   const newOrders = orders.filter((o) => o.status === "Confirmed" && o.paymentStatus === "Paid");
@@ -112,15 +104,17 @@ export default function KitchenDashboard() {
 
       {type === 'new' ? (
         <button 
+          disabled={updateStatusMutation.isPending}
           onClick={() => updateOrderStatus(order.orderId, "Cooking")}
-          className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors py-3 rounded-lg font-bold flex justify-center items-center gap-2 cursor-pointer"
+          className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors py-3 rounded-lg font-bold flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           <ChefHat size={18} /> {t("btnStartCooking")}
         </button>
       ) : (
         <button 
+          disabled={updateStatusMutation.isPending}
           onClick={() => updateOrderStatus(order.orderId, "Ready for Pickup")}
-          className="w-full bg-yellow-50 text-yellow-700 hover:bg-yellow-500 hover:text-white border border-yellow-200 transition-colors py-3 rounded-lg font-bold flex justify-center items-center gap-2 cursor-pointer"
+          className="w-full bg-yellow-50 text-yellow-700 hover:bg-yellow-500 hover:text-white border border-yellow-200 transition-colors py-3 rounded-lg font-bold flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           <CheckCircle size={18} /> {t("btnMarkReady")}
         </button>
@@ -128,7 +122,7 @@ export default function KitchenDashboard() {
     </div>
   );
 
-  if (loading) return <div className="p-10 text-center text-gray-500">{t("loadingKitchenDisplay")}</div>;
+  if (isLoading) return <div className="p-10 text-center text-gray-500">{t("loadingKitchenDisplay")}</div>;
 
   return (
     <div className="w-full h-full flex flex-col min-h-[70vh]">
@@ -139,7 +133,6 @@ export default function KitchenDashboard() {
         </div>
       </div>
 
-      {/* ENFORCEMENT UI: Warning Banner for Suspended Restaurants */}
       {isRestricted && (
         <div className="bg-yellow-50 border border-yellow-200 p-4 mb-6 rounded-xl flex items-start gap-4 shadow-sm">
           <div className="bg-yellow-100 p-2 rounded-full text-yellow-600 shrink-0">
@@ -154,10 +147,7 @@ export default function KitchenDashboard() {
         </div>
       )}
 
-      {/* Dynamic Grid: Adjusts to 1 column if "New Orders" is hidden */}
       <div className={`grid grid-cols-1 ${!isRestricted ? "md:grid-cols-2" : ""} gap-6 flex-1 items-start`}>
-        
-        {/* Hide New Orders completely if restricted */}
         {!isRestricted && (
           <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 min-h-[500px]">
             <h3 className="font-bold text-gray-700 mb-4 flex items-center justify-between">
@@ -174,7 +164,6 @@ export default function KitchenDashboard() {
           </div>
         )}
 
-        {/* Cooking Now remains accessible so they can finish their active orders */}
         <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 min-h-[500px]">
           <h3 className="font-bold text-gray-700 mb-4 flex items-center justify-between">
             <span>{t("cookingNow")}</span>
