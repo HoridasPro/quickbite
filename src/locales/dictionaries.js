@@ -418,6 +418,13 @@ export const dictionaries = {
     deleteReviewConfirm: "Are you sure you want to delete this review?",
     reviewDeletedSuccess: "Review has been successfully deleted.",
     failedDeleteReview: "Failed to delete review.",
+    // Audit dashboard keys
+    auditLogs: "Audit Logs",
+    auditLogsDesc: "Monitor administrative actions and deleted content.",
+    tableActionType: "Action",
+    tableAdminEmail: "Admin Email",
+    tableDeletedContent: "Deleted Content",
+    noLogsFound: "No audit logs found.",
     // Rider dashboard keys
     deliveryCompletedToast: "Delivery Completed!",
     loadingRiderDashboard: "Loading Rider Dashboard...",
@@ -898,6 +905,13 @@ export const dictionaries = {
     deleteReviewConfirm: "আপনি কি নিশ্চিত যে আপনি এই রিভিউটি মুছে ফেলতে চান?",
     reviewDeletedSuccess: "রিভিউ সফলভাবে মুছে ফেলা হয়েছে।",
     failedDeleteReview: "রিভিউ মুছে ফেলতে ব্যর্থ হয়েছে।",
+    // Audit dashboard keys
+    auditLogs: "অডিট লগস",
+    auditLogsDesc: "প্রশাসনিক পদক্ষেপ এবং মুছে ফেলা সামগ্রী পর্যবেক্ষণ করুন।",
+    tableActionType: "পদক্ষেপ",
+    tableAdminEmail: "অ্যাডমিন ইমেইল",
+    tableDeletedContent: "মুছে ফেলা সামগ্রী",
+    noLogsFound: "কোনো অডিট লগ পাওয়া যায়নি।",
     // Rider dashboard keys
     deliveryCompletedToast: "ডেলিভারি সম্পন্ন হয়েছে!",
     loadingRiderDashboard: "রাইডার ড্যাশবোর্ড লোড হচ্ছে...",

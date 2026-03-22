@@ -75,7 +75,8 @@ export default function FoodForm({ initialData = null, onSubmit, isLoading = fal
     onSubmit({
       ...formData,
       price: Number(formData.price),
-      restaurant_name: selectedRes ? selectedRes.name : ""
+      restaurant_name: selectedRes ? selectedRes.name : "",
+      restaurant_nameBn: selectedRes && selectedRes.nameBn ? selectedRes.nameBn : ""
     });
   };
 

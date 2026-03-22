@@ -51,7 +51,6 @@ export default function DashboardHome() {
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
-    // Optional: Refresh these stats every 60 seconds automatically if they keep the dashboard open
     refetchInterval: 60000, 
   });
 

@@ -103,6 +103,7 @@ const FoodsModal = ({ food, onClose }) => {
       title: food.title || food.foodName,
       titleBn: food.titleBn || food.foodNameBn,
       restaurant: food.restaurant_name || food.restaurant || "QuickBite",
+      restaurantBn: food.restaurant_nameBn || food.restaurantBn || null,
       image: food.foodImg || food.image || "https://via.placeholder.com/150",
       basePrice: basePrice,
       selectedVariations: selections,

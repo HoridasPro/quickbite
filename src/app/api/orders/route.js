@@ -116,6 +116,7 @@ export async function POST(request) {
         title: dbItem.title || item.title,
         titleBn: dbItem.titleBn || item.titleBn || null,
         restaurant: dbItem.restaurant_name || item.restaurant || "QuickBite",
+        restaurantBn: dbItem.restaurantBn || dbItem.restaurant_nameBn || item.restaurantBn || null,
         image: dbItem.foodImg || dbItem.image || item.image,
         selectedVariations: validatedVariations,
         quantity: quantity,
