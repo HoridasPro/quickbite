@@ -41,7 +41,8 @@ export default async function ItemPage({ params }) {
     category: food.category || "General",
     categoryBn: food.categoryBn || null,
     variations: food.variations || [],
-    restaurant_name: food.restaurant_name || "QuickBite"
+    restaurant_name: food.restaurant_name || "QuickBite",
+    restaurant_nameBn: food.restaurant_nameBn || food.restaurantBn || null
   };
 
   return (

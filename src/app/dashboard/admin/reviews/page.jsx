@@ -76,11 +76,12 @@ export default function AdminReviewsPage() {
     }
   };
 
-  // 3. Define Table Columns
+  // 3. Define Table Columns using the new meta properties!
   const columns = [
     {
       id: "item",
       header: t("tableItem"),
+      meta: { widthClass: "w-[200px]" }, // Locked width for the item info
       cell: ({ row }) => {
         const review = row.original;
         const displayTitle = language === "bn" && review.itemInfo?.titleBn 
@@ -98,6 +99,7 @@ export default function AdminReviewsPage() {
     {
       id: "user",
       header: t("tableUser"),
+      meta: { widthClass: "w-[200px]" }, // Locked width for the user info
       cell: ({ row }) => {
         const review = row.original;
         return (
@@ -114,6 +116,7 @@ export default function AdminReviewsPage() {
     {
       accessorKey: "rating",
       header: t("tableRating"),
+      meta: { widthClass: "w-[120px]" }, // Keep the stars compact
       cell: ({ row }) => (
         <div className="flex items-center align-top">
           {[...Array(5)].map((_, i) => (
@@ -128,9 +131,11 @@ export default function AdminReviewsPage() {
     {
       accessorKey: "comment",
       header: t("tableReview"),
+      meta: { expandable: true }, // The magic trigger for DataTable to handle truncation and expansion
       cell: ({ row }) => (
         <div className="align-top">
-          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 hover:line-clamp-none transition-all">
+          {/* Removed manual line-clamp classes, DataTable handles it now */}
+          <p className="text-sm text-gray-700 leading-relaxed">
             {row.original.comment}
           </p>
         </div>
@@ -139,6 +144,7 @@ export default function AdminReviewsPage() {
     {
       id: "actions",
       header: () => <div className="text-right">{t("tableActions")}</div>,
+      meta: { widthClass: "w-[100px]" }, // Keeps the action column tight to the right edge
       cell: ({ row }) => (
         <div className="flex justify-end align-top">
           <button

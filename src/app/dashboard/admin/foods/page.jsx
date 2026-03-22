@@ -17,13 +17,11 @@ export default function AdminFoodsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  // Sync search input to debouncedSearch with a 500ms delay
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // 1. Fetch Data with React Query
   const { data, isLoading } = useQuery({
     queryKey: ["foods", page, debouncedSearch],
     queryFn: async () => {
@@ -31,13 +29,12 @@ export default function AdminFoodsPage() {
       if (!res.ok) throw new Error("Failed to fetch foods");
       return res.json();
     },
-    keepPreviousData: true, // Keeps current data on screen while fetching the next page
+    keepPreviousData: true,
   });
 
   const foods = data?.foods || [];
   const totalPages = data?.totalPages || 1;
 
-  // 2. Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const res = await fetch("/api/foods", {
@@ -51,7 +48,7 @@ export default function AdminFoodsPage() {
     onSuccess: (data) => {
       if (data.success) {
         Swal.fire(t("deletedSuccessTitle"), t("foodDeletedSuccess"), "success");
-        queryClient.invalidateQueries(["foods"]); // Triggers a refetch
+        queryClient.invalidateQueries(["foods"]);
       } else {
         Swal.fire(t("error"), data.message || "Failed to delete", "error");
       }
@@ -78,56 +75,61 @@ export default function AdminFoodsPage() {
     }
   };
 
-  // 3. Define Table Columns
   const columns = [
     {
       id: "foodImg",
       header: t("foodImage"),
+      meta: { widthClass: "w-[80px]", align: "align-top" },
       cell: ({ row }) => (
         <img
           src={row.original.foodImg || "https://via.placeholder.com/150"}
           alt={row.original.title || row.original.foodName}
-          className="w-12 h-12 rounded-lg object-cover"
+          className="w-12 h-12 rounded-lg object-cover border border-gray-100 shadow-sm"
         />
       ),
     },
     {
       id: "title",
       header: t("foodNameInput"),
+      meta: { expandable: true, align: "align-top" },
       cell: ({ row }) => {
         const food = row.original;
-        return <span className="font-medium text-gray-900">{isBn && food.titleBn ? food.titleBn : food.title || food.foodName}</span>;
+        return <span className="font-bold text-gray-900">{isBn && food.titleBn ? food.titleBn : food.title || food.foodName}</span>;
       }
     },
     {
       id: "restaurant_name",
       header: t("restaurantNameInput"),
+      meta: { widthClass: "w-[200px]", align: "align-top" },
       cell: ({ row }) => {
         const food = row.original;
-        return <span className="text-gray-700">{isBn && food.restaurant_nameBn ? food.restaurant_nameBn : food.restaurant_name || "N/A"}</span>;
+        return <span className="text-gray-600 text-sm font-medium">{isBn && food.restaurant_nameBn ? food.restaurant_nameBn : food.restaurant_name || "N/A"}</span>;
       }
     },
     {
       id: "category",
       header: t("categoryLabel"),
+      meta: { widthClass: "w-[150px]", align: "align-top" },
       cell: ({ row }) => {
         const food = row.original;
-        return <span className="text-gray-500">{isBn && food.categoryBn ? food.categoryBn : food.category || food.categoryName}</span>;
+        return <span className="text-gray-500 text-sm bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">{isBn && food.categoryBn ? food.categoryBn : food.category || food.categoryName}</span>;
       }
     },
     {
       id: "price",
       header: t("foodPrice"),
+      meta: { widthClass: "w-[120px]", align: "align-top" },
       cell: ({ row }) => {
         const food = row.original;
-        return <span className="font-medium text-gray-900">{isBn && food.priceBn ? food.priceBn : `Tk ${food.price}`}</span>;
+        return <span className="font-bold text-orange-600">{isBn && food.priceBn ? food.priceBn : `Tk ${food.price}`}</span>;
       }
     },
     {
       id: "actions",
-      header: t("tableActions"),
+      header: () => <div className="text-right">{t("tableActions")}</div>,
+      meta: { widthClass: "w-[120px]", align: "align-top" },
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           <Link
             href={`/dashboard/admin/foods/${row.original.id}`}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -156,7 +158,7 @@ export default function AdminFoodsPage() {
         </div>
         <Link
           href="/dashboard/admin/foods/add"
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-orange-100"
         >
           <Plus className="w-5 h-5" />
           <span>{t("addNewFood")}</span>
@@ -173,7 +175,7 @@ export default function AdminFoodsPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPage(1); // Reset to page 1 on new search
+                setPage(1);
               }}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
@@ -188,7 +190,6 @@ export default function AdminFoodsPage() {
         />
       </div>
 
-      {/* Pagination Controls */}
       {!isLoading && totalPages > 1 && (
         <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
           <button

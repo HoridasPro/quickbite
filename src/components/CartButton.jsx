@@ -29,6 +29,7 @@ const CartButton = ({ food, quantity = 1, price }) => {
       title: food.title || food.foodName,
       titleBn: food.titleBn || food.foodNameBn,
       restaurant: food.restaurant || food.restaurant_name || "QuickBite",
+      restaurantBn: food.restaurant_nameBn || food.restaurantBn || null,
       image: food.foodImg || food.image || "https://via.placeholder.com/150",
       basePrice: itemPrice,
       selectedVariations: {}, 

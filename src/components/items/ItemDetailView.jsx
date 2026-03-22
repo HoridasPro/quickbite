@@ -130,6 +130,7 @@ const ItemDetailView = ({ item }) => {
       title: item.title,
       titleBn: item.titleBn,
       restaurant: item.restaurant_name,
+      restaurantBn: item.restaurant_nameBn || null,
       image: item.image,
       basePrice: item.price,
       selectedVariations: selections,

@@ -22,49 +22,48 @@ export default function AdminPaymentsPage() {
   const columns = [
     {
       accessorKey: "orderId",
-      header: () => (
-        <div className="flex items-center gap-2">
-          {t("tableTransactionId")}
-        </div>
-      ),
+      header: () => <div className="flex items-center gap-2">{t("tableTransactionId")}</div>,
+      meta: { widthClass: "w-[25%]" }, // Added width control
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">
+        <span className="font-mono text-xs font-bold bg-gray-100 px-2.5 py-1.5 rounded text-gray-600 uppercase tracking-wider">
           {row.original.orderId}
         </span>
       ),
     },
     {
       id: "customer",
-      header: () => (
-        <div className="flex items-center gap-2">
-          {t("tableCustomer")}
-        </div>
-      ),
+      header: () => <div className="flex items-center gap-2">{t("tableCustomer")}</div>,
+      meta: { expandable: true }, // Allows email to truncate/expand gracefully
       cell: ({ row }) => (
-        <span className="text-sm text-gray-700">
-          {row.original.customerInfo?.email || row.original.email}
-        </span>
+        <div className="flex flex-col">
+          {row.original.customerInfo?.firstName && (
+            <span className="font-bold text-gray-900 text-sm">
+              {row.original.customerInfo.firstName} {row.original.customerInfo.lastName}
+            </span>
+          )}
+          <span className="text-sm text-gray-500">
+            {row.original.customerInfo?.email || row.original.email}
+          </span>
+        </div>
       ),
     },
     {
       accessorKey: "totalAmount",
       header: t("tableAmount"),
+      meta: { widthClass: "w-[20%]" }, // Added width control
       cell: ({ row }) => (
-        <span className="font-bold text-green-600">
+        <span className="font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg border border-green-100">
           Tk {row.original.totalAmount}
         </span>
       ),
     },
     {
       accessorKey: "timestamp",
-      header: () => (
-        <div className="flex items-center gap-2">
-          {t("tableDate")}
-        </div>
-      ),
+      header: () => <div className="flex items-center gap-2">{t("tableDate")}</div>,
+      meta: { widthClass: "w-[25%]" }, // Added width control
       cell: ({ row }) => (
-        <span className="text-sm text-gray-500">
-          {new Date(row.original.timestamp).toLocaleDateString()}
+        <span className="text-sm text-gray-500 font-medium">
+          {new Date(row.original.timestamp).toLocaleString()} {/* Changed to localeString to show time of payment */}
         </span>
       ),
     }

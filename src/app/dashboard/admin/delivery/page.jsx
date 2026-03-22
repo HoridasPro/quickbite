@@ -17,7 +17,6 @@ export default function AdminDeliveryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  // 1. Fetch Orders and Riders in parallel
   const { data: allOrders = [], isLoading: isLoadingOrders } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => {
@@ -38,7 +37,6 @@ export default function AdminDeliveryPage() {
 
   const isLoading = isLoadingOrders || isLoadingRiders;
 
-  // 2. Unified Mutation for both Status Updates and Rider Assignment
   const updateOrderMutation = useMutation({
     mutationFn: async (payload) => {
       const res = await fetch("/api/orders", {
@@ -74,15 +72,16 @@ export default function AdminDeliveryPage() {
     if (!riderEmail) return;
     const selectedRider = riders.find(r => r.email === riderEmail);
     
+    if (!selectedRider) return;
+    
     updateOrderMutation.mutate({
       orderId,
-      status: "On the way", // Force status to 'on the way' when assigning
+      status: "On the way",
       riderEmail: selectedRider.email,
       riderName: selectedRider.name,
     });
   };
 
-  // 3. Prepare Dropdown Options
   const riderOptions = riders.map(r => ({
     id: r.email,
     label: `${r.name} (${r.email})`
@@ -95,13 +94,13 @@ export default function AdminDeliveryPage() {
     { id: "Delivered", label: t("statusDelivered") }
   ];
 
-  // 4. Define Table Columns
   const columns = [
     {
       accessorKey: "orderId",
-      header: () => <div className="w-24">{t("tableOrderId")}</div>,
+      header: t("tableOrderId"),
+      meta: { widthClass: "w-[25%]", align: "align-top" },
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-600 uppercase align-top">
+        <span className="font-mono text-[11px] font-bold bg-gray-100 px-2.5 py-1.5 rounded text-gray-600 uppercase inline-block whitespace-nowrap mt-1">
           {row.original.orderId}
         </span>
       ),
@@ -109,22 +108,28 @@ export default function AdminDeliveryPage() {
     {
       id: "deliveryDetails",
       header: t("deliveryDetails"),
+      meta: { widthClass: "w-[25%]", align: "align-top" },
       cell: ({ row }) => {
         const order = row.original;
-        const restaurantName = order.items[0]?.restaurant || t("quickBite");
+        
+        // Applied the isBn logic here
+        const englishName = order.items?.[0]?.restaurant || t("quickBite");
+        const banglaName = order.items?.[0]?.restaurantBn;
+        const restaurantName = (isBn && banglaName) ? banglaName : englishName;
+
         return (
-          <div className="space-y-3 align-top">
-            <div className="flex gap-2">
+          <div className="space-y-4 py-1 pr-4">
+            <div className="flex gap-3">
               <Store size={16} className="text-gray-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t("pickupFrom")}</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">{t("pickupFrom")}</p>
                 <p className="text-sm font-semibold text-gray-900">{restaurantName}</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <MapPin size={16} className="text-orange-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">{t("deliverTo")}</p>
+                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-0.5">{t("deliverTo")}</p>
                 <p className="text-sm font-semibold text-gray-900">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</p>
                 <p className="text-xs text-gray-500">{order.customerInfo?.street}, {order.customerInfo?.city}</p>
               </div>
@@ -135,16 +140,17 @@ export default function AdminDeliveryPage() {
     },
     {
       id: "rider",
-      header: () => <div className="w-56">{t("tableRider")}</div>,
+      header: t("tableRider"),
+      meta: { widthClass: "w-[25%]", align: "align-top" },
       cell: ({ row }) => {
         const order = row.original;
         return order.riderEmail ? (
-          <div className="align-middle">
+          <div className="flex flex-col gap-0.5 pt-1">
             <p className="font-bold text-gray-900">{order.riderName}</p>
-            <p className="text-xs text-gray-500">{order.riderEmail}</p>
+            <p className="text-xs text-gray-500 lowercase">{order.riderEmail}</p>
           </div>
         ) : (
-          <div className="align-middle">
+          <div className="pr-4 pt-1">
             <CustomDropdown 
               value={order.riderEmail || ""}
               onChange={(val) => handleAssignRider(order.orderId, val)}
@@ -157,21 +163,29 @@ export default function AdminDeliveryPage() {
     },
     {
       id: "actions",
-      header: () => <div className="text-right w-40">{t("tableStatusAction")}</div>,
+      header: () => (
+        <div className="flex justify-end w-full">
+          <div className="w-[180px] text-left pl-2">
+            {t("tableStatusAction")}
+          </div>
+        </div>
+      ),
+      meta: { widthClass: "w-[25%]", align: "align-top" },
       cell: ({ row }) => (
-        <div className="flex justify-end align-middle">
-          <StatusDropdown 
-            currentStatus={row.original.status} 
-            orderId={row.original.orderId} 
-            onStatusChange={handleStatusChange} 
-            paymentStatus={row.original.paymentStatus}
-          />
+        <div className="flex justify-end w-full pt-1">
+          <div className="w-[180px]">
+            <StatusDropdown 
+              currentStatus={row.original.status} 
+              orderId={row.original.orderId} 
+              onStatusChange={handleStatusChange} 
+              paymentStatus={row.original.paymentStatus}
+            />
+          </div>
         </div>
       ),
     }
   ];
 
-  // 5. Client-Side Filtering
   const filteredOrders = allOrders
     .filter(o => ["Ready for Pickup", "On the way", "Delivered"].includes(o.status))
     .filter(order => {

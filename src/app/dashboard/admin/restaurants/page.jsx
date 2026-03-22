@@ -17,13 +17,11 @@ export default function AdminRestaurantsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  // Sync search input to debouncedSearch with a 500ms delay
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // 1. Fetch Data with React Query
   const { data, isLoading } = useQuery({
     queryKey: ["restaurants", page, debouncedSearch],
     queryFn: async () => {
@@ -31,13 +29,12 @@ export default function AdminRestaurantsPage() {
       if (!res.ok) throw new Error("Failed to fetch restaurants");
       return res.json();
     },
-    keepPreviousData: true, 
+    keepPreviousData: true,
   });
 
   const restaurants = data?.restaurants || [];
   const totalPages = data?.totalPages || 1;
 
-  // 2. Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const res = await fetch(`/api/restaurants/${id}`, {
@@ -76,11 +73,11 @@ export default function AdminRestaurantsPage() {
     }
   };
 
-  // 3. Define Table Columns
   const columns = [
     {
       id: "logo",
       header: t("foodImage"),
+      meta: { widthClass: "w-[80px]", align: "align-top" },
       cell: ({ row }) => {
         const item = row.original;
         return item.logo ? (
@@ -99,44 +96,59 @@ export default function AdminRestaurantsPage() {
     {
       id: "name",
       header: t("restaurantName"),
+      meta: { widthClass: "w-[25%]", align: "align-top" },
       cell: ({ row }) => {
         const item = row.original;
-        return <span className="font-medium text-gray-900">{isBn && item.nameBn ? item.nameBn : item.name}</span>;
+        return (
+          <div className="pt-2">
+            <span className="font-bold text-gray-900">{isBn && item.nameBn ? item.nameBn : item.name}</span>
+          </div>
+        );
       }
     },
     {
       id: "address",
       header: t("restaurantAddress"),
+      meta: { align: "align-top" },
       cell: ({ row }) => (
-        <div className="text-gray-600 text-sm max-w-xs truncate" title={row.original.address}>
-          {row.original.address}
+        <div className="pt-2">
+          <span className="text-gray-600 text-sm">{row.original.address}</span>
         </div>
       ),
     },
     {
       id: "contact",
       header: t("restaurantContact"),
-      cell: ({ row }) => <span className="text-gray-600 text-sm">{row.original.contact}</span>,
+      meta: { widthClass: "w-[150px]", align: "align-top" },
+      cell: ({ row }) => (
+        <div className="pt-2">
+          <span className="text-gray-600 text-sm font-medium">{row.original.contact}</span>
+        </div>
+      ),
     },
     {
       id: "status",
       header: t("restaurantStatus"),
+      meta: { widthClass: "w-[120px]", align: "align-top" },
       cell: ({ row }) => {
         const status = row.original.status || 'Active';
         return (
-          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-            status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-          }`}>
-            {status}
-          </span>
+          <div className="pt-1.5">
+            <span className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider ${
+              status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+            }`}>
+              {status}
+            </span>
+          </div>
         );
       }
     },
     {
       id: "actions",
-      header: t("tableActions"),
+      header: () => <div className="text-right">{t("tableActions")}</div>,
+      meta: { widthClass: "w-[120px]", align: "align-top" },
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 pt-1">
           <Link
             href={`/dashboard/admin/restaurants/${row.original.id}`}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

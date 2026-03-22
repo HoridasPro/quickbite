@@ -53,13 +53,19 @@ export default function OrdersManagementPage() {
     {
       accessorKey: "orderId",
       header: t("tableOrderId"),
-      cell: ({ row }) => <span className="font-medium text-gray-700">{row.original.orderId}</span>,
+      meta: { widthClass: "w-[20%]", align: "align-top" },
+      cell: ({ row }) => (
+        <span className="font-mono text-[11px] font-bold bg-gray-100 px-2.5 py-1.5 rounded text-gray-600 uppercase inline-block whitespace-nowrap mt-1">
+          {row.original.orderId}
+        </span>
+      ),
     },
     {
       id: "customer",
       header: t("tableCustomer"),
+      meta: { widthClass: "w-[30%]", align: "align-top" },
       cell: ({ row }) => (
-        <div>
+        <div className="pr-4 mt-1">
           <p className="font-bold text-gray-900">
             {row.original.customerInfo?.firstName} {row.original.customerInfo?.lastName}
           </p>
@@ -70,13 +76,19 @@ export default function OrdersManagementPage() {
     {
       accessorKey: "totalAmount",
       header: t("tableAmount"),
-      cell: ({ row }) => <span className="font-bold text-orange-600">Tk {row.original.totalAmount}</span>,
+      meta: { widthClass: "w-[15%]", align: "align-top" },
+      cell: ({ row }) => (
+        <span className="font-bold text-orange-600 mt-1 inline-block">
+          Tk {row.original.totalAmount}
+        </span>
+      ),
     },
     {
       accessorKey: "paymentStatus",
       header: () => <div className="text-center">{t("tablePayment")}</div>,
+      meta: { widthClass: "w-[15%]", align: "align-top" },
       cell: ({ row }) => (
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-1">
           <span
             className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded-md ${
               row.original.paymentStatus === "Paid"
@@ -91,15 +103,24 @@ export default function OrdersManagementPage() {
     },
     {
       id: "actions",
-      header: () => <div className="text-center">{t("tableStatusAction")}</div>,
+      header: () => (
+        <div className="flex justify-end w-full">
+          <div className="w-[180px] text-left pl-2">
+            {t("tableStatusAction")}
+          </div>
+        </div>
+      ),
+      meta: { widthClass: "w-[20%]", align: "align-top" },
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <StatusDropdown 
-            currentStatus={row.original.status} 
-            orderId={row.original.orderId} 
-            onStatusChange={handleStatusChange} 
-            paymentStatus={row.original.paymentStatus}
-          />
+        <div className="flex justify-end w-full mt-1">
+          <div className="w-[180px]">
+            <StatusDropdown 
+              currentStatus={row.original.status} 
+              orderId={row.original.orderId} 
+              onStatusChange={handleStatusChange} 
+              paymentStatus={row.original.paymentStatus}
+            />
+          </div>
         </div>
       ),
     }

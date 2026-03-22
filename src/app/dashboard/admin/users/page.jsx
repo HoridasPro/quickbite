@@ -14,7 +14,6 @@ export default function UsersPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 1. Fetch Data via TanStack Query (Handles loading, caching, and background refetching automatically)
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -24,7 +23,6 @@ export default function UsersPage() {
     }
   });
 
-  // 2. Mutations (Automatically refresh the table on success)
   const updateRoleMutation = useMutation({
     mutationFn: async ({ id, role }) => {
       return fetch("/api/users", {
@@ -61,7 +59,6 @@ export default function UsersPage() {
     },
   });
 
-  // 3. Action Handlers
   const handleStatusChange = async (id, newStatus) => {
     let reason = "Action taken by Administrator.";
     if (newStatus === "Suspended" || newStatus === "Banned") {
@@ -92,11 +89,11 @@ export default function UsersPage() {
     if (result.isConfirmed) deleteMutation.mutate(id);
   };
 
-  // 4. Define Table Columns
   const columns = [
     {
       accessorKey: "name",
       header: t("tableUserDetails"),
+      meta: { align: "align-top" },
       cell: ({ row }) => (
         <div>
           <p className="font-bold text-gray-900">{row.original.name}</p>
@@ -107,6 +104,7 @@ export default function UsersPage() {
     {
       accessorKey: "role",
       header: t("tableRole"),
+      meta: { widthClass: "w-[180px]", align: "align-top" },
       cell: ({ row }) => (
         <RoleDropdown
           currentRole={row.original.role}
@@ -118,6 +116,7 @@ export default function UsersPage() {
     {
       accessorKey: "accountStatus",
       header: t("tableAccountStatus"),
+      meta: { widthClass: "w-[250px]", align: "align-top" },
       cell: ({ row }) => (
         <div>
           <AccountStatusDropdown
@@ -126,7 +125,7 @@ export default function UsersPage() {
             onStatusChange={handleStatusChange}
           />
           {row.original.statusReason && row.original.accountStatus !== "Active" && (
-            <p className="text-[10px] text-gray-500 mt-1.5 max-w-[150px] truncate" title={row.original.statusReason}>
+            <p className="text-[10px] text-gray-500 mt-1.5 max-w-[200px] truncate" title={row.original.statusReason}>
               {t("reasonPrefix")} {row.original.statusReason}
             </p>
           )}
@@ -136,6 +135,7 @@ export default function UsersPage() {
     {
       id: "actions",
       header: () => <div className="text-right">{t("tableActions")}</div>,
+      meta: { widthClass: "w-[120px]", align: "align-top" },
       cell: ({ row }) => (
         <div className="flex justify-end">
           <button
@@ -149,7 +149,6 @@ export default function UsersPage() {
     },
   ];
 
-  // 5. Client-Side Filtering
   const filteredUsers = users.filter(user =>
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.name?.toLowerCase().includes(searchTerm.toLowerCase())
