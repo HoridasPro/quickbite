@@ -70,7 +70,7 @@ export default function DataTable({ columns, data, isLoading, emptyMessage, layo
           ) : (
             <tr>
               <td colSpan={columns.length} className="text-center py-16 text-gray-500 font-medium">
-                {emptyMessage || t("noDataFound")}
+                {emptyMessage || t("noVouchersFound")}
               </td>
             </tr>
           )}

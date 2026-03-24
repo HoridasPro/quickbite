@@ -1,132 +1,100 @@
 "use client";
 
-import { Ticket, Info } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import CustomDropdown from "@/components/admin/CustomDropdown";
+import VoucherCard from "@/components/vouchers/VoucherCard";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function VouchersPage() {
-  const vouchers = [
-    {
-      title: "50% off for your first order",
-      subtitle: "50%",
-      code: "yumpanda",
-      min: "Min. order Tk 199",
-      expiry: "Use by Dec 31, 2026",
-    },
-    {
-      title: "BANKASIA150 : Bank Asia Credit Card",
-      subtitle: "25%",
-      code: "bankasia150",
-      min: "Min. order Tk 599",
-      expiry: "Use by Mar 20, 2026",
-    },
-    {
-      title: "UCB150 : Applicable for all UCB",
-      subtitle: "20%",
-      code: "ucb150",
-      min: "Min. order Tk 499",
-      expiry: "Expiring in 13 hours",
-    },
-    {
-      title: "DBBL120 : Dutch Bangla Debit Card",
-      subtitle: "15%",
-      code: "dbbl120",
-      min: "Min. order Tk 399",
-      expiry: "Use by Apr 15, 2026",
-    },
-    {
-      title: "BRAC200 : BRAC Bank Special Offer",
-      subtitle: "30%",
-      code: "brac200",
-      min: "Min. order Tk 699",
-      expiry: "Use by May 10, 2026",
-    },
-    {
-      title: "CITY100 : City Bank Exclusive",
-      subtitle: "18%",
-      code: "city100",
-      min: "Min. order Tk 499",
-      expiry: "Expiring in 2 days",
-    },
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("All");
+  const [sortBy, setSortBy] = useState("Default");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["public-vouchers"],
+    queryFn: async () => {
+      const res = await fetch("/api/vouchers?type=public");
+      if (!res.ok) throw new Error("Failed to fetch vouchers");
+      return res.json();
+    }
+  });
+
+  const vouchers = data?.vouchers || [];
+
+  let displayedVouchers = vouchers.filter((v) => {
+    if (activeTab === "All") return true;
+    if (activeTab === "Restaurants") return v.applicableTo === "restaurant" || v.applicableTo === "all";
+    if (activeTab === "Shops") return v.applicableTo === "shop" || v.applicableTo === "all";
+    return true;
+  });
+
+  if (sortBy === "Lowest minimum order value") {
+    displayedVouchers.sort((a, b) => (a.minOrderValue || 0) - (b.minOrderValue || 0));
+  }
+
+  const tabs = [
+    { id: "All", label: t("tabAll") || "All" },
+    { id: "Restaurants", label: t("tabRestaurants") || "Restaurants" },
+    { id: "Shops", label: t("tabShops") || "Shops" }
+  ];
+
+  const sortOptions = [
+    { id: "Default", label: t("defaultText") || "Default" },
+    { id: "Lowest minimum order value", label: t("sortLowestMinOrder") || "Lowest minimum order value" }
   ];
 
   return (
     <div className="bg-[#ffffff] px-8 min-h-screen">
-
-      {/* Header */}
       <div className="max-w-6xl mx-auto pt-10 pb-6 px-4">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-extrabold text-gray-800">
-            Vouchers & offers
+            {t("vouchersAndOffers") || "Vouchers & offers"}
           </h1>
-
-          <button className="flex items-center gap-2 border px-4 py-2 rounded text-gray-800 font-medium transition shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-            <Ticket className="text-gray-600 w-4 h-4" />
-            Add a Voucher
-          </button>
         </div>
 
         <div className="flex gap-8 border-b">
-          <button className="pb-3 border-b-2 border-black text-black font-semibold">
-            All
-          </button>
-          <button className="pb-3 text-gray-500">Restaurants</button>
-          <button className="pb-3 text-gray-500">Shops</button>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-3 font-semibold transition-colors cursor-pointer ${
+                activeTab === tab.id
+                  ? "border-b-2 border-black text-black"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main */}
-      <div className="max-w-6xl mx-auto grid grid-cols-12 gap-8 px-4">
-        <div className="col-span-4 space-y-4">
-          <select className="w-full border border-gray-300 rounded-lg px-4 py-3 text-black bg-white">
-            <option>Default</option>
-            <option>Latest</option>
-            <option>Expiring First</option>
-            <option>Lowest minimum order value</option>
-          </select>
-
-          {vouchers.map((v, i) => (
-            <div
-              key={i}
-              className="relative bg-white border border-gray-200 rounded-xl shadow-sm px-2 py-2 overflow-hidden"
-            >
-              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-100 rounded-full border border-gray-200"></div>
-              <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-100 rounded-full border border-gray-200"></div>
-
-              <div className="flex gap-2">
-                <div className="h-[32px]">
-                  <Ticket className="text-orange-500 w-5 h-5" />
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-[15px] font-semibold text-gray-800 leading-5">
-                    {v.title}
-                  </h3>
-
-                  <div className="flex items-center gap-2 mt-1 text-sm">
-                    <span className="font-semibold text-gray-800">
-                      {v.subtitle}
-                    </span>
-
-                    <Info className="w-4 h-4 text-gray-400" />
-
-                    <span className="text-gray-500 text-sm">{v.code}</span>
-                  </div>
-
-                  <div className="border-t border-dashed border-gray-200 my-3"></div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-[12px] bg-gray-100 border border-gray-200 rounded-full px-3 py-[4px] text-gray-500">
-                      {v.min} • {v.expiry}
-                    </div>
-
-                    <button className="text-orange-500 font-medium text-sm hover:underline">
-                      Use now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-12">
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-2">
+          <div className="w-full md:w-64">
+            <CustomDropdown
+              value={sortBy}
+              onChange={setSortBy}
+              options={sortOptions}
+              placeholder={t("sortBy") || "Sort by"}
+            />
+          </div>
         </div>
+
+        {isLoading ? (
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center py-12">
+            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : displayedVouchers.length === 0 ? (
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-gray-500">
+            {t("noActiveVouchers") || "No active vouchers found."}
+          </div>
+        ) : (
+          displayedVouchers.map((v) => (
+            <VoucherCard key={v._id} voucher={v} />
+          ))
+        )}
       </div>
     </div>
   );
