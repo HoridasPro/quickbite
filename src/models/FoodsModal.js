@@ -1,84 +1,69 @@
-// "use client";
+// import React, { useState } from "react";
 
-// import CartButton from "@/components/CartButton";
-// import React from "react";
-// import { useLanguage } from "@/contexts/LanguageProvider";
-
-// const FoodsModal = ({ food, quantity, onClose, addToCart }) => {
-//   const { language } = useLanguage();
-//   const price = food?.price || 0;
-
+// const FoodsModal = () => {
+//   const [quantity, setQuantity] = useState(1);
+//   const [modalFood, setModalFood] = useState(null);
 //   return (
-//     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-//       <div className="bg-white w-full max-w-3xl rounded-lg overflow-hidden shadow-xl relative">
-//         {/* Close Button */}
-//         <button
-//           onClick={onClose}
-//           className="absolute top-4 right-4 text-red-600 cursor-pointer text-2xl font-bold z-20"
-//         >
-//           ✕
-//         </button>
+//     <div>
+//       {/* Modal */}
+//       {modalFood && (
+//         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+//           <div className="bg-white rounded-2xl p-6 w-80 relative">
+//             {/* Close Button */}
+//             <button
+//               onClick={() => setModalFood(null)}
+//               className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 font-bold"
+//             >
+//               ✕
+//             </button>
 
-//         {/* Image */}
-//         <div className="relative">
-//           <img
-//             src={
-//               food?.foodImg ||
-//               "https://images.unsplash.com/photo-1604908554165-2e0c15e36d1a"
-//             }
-//             alt={food?.title || "Food Item"}
-//             className="object-cover rounded-t-lg w-full h-56"
-//           />
-//         </div>
+//             {/* Food Image */}
+//             <div className="h-40 w-full mb-4 rounded-xl overflow-hidden bg-gray-100">
+//               <img
+//                 src={modalFood.strMealThumb}
+//                 alt={modalFood.strMeal}
+//                 className="w-full h-full object-cover"
+//               />
+//             </div>
 
-//         {/* Content */}
-//         <div className="p-6 space-y-4">
-//           <h2 className="text-xl font-bold">{food?.title || "Food Item"}</h2>
+//             {/* Title */}
+//             <h3 className="font-bold text-lg mb-2">{modalFood.strMeal}</h3>
 
-//           <p className="text-lg font-bold">
-//             {language === "bn" ? `৳ ${price}` : `Tk ${price}`}
-//           </p>
-
-//           <p className="text-gray-500 text-sm leading-relaxed">
-//             {food?.description ||
-//               (language === "bn"
-//                 ? "তাজা উপকরণ দিয়ে তৈরি সুস্বাদু খাবার।"
-//                 : "Delicious, freshly prepared food made with premium ingredients.")}
-//           </p>
-
-//           <hr />
-
-//           {/* Special Instructions */}
-//           <div>
-//             <h3 className="font-semibold text-lg">
-//               {language === "bn" ? "বিশেষ নির্দেশনা" : "Special instructions"}
-//             </h3>
-
-//             <p className="text-sm text-gray-500 mb-2">
-//               {language === "bn"
-//                 ? "বিশেষ অনুরোধ রেস্টুরেন্টের অনুমোদনের উপর নির্ভর করে।"
-//                 : "Special requests are subject to the restaurant's approval."}
+//             {/* Price */}
+//             <p className="text-orange-600 font-bold mb-4">
+//               Tk {Math.floor(Math.random() * 500) + 100}
 //             </p>
 
-//             <textarea
-//               placeholder={
-//                 language === "bn" ? "যেমন: মেয়োনিজ নয়" : "e.g. No mayo"
-//               }
-//               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500"
-//               rows={3}
-//             ></textarea>
+//             {/* Quantity Selector */}
+//             <div className="flex items-center justify-between mb-4">
+//               <button
+//                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+//                 className="w-8 h-8 bg-gray-200 rounded-full text-lg font-bold"
+//               >
+//                 -
+//               </button>
+//               <span className="text-lg font-bold">{quantity}</span>
+//               <button
+//                 onClick={() => setQuantity((q) => q + 1)}
+//                 className="w-8 h-8 bg-gray-200 rounded-full text-lg font-bold"
+//               >
+//                 +
+//               </button>
+//             </div>
+
+//             {/* Add to Cart Button */}
+//             <button
+//               onClick={() => {
+//                 alert(`Added ${quantity} x ${modalFood.strMeal} to cart!`);
+//                 setModalFood(null);
+//               }}
+//               className="w-full bg-orange-600 text-white py-2 rounded-xl font-bold hover:bg-orange-700"
+//             >
+//               Add to Cart
+//             </button>
 //           </div>
 //         </div>
-
-//         <div>
-//           <CartButton
-//             price={price}
-//             food={food}
-//             quantity={quantity}
-//             addToCart={addToCart}
-//           ></CartButton>
-//         </div>
-//       </div>
+//       )}
 //     </div>
 //   );
 // };

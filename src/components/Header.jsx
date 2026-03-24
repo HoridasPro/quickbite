@@ -249,13 +249,11 @@ const Header = () => {
             </Link>
 
             <Link
-              href="/pandamart"
-              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition ${
-                pathname === "/pandamart" ? "text-orange-500" : ""
-              }`}
+              href="/quickmart"
+              className={`flex items-center gap-2 hover:bg-gray-100 p-2 rounded-xl transition`}
             >
               <MdOutlineShoppingBag className="w-5 h-5" />
-              <Translation en="Pandamart" bn="পান্ডামার্ট" />
+              <Translation en="Quickmart" bn=" কুইকমার্ট" />
             </Link>
 
             <Link

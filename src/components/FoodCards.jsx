@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageProvider";
+// import { Image } from "lucide-react";
 
 const FoodCards = ({ food }) => {
   const router = useRouter();
