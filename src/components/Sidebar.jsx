@@ -13,7 +13,8 @@ import {
   Bike,
   AlertTriangle,
   MessageSquare,
-  ShieldCheck
+  ShieldCheck,
+  Ticket
 } from "lucide-react";
 import NavLink from "./NavLink";
 import { useSession } from "next-auth/react";
@@ -114,6 +115,11 @@ export default function Sidebar({ closeSidebar }) {
             <li>
               <NavLink href="/dashboard/admin/restaurants" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
                 <Store size={20} /> {t("menuRestaurants")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink href="/dashboard/admin/vouchers" className={baseClass} activeClassName={activeClass} inactiveClassName={inactiveClass} onClick={closeSidebar}>
+                <Ticket size={20} /> {t("vouchers") || "Vouchers"}
               </NavLink>
             </li>
             <li>
