@@ -162,7 +162,7 @@ const QuickMartPage = () => {
               <p className="text-orange-600 font-bold text-sm">up to 60% off</p>
             </div>
           </div>
-          <div className="md:flex h-32 rounded-2xl bg-gradient-to-r from-red-100 to-orange-200 p-6 items-center shadow-sm relative overflow-hidden">
+          <div className="md:flex h-32 md:h-40 rounded-2xl bg-gradient-to-r from-red-100 to-orange-200 p-6 items-center shadow-sm relative overflow-hidden">
             <div className="z-10">
               <h2 className="text-2xl font-black text-orange-700 leading-tight">
                 Fresh Picks
