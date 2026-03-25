@@ -208,12 +208,12 @@ const Header = () => {
               <Ticket className="w-5 h-5" /> {t("vouchers")}
             </NavLink>
             <NavLink
-              href="/pandamart"
+              href="/quickmart"
               className="flex items-center gap-2 p-2 rounded-xl transition"
               activeClassName="text-orange-500"
               inactiveClassName="text-gray-700 hover:bg-gray-100"
             >
-              <MdOutlineShoppingBag className="w-5 h-5" /> {t("pandamart")}
+              <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
             </NavLink>
             <NavLink
               href="/shops"
@@ -275,13 +275,13 @@ const Header = () => {
               </NavLink>
               
               <NavLink
-                href="/pandamart"
+                href="/quickmart"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-xl transition"
                 activeClassName="text-orange-600 bg-orange-50"
                 inactiveClassName="text-gray-700 hover:bg-gray-50"
               >
-                <MdOutlineShoppingBag className="w-5 h-5" /> {t("pandamart")}
+                <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
               </NavLink>
               
               <NavLink
