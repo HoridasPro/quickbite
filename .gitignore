@@ -66,8 +66,8 @@ yarn-error.log*
 *.pem
 
 # Env files (keep secrets local)
- .env
- .env.local
+.env.local
+.env
 .env.development.local
 .env.test.local
 .env.production.local
