@@ -1,6 +1,6 @@
 "use client";
-
 import ShopCard from "@/components/ShopCard";
+import ShopCardsSkeleton from "@/components/ShopCardsSkeleton";
 import React, { useEffect, useState } from "react";
 
 export default function FoodDeliveryPlatform() {
@@ -179,59 +179,23 @@ export default function FoodDeliveryPlatform() {
             </div>
           </section>
 
-          {/* Section 2: Deals & More */}
-          <section className="mb-10 relative">
-            <h2 className="text-2xl font-bold mb-4">Deals & More</h2>
+          {/* Section 3: Shop by store */}
+          <section>
+            <h2 className="text-2xl font-bold mb-4">Shop by store</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {loading ? (
-                <p>Loading...</p>
-              ) : (
-                stores
-                  .slice(0, 4)
-                  .map((store) => (
+              {loading
+                ? // স্কেলিটন এখন সরাসরি মেইন গ্রিডে থাকবে, তাই এটি ফুল সাইজ দেখাবে
+                  [...Array(8)].map((_, index) => (
+                    <ShopCardsSkeleton key={index} />
+                  ))
+                : stores.map((store) => (
                     <ShopCard
                       key={store.id}
                       store={store}
                       toggleWishlist={toggleWishlist}
                       isWishlisted={wishlistedIds.has(store.id)}
                     />
-                  ))
-              )}
-            </div>
-
-            <div className="absolute right-[-15px] top-1/2 bg-white shadow-md rounded-full p-2 cursor-pointer hidden lg:block">
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
-          </section>
-
-          {/* Section 3: Shop by store */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Shop by store</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {loading ? (
-                <p>Loading...</p>
-              ) : (
-                stores.map((store) => (
-                  <ShopCard
-                    key={store.id}
-                    store={store}
-                    toggleWishlist={toggleWishlist}
-                    isWishlisted={wishlistedIds.has(store.id)}
-                  />
-                ))
-              )}
+                  ))}
             </div>
           </section>
         </main>

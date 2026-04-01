@@ -1,4 +1,4 @@
-export default function LoadingSkeleton() {
+export default function FoodCardsSkeleton() {
   return (
     <div className="flex gap-4 overflow-x-auto p-4 animate-pulse">
       <div className="min-w-[280px] border rounded-lg p-4 space-y-3">
