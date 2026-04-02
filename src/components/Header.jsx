@@ -1,8 +1,6 @@
 "use client";
-
 import { useSession, signOut } from "next-auth/react";
 import React, { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import {
   MapPin,
   ShoppingCart,
@@ -15,6 +13,7 @@ import {
   LogOut,
   ChevronDown,
   X,
+  Heart,
 } from "lucide-react";
 import { MdOutlineDashboardCustomize, MdOutlineDeliveryDining, MdOutlineShoppingBag } from "react-icons/md";
 import Language from "./Language";
@@ -32,8 +31,27 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
   const [deliveryAddress, setDeliveryAddress] = useState(null);
-  
+  const [wishlistCount, setWishlistCount] = useState(0);
+
   const { t } = useTranslation();
+
+  const updateWishlistCount = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("wishlist");
+      if (saved) {
+        const list = JSON.parse(saved);
+        setWishlistCount(list.length);
+      } else {
+        setWishlistCount(0);
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateWishlistCount();
+    window.addEventListener("wishlistUpdated", updateWishlistCount);
+    return () => window.removeEventListener("wishlistUpdated", updateWishlistCount);
+  }, []);
 
   useEffect(() => {
     const fetchDefaultAddress = () => {
@@ -50,7 +68,6 @@ const Header = () => {
           .catch((err) => console.error(err));
       }
     };
-
     fetchDefaultAddress();
     window.addEventListener("addressUpdated", fetchDefaultAddress);
     return () => window.removeEventListener("addressUpdated", fetchDefaultAddress);
@@ -63,41 +80,37 @@ const Header = () => {
     <>
       <div id="main-header" className="w-full bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between px-4 xl:px-0">
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
             <div className="lg:hidden">
               <Menu
                 onClick={() => setOpen(true)}
                 className="w-6 h-6 text-gray-700 cursor-pointer"
               />
             </div>
-
-            <Link href="/" className="text-orange-500 font-bold text-xl sm:text-2xl cursor-pointer">
+            <Link href="/" className="text-orange-500 font-bold text-xl sm:text-2xl cursor-pointer whitespace-nowrap">
               🍔QuickBite
             </Link>
           </div>
-
-          <Link href="/profile/addresses" className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] transition">
+          <Link href="/profile/addresses" className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[300px] xl:max-w-[400px] transition">
             <MapPin className="w-4 h-4 shrink-0" />
             <span className="truncate">
               {status === "authenticated" && deliveryAddress ? deliveryAddress : t("addDeliveryAddress")}
             </span>
           </Link>
-
-          <div className="flex items-center gap-4 relative">
+          <div className="flex items-center gap-2 sm:gap-3 relative">
             {status === "authenticated" && session?.user ? (
               <div className="relative">
                 <div
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-1 sm:gap-2 cursor-pointer"
                 >
                   <img
                     src={session.user.image || "/default-avatar.png"}
                     alt="User"
-                    className="w-10 h-10 rounded-full object-cover border"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border"
                   />
                   <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
                 </div>
-
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-xl border border-gray-100 z-50 overflow-hidden py-1">
                     <NavLink
@@ -109,7 +122,6 @@ const Header = () => {
                     >
                       <User className="w-4 h-4" /> {t("profile")}
                     </NavLink>
-
                     {hasDashboard && (
                       <NavLink
                         href={`/dashboard/${userRole}`}
@@ -121,7 +133,6 @@ const Header = () => {
                         <MdOutlineDashboardCustomize className="w-4 h-4" /> {t("dashboard")}
                       </NavLink>
                     )}
-
                     <NavLink
                       href="/orders"
                       onClick={() => setDropdownOpen(false)}
@@ -131,7 +142,6 @@ const Header = () => {
                     >
                       <Package className="w-4 h-4" /> {t("orders")}
                     </NavLink>
-
                     <NavLink
                       href="/vouchers"
                       onClick={() => setDropdownOpen(false)}
@@ -141,9 +151,7 @@ const Header = () => {
                     >
                       <Ticket className="w-4 h-4" /> {t("vouchers")}
                     </NavLink>
-
                     <div className="border-t border-gray-100 my-1"></div>
-                    
                     <button
                       onClick={() => signOut({ callbackUrl: "/" })}
                       className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
@@ -154,32 +162,42 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <>
-                <Link href="/login" className="hidden md:block px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition">
+              <div className="hidden sm:flex gap-2">
+                <Link href="/login" className="px-3 md:px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100 transition">
                   {t("login")}
                 </Link>
-                <Link href="/register" className="hidden md:block px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer">
+                <Link href="/register" className="px-3 md:px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition cursor-pointer">
                   {t("signup")}
                 </Link>
-              </>
+              </div>
             )}
-
             <Language />
-
+            <Link
+              href="/wishlist"
+              className="relative bg-gray-100 p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+            >
+              <Heart
+                className={`w-5 h-5 ${wishlistCount > 0 ? "text-red-500 fill-red-500" : "text-gray-800"}`}
+              />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative bg-gray-100 p-3 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+              className="relative bg-gray-100 p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
             >
               <ShoppingCart className="w-5 h-5 text-gray-800" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">
+                <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
                   {cartCount}
                 </span>
               )}
             </button>
           </div>
         </div>
-
         <div className="max-w-[1380px] mx-auto py-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
           <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
             <NavLink
@@ -224,7 +242,6 @@ const Header = () => {
               <Store className="w-5 h-5" /> {t("shops")}
             </NavLink>
           </div>
-
           <div className="relative w-full lg:w-[400px]">
             <Suspense fallback={<div className="h-10 bg-gray-100 rounded-full w-full"></div>}>
               <InputSearch />
@@ -232,16 +249,14 @@ const Header = () => {
           </div>
         </div>
       </div>
-
       {open && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setOpen(false)}></div>
-          <div className="relative w-64 bg-white h-full shadow-lg flex flex-col pt-5 pb-4 overflow-y-auto">
+          <div className="relative w-72 sm:w-80 bg-white h-full shadow-lg flex flex-col pt-5 pb-4 overflow-y-auto">
             <div className="flex items-center justify-between px-4 pb-4 border-b">
               <span className="text-orange-500 font-bold text-xl">🍔QuickBite</span>
               <X className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => setOpen(false)} />
             </div>
-            
             <div className="flex flex-col gap-2 p-4 font-medium text-sm">
               <NavLink
                 href="/"
@@ -253,7 +268,6 @@ const Header = () => {
               >
                 <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
               </NavLink>
-              
               <NavLink
                 href="/pick-up"
                 onClick={() => setOpen(false)}
@@ -263,7 +277,6 @@ const Header = () => {
               >
                 <Bike className="w-5 h-5" /> {t("pickup")}
               </NavLink>
-              
               <NavLink
                 href="/vouchers"
                 onClick={() => setOpen(false)}
@@ -273,7 +286,6 @@ const Header = () => {
               >
                 <Ticket className="w-5 h-5" /> {t("vouchers")}
               </NavLink>
-              
               <NavLink
                 href="/quickmart"
                 onClick={() => setOpen(false)}
@@ -283,7 +295,6 @@ const Header = () => {
               >
                 <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
               </NavLink>
-              
               <NavLink
                 href="/shops"
                 onClick={() => setOpen(false)}
@@ -293,9 +304,7 @@ const Header = () => {
               >
                 <Store className="w-5 h-5" /> {t("shops")}
               </NavLink>
-
               <hr className="my-2 border-gray-100" />
-              
               {status === "authenticated" && session?.user ? (
                 <>
                   <NavLink
@@ -307,7 +316,6 @@ const Header = () => {
                   >
                     <User className="w-5 h-5" /> {t("profile")}
                   </NavLink>
-                  
                   {hasDashboard && (
                     <NavLink
                       href={`/dashboard/${userRole}`}
@@ -319,7 +327,6 @@ const Header = () => {
                       <MdOutlineDashboardCustomize className="w-5 h-5" /> {t("dashboard")}
                     </NavLink>
                   )}
-                  
                   <NavLink
                     href="/orders"
                     onClick={() => setOpen(false)}
@@ -329,7 +336,6 @@ const Header = () => {
                   >
                     <Package className="w-5 h-5" /> {t("orders")}
                   </NavLink>
-                  
                   <button
                     onClick={() => {
                       signOut({ callbackUrl: "/" });
@@ -362,7 +368,6 @@ const Header = () => {
           </div>
         </div>
       )}
-
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
