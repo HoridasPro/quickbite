@@ -214,7 +214,7 @@ const Header = () => {
               </div>
             )}
 
-            <div className="hidden xs:block">
+            <div>
               <Language />
             </div>
 

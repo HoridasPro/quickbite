@@ -12,7 +12,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 export default function RegisterPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  
+
   const [imageUrl, setImageUrl] = useState("");
   const [errors, setErrors] = useState({
     name: "",
@@ -98,11 +98,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mt-10 mb-10">
-        <h2 className="text-2xl font-bold mb-6 text-center">{t("registerTitle")}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          {t("registerTitle")}
+        </h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">{t("nameLabel")}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("nameLabel")}
+            </label>
             <input
               name="name"
               type="text"
@@ -117,7 +121,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t("emailLabel")}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("emailLabel")}
+            </label>
             <input
               name="email"
               type="email"
@@ -132,18 +138,21 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <ImageUpload 
+            <ImageUpload
               label={t("photoUrlLabel")}
               value={imageUrl}
               onChange={setImageUrl}
             />
+
             {errors.image && (
               <p className="text-red-500 text-sm mt-1">{errors.image}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t("passwordLabel")}</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("passwordLabel")}
+            </label>
             <input
               name="password"
               type="password"
