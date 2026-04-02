@@ -142,15 +142,6 @@ const Header = () => {
                     >
                       <Package className="w-4 h-4" /> {t("orders")}
                     </NavLink>
-                    <NavLink
-                      href="/vouchers"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
-                      activeClassName="text-orange-600 bg-orange-50 font-medium"
-                      inactiveClassName="text-gray-700 hover:bg-gray-50"
-                    >
-                      <Ticket className="w-4 h-4" /> {t("vouchers")}
-                    </NavLink>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={() => signOut({ callbackUrl: "/" })}
