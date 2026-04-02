@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, Trash2, ArrowLeft } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 export default function WishlistPage() {
   const [items, setItems] = useState([]);
+  const router = useRouter();
 
-  // লোড করার সময় লোকাল স্টোরেজ থেকে ডাটা নেওয়া
   useEffect(() => {
     const saved = localStorage.getItem("wishlist");
     if (saved) {
@@ -14,13 +14,11 @@ export default function WishlistPage() {
     }
   }, []);
 
-  // উইশলিস্ট থেকে আইটেম ডিলিট করার ফাংশন
   const removeItem = (id) => {
     const updatedList = items.filter((item) => item.id !== id);
     setItems(updatedList);
     localStorage.setItem("wishlist", JSON.stringify(updatedList));
 
-    // হেডার কাউন্ট আপডেট করার জন্য ইভেন্ট পাঠানো
     window.dispatchEvent(new Event("wishlistUpdated"));
   };
 
@@ -75,7 +73,7 @@ export default function WishlistPage() {
                   />
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm text-red-500 rounded-full shadow-md hover:bg-red-50 transition-all"
+                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm text-red-500 rounded-full shadow-md hover:bg-red-50 transition-all cursor-pointer"
                     title="Remove from wishlist"
                   >
                     <Trash2 size={18} />
@@ -94,12 +92,12 @@ export default function WishlistPage() {
                     {item.time && <span>• {item.time} min</span>}
                   </div>
 
-                  <Link
-                    href={`/shop/${item.id}`} // আপনার শপ ডিটেইলস পেজের লিঙ্ক অনুযায়ী ঠিক করুন
-                    className="mt-4 block w-full text-center py-2.5 bg-gray-50 hover:bg-orange-500 hover:text-white text-gray-700 font-bold rounded-xl transition-all border border-gray-100"
+                  <button
+                    onClick={() => router.push(`/shops/${item.id}`)}
+                    className="mt-4 block w-full text-center py-2.5 bg-gray-50 hover:bg-orange-500 hover:text-white text-gray-700 font-bold rounded-xl transition-all border border-gray-100 cursor-pointer"
                   >
-                    Order Now
-                  </Link>
+                    See More
+                  </button>
                 </div>
               </div>
             ))}

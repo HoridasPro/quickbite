@@ -19,16 +19,15 @@ const ShopCard = ({ store, toggleWishlist, isWishlisted }) => {
 
         <button
           onClick={(e) => {
-            e.preventDefault(); // লিঙ্ক থাকলে পেজ জাম্প আটকাবে
-            e.stopPropagation(); // কার্ডের ক্লিক ইভেন্ট আটকাবে
+            e.preventDefault();
+            e.stopPropagation();
 
-            // ফিক্স: এখানে শুধু store.id না পাঠিয়ে পুরো store অবজেক্ট পাঠান
             toggleWishlist(store);
           }}
           className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-md hover:scale-110 transition-all z-10"
         >
           <svg
-            className={`h-4 w-4 ${isWishlisted ? "fill-orange-600 text-orange-600" : "text-gray-500"}`}
+            className={`h-4 w-4 ${isWishlisted ? "fill-orange-500 text-orange-500" : "text-gray-500"}`}
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={isWishlisted ? 0 : 2}
@@ -40,7 +39,8 @@ const ShopCard = ({ store, toggleWishlist, isWishlisted }) => {
 
       <div className="px-1">
         <h3 className="font-bold text-[15px] text-gray-800 truncate">
-          {store.name}{" "}
+          {store.name}
+
           <span className="font-normal text-gray-500">({store.location})</span>
         </h3>
         <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5 font-medium">
@@ -75,7 +75,8 @@ const ShopCard = ({ store, toggleWishlist, isWishlisted }) => {
               d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
             />
           </svg>
-          Tk {store.fee} <span className="text-[10px] text-orange-600">▼</span>
+          Tk {store.fee}
+          <span className="text-[10px] text-orange-600">▼</span>
         </div>
       </div>
     </div>
