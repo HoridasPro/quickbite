@@ -14,7 +14,7 @@ import {
   LogOut,
   ChevronDown,
   X,
-  Heart, // Heart icon import করা হয়েছে
+  Heart,
 } from "lucide-react";
 import {
   MdOutlineDashboardCustomize,
@@ -56,7 +56,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    updateWishlistCount(); // মাউন্ট হওয়ার সময় চেক করবে
+    updateWishlistCount(); // মাউন্ট হওয়ার সময় চেক করবে
 
     // Custom Event শোনা (যখন অন্য ফাইল থেকে উইশলিস্ট আপডেট হবে)
     window.addEventListener("wishlistUpdated", updateWishlistCount);
@@ -97,8 +97,9 @@ const Header = () => {
         id="main-header"
         className="w-full bg-white shadow-sm sticky top-0 z-40"
       >
+        {/* --- Main Header Top --- */}
         <div className="max-w-[1380px] mx-auto py-3 flex items-center justify-between px-4 xl:px-0">
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
             <div className="lg:hidden">
               <Menu
                 onClick={() => setOpen(true)}
@@ -108,15 +109,16 @@ const Header = () => {
 
             <Link
               href="/"
-              className="text-orange-500 font-bold text-xl sm:text-2xl cursor-pointer"
+              className="text-orange-500 font-bold text-xl sm:text-2xl cursor-pointer whitespace-nowrap"
             >
               🍔QuickBite
             </Link>
           </div>
 
+          {/* MapPin: Hidden on mobile/tablet, visible on Laptop/Desktop (lg+) */}
           <Link
             href="/profile/addresses"
-            className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[400px] transition"
+            className="hidden lg:flex items-center gap-2 text-gray-900 text-sm hover:bg-gray-100 px-3 py-2 rounded-xl cursor-pointer max-w-[300px] xl:max-w-[400px] transition"
           >
             <MapPin className="w-4 h-4 shrink-0" />
             <span className="truncate">
@@ -126,18 +128,18 @@ const Header = () => {
             </span>
           </Link>
 
-          <div className="flex items-center gap-3 relative">
+          <div className="flex items-center gap-2 sm:gap-3 relative">
             {/* User Dropdown */}
             {status === "authenticated" && session?.user ? (
               <div className="relative">
                 <div
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-1 sm:gap-2 cursor-pointer"
                 >
                   <img
                     src={session.user.image || "/default-avatar.png"}
                     alt="User"
-                    className="w-10 h-10 rounded-full object-cover border"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border"
                   />
                   <ChevronDown
                     className={`w-4 h-4 text-gray-600 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
@@ -196,27 +198,30 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <div className="hidden md:flex gap-2">
+              <div className="hidden sm:flex gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100"
+                  className="px-3 md:px-4 py-1.5 border rounded-lg text-sm hover:bg-gray-100"
                 >
                   {t("login")}
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
+                  className="px-3 md:px-5 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
                 >
                   {t("signup")}
                 </Link>
               </div>
             )}
 
-            <Language />
+            <div className="hidden xs:block">
+              <Language />
+            </div>
+
             {/* --- Wishlist Button --- */}
             <Link
               href="/wishlist"
-              className="relative bg-gray-100 p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+              className="relative bg-gray-100 p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
             >
               <Heart
                 className={`w-5 h-5 ${wishlistCount > 0 ? "text-red-500 fill-red-500" : "text-gray-800"}`}
@@ -228,9 +233,10 @@ const Header = () => {
               )}
             </Link>
 
+            {/* --- Cart Button --- */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative bg-gray-100 p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+              className="relative bg-gray-100 p-2 sm:p-2.5 rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
             >
               <ShoppingCart className="w-5 h-5 text-gray-800" />
               {cartCount > 0 && (
@@ -242,51 +248,56 @@ const Header = () => {
           </div>
         </div>
 
-        {/* --- Sub Header (Desktop) --- */}
-        <div className="max-w-[1380px] mx-auto py-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 xl:px-0 border-t border-gray-100 hidden md:flex">
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
-            <NavLink
-              href="/"
-              aliases={["/foods"]}
-              className="flex items-center gap-2 p-2 rounded-xl transition"
-              activeClassName="text-orange-500"
-              inactiveClassName="text-gray-700 hover:bg-gray-100"
-            >
-              <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
-            </NavLink>
-            <NavLink
-              href="/pick-up"
-              className="flex items-center gap-2 p-2 rounded-xl transition"
-              activeClassName="text-orange-500"
-              inactiveClassName="text-gray-700 hover:bg-gray-100"
-            >
-              <Bike className="w-5 h-5" /> {t("pickup")}
-            </NavLink>
-            <NavLink
-              href="/quickmart"
-              className="flex items-center gap-2 p-2 rounded-xl transition"
-              activeClassName="text-orange-500"
-              inactiveClassName="text-gray-700 hover:bg-gray-100"
-            >
-              <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
-            </NavLink>
-            <NavLink
-              href="/shops"
-              className="flex items-center gap-2 p-2 rounded-xl transition"
-              activeClassName="text-orange-500"
-              inactiveClassName="text-gray-700 hover:bg-gray-100"
-            >
-              <Store className="w-5 h-5" /> {t("shops")}
-            </NavLink>
-          </div>
-          <div className="relative w-full lg:w-[400px]">
-            <Suspense
-              fallback={
-                <div className="h-10 bg-gray-100 rounded-full w-full"></div>
-              }
-            >
-              <InputSearch />
-            </Suspense>
+        {/* --- Sub Header (Mobile Search + Desktop Nav) --- */}
+        <div className="max-w-[1380px] mx-auto py-1 border-t border-gray-100 px-4 xl:px-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 py-1">
+            {/* Nav Links: Visible on lg+ screens */}
+            <div className="hidden lg:flex items-center gap-4 xl:gap-8 text-sm font-medium">
+              <NavLink
+                href="/"
+                aliases={["/foods"]}
+                className="flex items-center gap-2 p-2 rounded-xl transition"
+                activeClassName="text-orange-500"
+                inactiveClassName="text-gray-700 hover:bg-gray-100"
+              >
+                <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
+              </NavLink>
+              <NavLink
+                href="/pick-up"
+                className="flex items-center gap-2 p-2 rounded-xl transition"
+                activeClassName="text-orange-500"
+                inactiveClassName="text-gray-700 hover:bg-gray-100"
+              >
+                <Bike className="w-5 h-5" /> {t("pickup")}
+              </NavLink>
+              <NavLink
+                href="/quickmart"
+                className="flex items-center gap-2 p-2 rounded-xl transition"
+                activeClassName="text-orange-500"
+                inactiveClassName="text-gray-700 hover:bg-gray-100"
+              >
+                <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
+              </NavLink>
+              <NavLink
+                href="/shops"
+                className="flex items-center gap-2 p-2 rounded-xl transition"
+                activeClassName="text-orange-500"
+                inactiveClassName="text-gray-700 hover:bg-gray-100"
+              >
+                <Store className="w-5 h-5" /> {t("shops")}
+              </NavLink>
+            </div>
+
+            {/* Search Input: Full width on mobile/tablet, fixed width on laptop/desktop */}
+            <div className="relative w-full lg:w-[350px] xl:w-[450px]">
+              <Suspense
+                fallback={
+                  <div className="h-10 bg-gray-100 rounded-full w-full"></div>
+                }
+              >
+                <InputSearch />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>
@@ -298,7 +309,7 @@ const Header = () => {
             className="fixed inset-0 bg-black/50"
             onClick={() => setOpen(false)}
           ></div>
-          <div className="relative w-64 bg-white h-full shadow-lg flex flex-col pt-5 pb-4 overflow-y-auto">
+          <div className="relative w-72 sm:w-80 bg-white h-full shadow-lg flex flex-col pt-5 pb-4 overflow-y-auto">
             <div className="flex items-center justify-between px-4 pb-4 border-b">
               <span className="text-orange-500 font-bold text-xl">
                 🍔QuickBite
@@ -318,7 +329,62 @@ const Header = () => {
               >
                 <MdOutlineDeliveryDining className="w-5 h-5" /> {t("delivery")}
               </NavLink>
-              {/* Add other mobile links here similar to desktop */}
+              <NavLink
+                href="/pick-up"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-xl transition"
+                activeClassName="text-orange-600 bg-orange-50"
+                inactiveClassName="text-gray-700 hover:bg-gray-50"
+              >
+                <Bike className="w-5 h-5" /> {t("pickup")}
+              </NavLink>
+              <NavLink
+                href="/quickmart"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-xl transition"
+                activeClassName="text-orange-600 bg-orange-50"
+                inactiveClassName="text-gray-700 hover:bg-gray-50"
+              >
+                <MdOutlineShoppingBag className="w-5 h-5" /> {t("quickmart")}
+              </NavLink>
+              <NavLink
+                href="/shops"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-xl transition"
+                activeClassName="text-orange-600 bg-orange-50"
+                inactiveClassName="text-gray-700 hover:bg-gray-50"
+              >
+                <Store className="w-5 h-5" /> {t("shops")}
+              </NavLink>
+
+              <div className="border-t border-gray-100 my-2 pt-2">
+                <Link
+                  href="/profile/addresses"
+                  className="flex items-center gap-3 p-3 text-gray-700 hover:bg-gray-50 rounded-xl"
+                  onClick={() => setOpen(false)}
+                >
+                  <MapPin className="w-5 h-5" /> {t("addDeliveryAddress")}
+                </Link>
+              </div>
+
+              {status !== "authenticated" && (
+                <div className="flex flex-col gap-2 mt-4 sm:hidden">
+                  <Link
+                    href="/login"
+                    className="w-full py-2.5 text-center border rounded-xl"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("login")}
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="w-full py-2.5 text-center bg-orange-500 text-white rounded-xl"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("signup")}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

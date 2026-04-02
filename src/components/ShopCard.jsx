@@ -27,7 +27,7 @@ const ShopCard = ({ store, toggleWishlist, isWishlisted }) => {
           className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-md hover:scale-110 transition-all z-10"
         >
           <svg
-            className={`h-4 w-4 ${isWishlisted ? "fill-orange-500 text-orange-500" : "text-gray-500"}`}
+            className={`h-4 w-4  cursor-pointer ${isWishlisted ? "fill-orange-500 text-orange-500" : "text-gray-500"}`}
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={isWishlisted ? 0 : 2}
