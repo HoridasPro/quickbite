@@ -14,10 +14,11 @@ const CartButton = ({ food, quantity = 1, price }) => {
   const isBn = language === "bn";
 
   // ENFORCEMENT: Check if the user is suspended/restricted
-  const isRestricted = session?.user?.accountStatus && session.user.accountStatus !== "Active";
+  const isRestricted =
+    session?.user?.accountStatus && session.user.accountStatus !== "Active";
 
   const handleAdd2Card = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (isRestricted) return; // Failsafe guard
     setIsLoading(true);
 
@@ -32,23 +33,24 @@ const CartButton = ({ food, quantity = 1, price }) => {
       restaurantBn: food.restaurant_nameBn || food.restaurantBn || null,
       image: food.foodImg || food.image || "https://via.placeholder.com/150",
       basePrice: itemPrice,
-      selectedVariations: {}, 
+      selectedVariations: {},
       quantity: quantity,
       totalPrice: itemPrice * quantity,
     };
 
     addToCart(orderPayload);
-    
-    const displayTitle = isBn && orderPayload.titleBn ? orderPayload.titleBn : orderPayload.title;
+
+    const displayTitle =
+      isBn && orderPayload.titleBn ? orderPayload.titleBn : orderPayload.title;
 
     Swal.fire({
       icon: "success",
       title: t("addedToCartSuccess"),
       text: displayTitle,
       showConfirmButton: false,
-      timer: 1500
+      timer: 1500,
     });
-    
+
     setIsLoading(false);
   };
 
@@ -58,12 +60,14 @@ const CartButton = ({ food, quantity = 1, price }) => {
         disabled={isLoading || isRestricted}
         onClick={handleAdd2Card}
         className={`flex-1 font-semibold py-3 rounded-lg transition ${
-          isRestricted 
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+          isRestricted
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
             : "bg-orange-500 text-white hover:bg-orange-600 cursor-pointer disabled:bg-gray-400"
         }`}
       >
-        {isRestricted ? (t("accountRestricted") || "Account Restricted") : t("addToCart")}
+        {isRestricted
+          ? t("accountRestricted") || "Account Restricted"
+          : t("addToCart")}
       </button>
     </div>
   );
